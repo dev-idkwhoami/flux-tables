@@ -1,12 +1,12 @@
 <?php
 
-namespace VendorName\Skeleton\Commands;
+namespace Idkwhoami\FluxTables\Commands;
 
 use Illuminate\Console\Command;
 
-class SkeletonCommand extends Command
+class FluxTablesCommand extends Command
 {
-    public $signature = 'skeleton';
+    public $signature = 'flux-tables';
 
     public $description = 'My command';
 
