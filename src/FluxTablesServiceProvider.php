@@ -2,9 +2,9 @@
 
 namespace Idkwhoami\FluxTables;
 
+use Idkwhoami\FluxTables\Commands\FluxTablesCommand;
 use Spatie\LaravelPackageTools\Package;
 use Spatie\LaravelPackageTools\PackageServiceProvider;
-use Idkwhoami\FluxTables\Commands\FluxTablesCommand;
 
 class FluxTablesServiceProvider extends PackageServiceProvider
 {

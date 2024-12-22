@@ -2,9 +2,9 @@
 
 namespace Idkwhoami\FluxTables\Tests;
 
+use Idkwhoami\FluxTables\FluxTablesServiceProvider;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Orchestra\Testbench\TestCase as Orchestra;
-use Idkwhoami\FluxTables\FluxTablesServiceProvider;
 
 class TestCase extends Orchestra
 {
