@@ -9,17 +9,49 @@
     $placeholder = __("Search for " . str($modelName)->lower()->plural() . "...");
 @endphp
 <div>
-    <div class="flex justify-items-start mb-4">
+    <div class="flex justify-items-start space-x-4 mb-4">
         <flux:heading level="1" size="xl">
             {{ $heading }}
         </flux:heading>
         <flux:spacer/>
     </div>
-    <div class="flex justify-items-between mb-4">
-        @foreach($this->table->getFilters() as $filter)
-            <livewire:flux-filter :$filter :name="$filter->getName()"/>
-        @endforeach
+    <div class="flex justify-items-between gap-x-2 mb-4">
+        @if($this->table->getPerPageOptions() !== null)
+            <div class="max-w-lg">
+                <flux:select size="sm" wire:model.live="table.perPage" variant="listbox">
+                    @foreach($this->table->getPerPageOptions() as $perPageOption)
+                        <flux:option :selected="$this->table->getPerPage() === $perPageOption">
+                            {{ $perPageOption }}
+                        </flux:option>
+                    @endforeach
+                </flux:select>
+            </div>
+        @endif
+        @if($this->table->hasToggleableColumns())
+            <flux:dropdown>
+                <flux:button size="sm" variant="filled" icon="columns-3"/>
+
+                <flux:menu>
+                    @foreach($this->table->getToggleableColumns() as $index => $column)
+                        <flux:menu.checkbox wire:model.live="table.columns.{{ $index }}.toggled">
+                            {{ $column->getLabel() }}
+                        </flux:menu.checkbox>
+                    @endforeach
+                </flux:menu>
+            </flux:dropdown>
+        @endif
         <flux:spacer/>
+        @if($this->table->hasActiveFilters())
+            <flux:tooltip content="Reset filters">
+                <flux:button variant="filled" class="hover:text-red-400" size="sm" color="primary"
+                             wire:click="resetFilters" icon="filter-x"/>
+            </flux:tooltip>
+        @endif
+        <flux:modal.trigger name="filters">
+            <flux:tooltip content="Apply filters">
+                <flux:button size="sm" variant="filled" icon="filter"/>
+            </flux:tooltip>
+        </flux:modal.trigger>
         @if($this->table->hasSearchable())
             <div>
                 <flux:input
@@ -35,13 +67,15 @@
     <flux:table :paginate="$this->models">
         <flux:columns>
             @foreach($this->table->getColumns() as $column)
-                <flux:column
-                    :sortable="$column->isSortable()"
-                    :sorted="$this->table->isSorted($column->getName())"
-                    :align="$column->getAlignment()"
-                >
-                    {{ $column->getLabel() }}
-                </flux:column>
+                @if(!$column->isToggleable() || $column->isToggled())
+                    <flux:column
+                        :sortable="$column->isSortable()"
+                        :sorted="$this->table->isSorted($column->getName())"
+                        :align="$column->getAlignment()->value"
+                    >
+                        {{ $column->getLabel() }}
+                    </flux:column>
+                @endif
             @endforeach
         </flux:columns>
 
@@ -55,4 +89,9 @@
             @endforeach
         </flux:rows>
     </flux:table>
+    <flux:modal :dismissible="false" variant="flyout" class="space-y-6" name="filters">
+        @foreach($this->table->getFilters() as $filter)
+            <livewire:flux-filter :$filter :name="$filter->getName()"/>
+        @endforeach
+    </flux:modal>
 </div>

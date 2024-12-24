@@ -3,6 +3,7 @@
 namespace Idkwhoami\FluxTables\Filters;
 
 use Illuminate\Contracts\Database\Eloquent\Builder;
+use Laravel\SerializableClosure\SerializableClosure;
 use Livewire\Wireable;
 
 abstract class Filter implements Wireable
@@ -14,6 +15,29 @@ abstract class Filter implements Wireable
         protected ?\Closure $callback = null,
         public mixed $value = null,
     ) {}
+
+    public function getFilterValueSessionKey(string $table): string
+    {
+        $class = strtolower(class_basename($this));
+
+        return "table:$table:filters:$class:value:$this->name";
+    }
+
+    public function loadValueFromSession(string $table): void
+    {
+        $this->value = session($this->getFilterValueSessionKey($table), $this->value);
+    }
+
+    public function setValueInSession(string $table): void
+    {
+        session()->put($this->getFilterValueSessionKey($table), $this->value);
+    }
+
+    public function resetValue(string $table): void
+    {
+        $this->value = null;
+        session()->forget($this->getFilterValueSessionKey($table));
+    }
 
     public function apply(Builder $query): Builder
     {
@@ -73,5 +97,27 @@ abstract class Filter implements Wireable
     public function getValue(): mixed
     {
         return $this->value;
+    }
+
+    public function toLivewire(): array
+    {
+        return [
+            'name' => $this->name,
+            'label' => $this->label,
+            'view' => $this->view,
+            'callback' => serialize(new SerializableClosure($this->callback)),
+            'value' => $this->value,
+        ];
+    }
+
+    public static function fromLivewire($value): static
+    {
+        return new static(
+            $value['name'],
+            $value['label'],
+            $value['view'],
+            unserialize($value['callback'])->getClosure(),
+            $value['value']
+        );
     }
 }

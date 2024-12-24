@@ -15,19 +15,17 @@ class Table implements Wireable
 
     protected string $name;
 
-    protected array $columns = [];
+    public array $columns = [];
 
     public array $filters = [];
 
-    protected array $actions = [];
+    public array $actions = [];
 
-    public $perPage = 10;
+    public int $perPage = 10;
 
-    public $page = 1;
+    public ?array $perPageOptions = null;
 
-    public $perPageOptions = [10, 25, 50, 100];
-
-    public $search = null;
+    public ?string $search = null;
 
     protected ?string $sortColumn = null;
 
@@ -41,6 +39,49 @@ class Table implements Wireable
 
         $this->model = $model;
         $this->name = strtolower(class_basename($model));
+    }
+
+    public function refillFilters(): void
+    {
+        foreach ($this->filters as $filter) {
+            $filter->loadValueFromSession($this->name);
+        }
+    }
+
+    public function refillColumnToggleStates(): void
+    {
+        foreach ($this->getToggleableColumns() as $column) {
+            $column->loadToggleStateFromSession($this->name);
+        }
+    }
+
+    public function resetFilters(): void
+    {
+        foreach ($this->filters as $filter) {
+            $filter->resetValue($this->name);
+        }
+    }
+
+    public function toggleColumn(int $index): void
+    {
+        $this->columns[$index]->setToggleStateInSession($this->name);
+    }
+
+    public function prepare(): void
+    {
+        $this->refillFilters();
+        $this->refillColumnToggleStates();
+        $this->perPage = session("table:{$this->name}:perPage", $this->perPage);
+    }
+
+    public function hasActiveFilters(): bool
+    {
+        return collect($this->filters)->filter->hasValue()->isNotEmpty();
+    }
+
+    public function hasToggleableColumns(): bool
+    {
+        return collect($this->columns)->filter->isToggleable()->isNotEmpty();
     }
 
     public function hasSearchable(): bool
@@ -79,7 +120,7 @@ class Table implements Wireable
     {
         foreach ($this->columns as /** @var $column Column */ $column) {
             $query->when($column->isSearchable(),
-                fn (Builder $query) => $query->where($column->getName(), 'ilike', "%{$this->search}%"));
+                fn (Builder $query) => $query->orWhere($column->getName(), 'ilike', "%{$this->search}%"));
         }
 
         return $query;
@@ -88,7 +129,6 @@ class Table implements Wireable
     public function applyFilters(Builder $query): Builder
     {
         foreach ($this->filters as $name => $filter) {
-            dump($filter);
             $query->when($filter->hasValue(), fn (Builder $query) => $filter->apply($query));
         }
 
@@ -142,9 +182,18 @@ class Table implements Wireable
         return $this;
     }
 
-    public function paginationOptions(array $options = []): static
+    public function paginationOptions(array $options, $default = null): static
     {
         $this->perPageOptions = $options;
+        $this->perPage = $default ?? array_shift($options);
+
+        return $this;
+    }
+
+    public function perPage(int $perPage): static
+    {
+        session()->put("table:{$this->name}:perPage", $perPage);
+        $this->perPage = $perPage;
 
         return $this;
     }
@@ -158,7 +207,6 @@ class Table implements Wireable
             'filters' => $this->filters,
             'actions' => $this->actions,
             'perPage' => $this->perPage,
-            'page' => $this->page,
             'perPageOptions' => $this->perPageOptions,
             'search' => $this->search,
             'sortColumn' => $this->sortColumn,
@@ -181,6 +229,11 @@ class Table implements Wireable
         return $this->columns;
     }
 
+    public function getToggleableColumns(): array
+    {
+        return collect($this->columns)->filter->isToggleable()->toArray();
+    }
+
     public function getFilters(): array
     {
         return $this->filters;
@@ -191,9 +244,9 @@ class Table implements Wireable
         return $this->model;
     }
 
-    public function getPage(): int
+    public function getName(): string
     {
-        return $this->page;
+        return $this->name;
     }
 
     public function getPerPage(): int
@@ -206,7 +259,7 @@ class Table implements Wireable
         return $this->perPageOptions;
     }
 
-    public function getSearch(): null
+    public function getSearch(): string
     {
         return $this->search;
     }

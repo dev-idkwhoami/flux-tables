@@ -7,31 +7,6 @@ use Illuminate\Database\Eloquent\Model;
 
 class ViewColumn extends Column
 {
-    public function toLivewire(): array
-    {
-        return [
-            'view' => $this->view,
-            'name' => $this->name,
-            'label' => $this->label,
-            'sortable' => $this->sortable,
-            'searchable' => $this->searchable,
-            'alignment' => $this->alignment,
-        ];
-    }
-
-    public static function fromLivewire($value): static
-    {
-        return new static(
-            $value['view'],
-            $value['name'],
-            null,
-            $value['label'],
-            $value['sortable'],
-            $value['searchable'],
-            $value['alignment'],
-        );
-    }
-
     public function view(string $view): static
     {
         $this->view = $view;
