@@ -32,5 +32,4 @@ class EqualsFilter extends Filter
             $value['value']
         );
     }
-
 }

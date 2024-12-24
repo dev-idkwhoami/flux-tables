@@ -4,7 +4,6 @@ namespace Idkwhoami\FluxTables\Columns;
 
 class TextColumn extends Column
 {
-
     public function toLivewire(): array
     {
         return [

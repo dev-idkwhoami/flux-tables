@@ -9,18 +9,16 @@ use Livewire\Livewire;
 
 class FluxTablesServiceProvider extends ServiceProvider
 {
-
     public function register(): void
     {
-        $this->app->singleton(FluxTables::class, fn() => new FluxTables);
+        $this->app->singleton(FluxTables::class, fn () => new FluxTables);
     }
 
     public function boot(): void
     {
-        $this->loadViewsFrom(__DIR__ . '/../resources/views', 'flux-tables');
+        $this->loadViewsFrom(__DIR__.'/../resources/views', 'flux-tables');
 
         Livewire::component('flux-table', TableComponent::class);
         Livewire::component('flux-filter', FilterComponent::class);
     }
-
 }

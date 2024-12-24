@@ -11,10 +11,11 @@ class FluxTables
 {
     protected array $tables = [];
 
-    public function create(string $model, string $name = null): Table
+    public function create(string $model, ?string $name = null): Table
     {
         $name ??= strtolower(class_basename($model));
         $this->tables[$name] = new Table($model);
+
         return $this->getTable($name);
     }
 
@@ -26,5 +27,4 @@ class FluxTables
 
         return $this->tables[$nameOrModelClass];
     }
-
 }

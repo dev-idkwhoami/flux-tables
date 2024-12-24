@@ -27,30 +27,35 @@ abstract class Column implements Wireable
     public function alignment(ColumnAlignment $alignment): static
     {
         $this->alignment = $alignment;
+
         return $this;
     }
 
     public function label(string $label): static
     {
         $this->label = $label;
+
         return $this;
     }
 
     public function searchable(bool $searchable = true): static
     {
         $this->searchable = $searchable;
+
         return $this;
     }
 
     public function sortable(bool $sortable = true): static
     {
         $this->sortable = $sortable;
+
         return $this;
     }
 
     public function transform(\Closure $transform): static
     {
         $this->transform = $transform;
+
         return $this;
     }
 
@@ -93,5 +98,4 @@ abstract class Column implements Wireable
     {
         return $this->view;
     }
-
 }

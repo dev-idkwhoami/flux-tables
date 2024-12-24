@@ -3,7 +3,6 @@
 namespace Idkwhoami\FluxTables\Filters;
 
 use Illuminate\Contracts\Database\Eloquent\Builder;
-use Laravel\SerializableClosure\SerializableClosure;
 use Livewire\Wireable;
 
 abstract class Filter implements Wireable
@@ -14,12 +13,11 @@ abstract class Filter implements Wireable
         protected ?string $view = null,
         protected ?\Closure $callback = null,
         public mixed $value = null,
-    ) {
-    }
+    ) {}
 
     public function apply(Builder $query): Builder
     {
-        if (!$this->callback) {
+        if (! $this->callback) {
             return $query;
         }
 
@@ -29,23 +27,26 @@ abstract class Filter implements Wireable
     public function label(string $label): static
     {
         $this->label = $label;
+
         return $this;
     }
 
     public function value(mixed $value): static
     {
         $this->value = $value;
+
         return $this;
     }
 
     public function hasValue(): bool
     {
-        return !empty($this->value);
+        return ! empty($this->value);
     }
 
     public function callback(\Closure $callback): static
     {
         $this->callback = $callback;
+
         return $this;
     }
 

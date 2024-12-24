@@ -7,7 +7,6 @@ use Illuminate\Database\Eloquent\Model;
 
 class ViewColumn extends Column
 {
-
     public function toLivewire(): array
     {
         return [
@@ -36,6 +35,7 @@ class ViewColumn extends Column
     public function view(string $view): static
     {
         $this->view = $view;
+
         return $this;
     }
 
@@ -45,7 +45,7 @@ class ViewColumn extends Column
         return view($this->view, ['column' => $this, 'row' => $row]);
     }
 
-    public static function make(string $name, string $view = null): static
+    public static function make(string $name, ?string $view = null): static
     {
         return new static($view, $name);
     }

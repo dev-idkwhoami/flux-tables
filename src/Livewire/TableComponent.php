@@ -27,5 +27,4 @@ class TableComponent extends Component
     {
         return view('flux-tables::livewire.table');
     }
-
 }

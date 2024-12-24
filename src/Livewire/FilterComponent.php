@@ -9,6 +9,7 @@ use Livewire\Component;
 class FilterComponent extends Component
 {
     public Filter $filter;
+
     public string $name;
 
     public function mount(Filter $filter, string $name): void
@@ -19,7 +20,6 @@ class FilterComponent extends Component
 
     public function render(): View
     {
-        return view('flux-tables::' . $this->filter->getView());
+        return view('flux-tables::'.$this->filter->getView());
     }
-
 }
