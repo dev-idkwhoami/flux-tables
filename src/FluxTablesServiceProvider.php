@@ -2,23 +2,25 @@
 
 namespace Idkwhoami\FluxTables;
 
-use Spatie\LaravelPackageTools\Package;
-use Spatie\LaravelPackageTools\PackageServiceProvider;
-use Idkwhoami\FluxTables\Commands\FluxTablesCommand;
+use Idkwhoami\FluxTables\Livewire\FilterComponent;
+use Idkwhoami\FluxTables\Livewire\TableComponent;
+use Illuminate\Support\ServiceProvider;
+use Livewire\Livewire;
 
-class FluxTablesServiceProvider extends PackageServiceProvider
+class FluxTablesServiceProvider extends ServiceProvider
 {
-    public function configurePackage(Package $package): void
+
+    public function register(): void
     {
-        /*
-         * This class is a Package Service Provider
-         *
-         * More info: https://github.com/spatie/laravel-package-tools
-         */
-        $package
-            ->name('flux-tables')
-            ->hasConfigFile()
-            ->hasViews()
-            ->hasCommand(FluxTablesCommand::class);
+        $this->app->singleton(FluxTables::class, fn() => new FluxTables);
     }
+
+    public function boot(): void
+    {
+        $this->loadViewsFrom(__DIR__ . '/../resources/views', 'flux-tables');
+
+        Livewire::component('flux-table', TableComponent::class);
+        Livewire::component('flux-filter', FilterComponent::class);
+    }
+
 }
