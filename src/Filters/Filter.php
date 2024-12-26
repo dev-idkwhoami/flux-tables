@@ -2,7 +2,7 @@
 
 namespace Idkwhoami\FluxTables\Filters;
 
-use Illuminate\Contracts\Database\Eloquent\Builder;
+use Illuminate\Contracts\Database\Query\Builder;
 use Laravel\SerializableClosure\SerializableClosure;
 use Livewire\Wireable;
 
@@ -14,7 +14,9 @@ abstract class Filter implements Wireable
         protected ?string $view = null,
         protected ?\Closure $callback = null,
         public mixed $value = null,
-    ) {}
+        public mixed $emptyValue = null,
+    ) {
+    }
 
     public function getFilterValueSessionKey(string $table): string
     {
@@ -35,13 +37,13 @@ abstract class Filter implements Wireable
 
     public function resetValue(string $table): void
     {
-        $this->value = null;
+        $this->value = $this->emptyValue;
         session()->forget($this->getFilterValueSessionKey($table));
     }
 
-    public function apply(Builder $query): Builder
+    public function apply(Builder $query): \Illuminate\Contracts\Database\Query\Builder
     {
-        if (! $this->callback) {
+        if (!$this->callback) {
             return $query;
         }
 
@@ -64,7 +66,7 @@ abstract class Filter implements Wireable
 
     public function hasValue(): bool
     {
-        return ! empty($this->value);
+        return !empty($this->value);
     }
 
     public function callback(\Closure $callback): static
@@ -119,5 +121,14 @@ abstract class Filter implements Wireable
             unserialize($value['callback'])->getClosure(),
             $value['value']
         );
+    }
+
+    protected function resolve($value): mixed
+    {
+        if ($value instanceof \Closure) {
+            return $value();
+        }
+
+        return $value;
     }
 }

@@ -11,10 +11,12 @@ class FilterComponent extends Component
     public Filter $filter;
 
     public string $name;
+    public int $index;
 
-    public function mount(Filter $filter, string $name): void
+    public function mount(Filter $filter, int $index, string $name): void
     {
         $this->filter = $filter;
+        $this->index = $index;
         $this->name = $name;
     }
 

@@ -5,6 +5,7 @@ namespace Idkwhoami\FluxTables\Columns;
 use Idkwhoami\FluxTables\Enums\ColumnAlignment;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Collection;
 use Livewire\Wireable;
 
 abstract class Column implements Wireable
@@ -19,15 +20,54 @@ abstract class Column implements Wireable
         protected bool $toggleable = false,
         public bool $toggled = false,
         protected ColumnAlignment $alignment = ColumnAlignment::Left,
-    ) {}
+    ) {
+    }
 
     public function render(Model $row): ?View
     {
-        if (! $this->isToggleable() || $this->isToggled()) {
+        if (!$this->isToggleable() || $this->isToggled()) {
             return view("flux-tables::{$this->view}", ['column' => $this, 'row' => $row]);
         }
 
         return null;
+    }
+
+    public function resolveValue(Model $row): mixed
+    {
+        if ($this->hasTransform()) {
+            return $this->getTransform()($row->{$this->getName()}, $row);
+        }
+
+        return $this->traverseModel($row, $this->getName());
+    }
+
+    protected function traverseModel(Model $model, string $property): mixed
+    {
+        /* Determine weather property wants to access an object */
+        if (str_contains($property, '.')) {
+            $path = explode('.', $property);
+            $relationName = array_shift($path);
+            if ($model->isRelation($relationName)) {
+                /* load relation if necessary */
+                $relation = $model
+                    ->loadMissing($relationName)
+                    ->getRelation($relationName);
+                if ($relation === null) {
+                    return null;
+                }
+                if($relation instanceof Model) {
+                    return $this->traverseModel($relation, implode('.', $path));
+                }
+
+                if($relation instanceof Collection) {
+                    return $relation->map(fn($item) => $this->traverseModel($item, implode('.', $path)));
+                }
+
+                return null;
+            }
+        }
+
+        return $model->{$property};
     }
 
     public function alignment(ColumnAlignment $alignment): static

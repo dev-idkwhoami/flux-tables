@@ -3,7 +3,6 @@
 namespace Idkwhoami\FluxTables;
 
 use Idkwhoami\FluxTables\Columns\Column;
-use Idkwhoami\FluxTables\Enums\SortDirection;
 use Illuminate\Contracts\Database\Query\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Pagination\LengthAwarePaginator;
@@ -29,16 +28,24 @@ class Table implements Wireable
 
     protected ?string $sortColumn = null;
 
-    protected SortDirection $sortDirection = SortDirection::Descending;
+    protected ?string $sortDirection = null;
 
     public function __construct(string $model)
     {
-        if (! class_exists($model) || ! is_subclass_of($model, Model::class)) {
+        if (!class_exists($model) || !is_subclass_of($model, Model::class)) {
             throw new \InvalidArgumentException("Model $model is not a valid model class");
         }
 
         $this->model = $model;
         $this->name = strtolower(class_basename($model));
+    }
+
+    public function fill(array $values): static
+    {
+        foreach ($values as $key => $value) {
+            $this->{$key} = $value;
+        }
+        return $this;
     }
 
     public function refillFilters(): void
@@ -96,11 +103,11 @@ class Table implements Wireable
 
     public function sort(string $column): void
     {
-        if ($this->sortColumn === $column) {
-            $this->sortDirection = $this->sortDirection === SortDirection::Ascending ? SortDirection::Descending : SortDirection::Ascending;
-        } else {
+        if ($this->sortColumn !== $column) {
             $this->sortColumn = $column;
-            $this->sortDirection = SortDirection::Ascending;
+            $this->sortDirection = 'asc';
+        } else {
+            $this->sortDirection = $this->sortDirection === 'desc' ? 'asc' : 'desc';
         }
     }
 
@@ -111,7 +118,7 @@ class Table implements Wireable
 
     public function applySort(Builder $query): Builder
     {
-        $query->orderBy($this->sortColumn, $this->sortDirection->value);
+        $query->orderBy($this->sortColumn, $this->sortDirection);
 
         return $query;
     }
@@ -120,7 +127,7 @@ class Table implements Wireable
     {
         foreach ($this->columns as /** @var $column Column */ $column) {
             $query->when($column->isSearchable(),
-                fn (Builder $query) => $query->orWhere($column->getName(), 'ilike', "%{$this->search}%"));
+                fn(Builder $query) => $query->orWhere($column->getName(), 'ilike', "%{$this->search}%"));
         }
 
         return $query;
@@ -128,8 +135,8 @@ class Table implements Wireable
 
     public function applyFilters(Builder $query): Builder
     {
-        foreach ($this->filters as $name => $filter) {
-            $query->when($filter->hasValue(), fn (Builder $query) => $filter->apply($query));
+        foreach ($this->filters as $filter) {
+            $query->when($filter->hasValue(), fn(Builder $query) => $filter->apply($query));
         }
 
         return $query;
@@ -143,9 +150,9 @@ class Table implements Wireable
     public function getPaginatedModels(): LengthAwarePaginator
     {
         return $this->getQuery()
-            ->when($this->search, fn ($query) => $this->applySearch($query))
-            ->when($this->sortColumn, fn ($query) => $this->applySort($query))
-            ->tap(fn ($query) => $this->applyFilters($query))
+            ->when($this->search, fn($query) => $this->applySearch($query))
+            ->when($this->sortColumn, fn($query) => $this->applySort($query))
+            ->when(!empty($this->filters), fn($query) => $this->applyFilters($query))
             ->paginate($this->perPage);
     }
 
@@ -157,28 +164,24 @@ class Table implements Wireable
     public function columns(array $columns = []): static
     {
         $this->columns = $columns;
-
         return $this;
     }
 
     public function filters(array $filters = []): static
     {
-        $this->filters = collect($filters)->mapWithKeys(fn ($filter) => [$filter->getName() => $filter])->toArray();
-
+        $this->filters = $filters;
         return $this;
     }
 
     public function actions(array $actions = []): static
     {
         $this->actions = $actions;
-
         return $this;
     }
 
     public function defaultSortColumn(string $column): static
     {
         $this->sortColumn = $column;
-
         return $this;
     }
 
@@ -186,7 +189,6 @@ class Table implements Wireable
     {
         $this->perPageOptions = $options;
         $this->perPage = $default ?? array_shift($options);
-
         return $this;
     }
 
@@ -194,7 +196,6 @@ class Table implements Wireable
     {
         session()->put("table:{$this->name}:perPage", $perPage);
         $this->perPage = $perPage;
-
         return $this;
     }
 
@@ -216,7 +217,7 @@ class Table implements Wireable
 
     public static function fromLivewire($value)
     {
-        return \Idkwhoami\FluxTables\Facades\FluxTables::getTable($value['name']);
+        return \Idkwhoami\FluxTables\Facades\FluxTables::getTable($value['name'])->fill($value);
     }
 
     public function getActions(): array
@@ -232,6 +233,11 @@ class Table implements Wireable
     public function getToggleableColumns(): array
     {
         return collect($this->columns)->filter->isToggleable()->toArray();
+    }
+
+    public function getFilterIndex(string $name): int
+    {
+        return collect($this->filters)->search(fn($filter) => $filter->getName() === $name);
     }
 
     public function getFilters(): array
@@ -269,8 +275,8 @@ class Table implements Wireable
         return $this->sortColumn;
     }
 
-    public function getSortDirection(): SortDirection
+    public function getSortDirection(): false|string
     {
-        return $this->sortDirection;
+        return $this->sortDirection ?? false;
     }
 }

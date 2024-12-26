@@ -8,7 +8,5 @@
      */
 @endphp
 <flux:cell :align="$column->getAlignment()->asCellAlignment()">
-    {{ $column->hasTransform()
-        ? $column->getTransform()($row->{$column->getName()}, $row)
-        : $row->{$column->getName()} }}
+    {{ $column->resolveValue($row) }}
 </flux:cell>

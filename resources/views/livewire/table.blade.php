@@ -68,13 +68,25 @@
         <flux:columns>
             @foreach($this->table->getColumns() as $column)
                 @if(!$column->isToggleable() || $column->isToggled())
-                    <flux:column
-                        :sortable="$column->isSortable()"
-                        :sorted="$this->table->isSorted($column->getName())"
-                        :align="$column->getAlignment()->value"
-                    >
-                        {{ $column->getLabel() }}
-                    </flux:column>
+                    @if($column->isSortable())
+                        <flux:column
+                            x-data="{ column: $wire.$entangle('table.sortColumn', true), direction: $wire.$entangle('table.sortDirection', false) }"
+                            x-effect="console.log(column, direction)"
+                            @click="$wire.sort('{{ $column->getName() }}')"
+                            sortable
+                            :sorted="$this->table->isSorted($column->getName())"
+                            :direction="$this->table->getSortDirection()"
+                            :align="$column->getAlignment()->value"
+                        >
+                            {{ $column->getLabel() }}
+                        </flux:column>
+                    @else
+                        <flux:column
+                            :align="$column->getAlignment()->value"
+                        >
+                            {{ $column->getLabel() }}
+                        </flux:column>
+                    @endif
                 @endif
             @endforeach
         </flux:columns>
@@ -90,8 +102,9 @@
         </flux:rows>
     </flux:table>
     <flux:modal :dismissible="false" variant="flyout" class="space-y-6" name="filters">
-        @foreach($this->table->getFilters() as $filter)
-            <livewire:flux-filter :$filter :name="$filter->getName()"/>
+        @foreach($this->table->getFilters() as $index => $filter)
+            <livewire:flux-filter :key="$index . '_' . $filter->getName() . '_' . $filter->getView()" :$index :$filter
+                                  :name="$filter->getName()"/>
         @endforeach
     </flux:modal>
 </div>

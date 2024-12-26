@@ -21,6 +21,11 @@ class TableComponent extends Component
         $this->table->prepare();
     }
 
+    public function sort(string $column): void
+    {
+        $this->table->sort($column);
+    }
+
     public function updating(string $property, mixed $value): void
     {
         if (str_starts_with($property, 'table.filters')
@@ -39,8 +44,8 @@ class TableComponent extends Component
     {
         if (str_starts_with($property, 'table.filters')) {
 
-            $filterName = str($property)->after('table.filters.')->before('.value')->value();
-            $this->table->filters[$filterName]->setValueInSession($this->table->getName());
+            $index = str($property)->after('table.filters.')->before('.value')->value();
+            $this->table->filters[$index]->setValueInSession($this->table->getName());
         }
 
         if (str_starts_with($property, 'table.columns')) {
