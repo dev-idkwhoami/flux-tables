@@ -1,19 +1,12 @@
-# This is my package flux-tables
+# Flux Tables
 
 [![Latest Version on Packagist](https://img.shields.io/packagist/v/idkwhoami/flux-tables.svg?style=flat-square)](https://packagist.org/packages/idkwhoami/flux-tables)
-[![GitHub Tests Action Status](https://img.shields.io/github/actions/workflow/status/idkwhoami/flux-tables/run-tests.yml?branch=main&label=tests&style=flat-square)](https://github.com/idkwhoami/flux-tables/actions?query=workflow%3Arun-tests+branch%3Amain)
-[![GitHub Code Style Action Status](https://img.shields.io/github/actions/workflow/status/idkwhoami/flux-tables/fix-php-code-style-issues.yml?branch=main&label=code%20style&style=flat-square)](https://github.com/idkwhoami/flux-tables/actions?query=workflow%3A"Fix+PHP+code+style+issues"+branch%3Amain)
-[![Total Downloads](https://img.shields.io/packagist/dt/idkwhoami/flux-tables.svg?style=flat-square)](https://packagist.org/packages/idkwhoami/flux-tables)
 
-This is where your description should go. Limit it to a paragraph or two. Consider adding a small example.
+This package is a simple wrapper around [Flux UI](http://fluxui.dev) for a quick and customizable way to create tables.
 
-## Support us
-
-[<img src="https://github-ads.s3.eu-central-1.amazonaws.com/flux-tables.jpg?t=1" width="419px" />](https://spatie.be/github-ad-click/flux-tables)
-
-We invest a lot of resources into creating [best in class open source packages](https://spatie.be/open-source). You can support us by [buying one of our paid products](https://spatie.be/open-source/support-us).
-
-We highly appreciate you sending us a postcard from your hometown, mentioning which of our package(s) you are using. You'll find our address on [our contact page](https://spatie.be/about-us). We publish all received postcards on [our virtual postcard wall](https://spatie.be/open-source/postcards).
+> [!IMPORTANT]
+> This package is NOT "in development". If I need to extend it i will do so. Feel free to fork it or use it as is.
+But feature requests are probably being ignored. Same for pull requests
 
 ## Installation
 
@@ -23,43 +16,57 @@ You can install the package via composer:
 composer require idkwhoami/flux-tables
 ```
 
-You can publish and run the migrations with:
-
-```bash
-php artisan vendor:publish --tag="flux-tables-migrations"
-php artisan migrate
-```
-
-You can publish the config file with:
-
-```bash
-php artisan vendor:publish --tag="flux-tables-config"
-```
-
-This is the contents of the published config file:
-
-```php
-return [
-];
-```
-
-Optionally, you can publish the views using
-
-```bash
-php artisan vendor:publish --tag="flux-tables-views"
-```
-
 ## Usage
 
+In a service provider's `boot()` method:
 ```php
-$fluxTables = new Idkwhoami\FluxTables();
-echo $fluxTables->echoPhrase('Hello, Idkwhoami!');
-```
-
-## Testing
-
-```bash
-composer test
+FluxTables::create(User::class)
+            ->table(
+                fn (Table $table) => $table
+                    ->paginationOptions([5, 10, 20], 10)
+                    ->actions([
+                        ComponentAction::make('create')
+                            ->icon('plus')
+                            ->position(ActionPosition::TITLE_INLINE)
+                            ->component('create-user')
+                            ->label('Create User'),
+                    ])
+                    ->columns([
+                        TextColumn::make('name')
+                            ->searchable()
+                            ->sortable()
+                            ->label('Name'),
+                        TextColumn::make('contact.first_name')
+                            ->label('User')
+                            ->sortable()
+                            ->searchable(),
+                        TextColumn::make('teams.name')
+                            ->label('Teams')
+                            ->list()
+                            ->searchable(),
+                        TextColumn::make('updated_at')
+                            ->label('Last Update')
+                            ->transform(fn ($value) => $value->diffForHumans()),
+                        ViewColumn::make('actions')
+                            ->view('table.user-actions'),
+                    ])
+                    ->filters([
+                        EqualsFilter::make('name')
+                            ->label('Name equals')
+                            ->callback(fn (Builder $query, mixed $value) => $query->where('users.name', '=', $value)),
+                        SelectFilter::make('user')
+                            ->label('Select User')
+                            ->multiple()
+                            ->options(fn () => User::all())
+                            ->callback(fn (Builder $query, mixed $value) => $query->whereIn('users.id', $value)),
+                        DateRangeFilter::make('createdBetween')
+                            ->label('Created Between')
+                            ->callback(fn (
+                                Builder $query,
+                                mixed $value
+                            ) => count($value) == 2 ? $query->whereBetween('users.created_at', $value) : $query),
+                    ])
+            );
 ```
 
 ## Changelog
@@ -68,15 +75,11 @@ Please see [CHANGELOG](CHANGELOG.md) for more information on what has changed re
 
 ## Contributing
 
-Please see [CONTRIBUTING](CONTRIBUTING.md) for details.
+Please see fork the project and adjust as much as u want to. But please dont expect me to answer to any PR or Issues.
 
-## Security Vulnerabilities
-
-Please review [our security policy](../../security/policy) on how to report security vulnerabilities.
 
 ## Credits
-
-- [Maximilian Oswald](https://github.com/idkwhoami)
+- [Maximilian Oswald](https://github.com/dev-idkwhoami)
 - [All Contributors](../../contributors)
 
 ## License
