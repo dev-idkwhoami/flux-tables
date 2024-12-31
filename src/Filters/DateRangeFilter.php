@@ -2,8 +2,6 @@
 
 namespace Idkwhoami\FluxTables\Filters;
 
-use Idkwhoami\FluxTables\Filters\Filter;
-
 class DateRangeFilter extends Filter
 {
     public static function make(string $name): static

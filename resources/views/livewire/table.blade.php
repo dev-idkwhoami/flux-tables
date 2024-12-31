@@ -1,5 +1,7 @@
 @php
+    use Idkwhoami\FluxTables\Enums\ActionPosition;
     /**
+     * @var $action \Idkwhoami\FluxTables\Actions\Action
      * @var $column \Idkwhoami\FluxTables\Columns\Column
      * @var $filter \Idkwhoami\FluxTables\Filters\Filter
      * @var $model \Illuminate\Database\Eloquent\Model
@@ -14,6 +16,14 @@
             {{ $heading }}
         </flux:heading>
         <flux:spacer/>
+        @foreach($this->table->getActionsAt(ActionPosition::TITLE_INLINE) as $index => $action)
+            <livewire:flux-action :$action :$index/>
+        @endforeach
+    </div>
+    <div class="flex justify-items-between gap-x-2 mb-4">
+        @foreach($this->table->getActionsAt(ActionPosition::ABOVE_TOOLBAR) as $index => $action)
+            <livewire:flux-action :$action :$index/>
+        @endforeach
     </div>
     <div class="flex justify-items-between gap-x-2 mb-4">
         @if($this->table->getPerPageOptions() !== null)
@@ -40,7 +50,13 @@
                 </flux:menu>
             </flux:dropdown>
         @endif
+        @foreach($this->table->getActionsAt(ActionPosition::TOOLBAR_LEFT) as $index => $action)
+            <livewire:flux-action :$action :$index/>
+        @endforeach
         <flux:spacer/>
+        @foreach($this->table->getActionsAt(ActionPosition::TOOLBAR_RIGHT) as $index => $action)
+            <livewire:flux-action :$action :$index/>
+        @endforeach
         @if($this->table->hasActiveFilters())
             <flux:tooltip content="Reset filters">
                 <flux:button variant="filled" class="hover:text-red-400" size="sm" color="primary"
@@ -64,6 +80,11 @@
             </div>
         @endif
     </div>
+    <div class="flex justify-items-between gap-x-2 mb-4">
+        @foreach($this->table->getActionsAt(ActionPosition::BELOW_TOOLBAR) as $index => $action)
+            <livewire:flux-action :$action :$index/>
+        @endforeach
+    </div>
     <flux:table :paginate="$this->models">
         <flux:columns>
             @foreach($this->table->getColumns() as $column)
@@ -71,7 +92,6 @@
                     @if($column->isSortable())
                         <flux:column
                             x-data="{ column: $wire.$entangle('table.sortColumn', true), direction: $wire.$entangle('table.sortDirection', false) }"
-                            x-effect="console.log(column, direction)"
                             @click="$wire.sort('{{ $column->getName() }}')"
                             sortable
                             :sorted="$this->table->isSorted($column->getName())"

@@ -2,6 +2,7 @@
 
 namespace Idkwhoami\FluxTables;
 
+use Idkwhoami\FluxTables\Livewire\ActionComponent;
 use Idkwhoami\FluxTables\Livewire\FilterComponent;
 use Idkwhoami\FluxTables\Livewire\TableComponent;
 use Illuminate\Support\ServiceProvider;
@@ -20,5 +21,6 @@ class FluxTablesServiceProvider extends ServiceProvider
 
         Livewire::component('flux-table', TableComponent::class);
         Livewire::component('flux-filter', FilterComponent::class);
+        Livewire::component('flux-action', ActionComponent::class);
     }
 }

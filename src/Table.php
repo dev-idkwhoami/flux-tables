@@ -3,8 +3,14 @@
 namespace Idkwhoami\FluxTables;
 
 use Idkwhoami\FluxTables\Columns\Column;
+use Idkwhoami\FluxTables\Enums\ActionPosition;
 use Illuminate\Contracts\Database\Query\Builder;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Livewire\Wireable;
 
@@ -118,7 +124,22 @@ class Table implements Wireable
 
     public function applySort(Builder $query): Builder
     {
-        $query->orderBy($this->sortColumn, $this->sortDirection);
+        $column = $this->columns[$this->getColumnIndex($this->sortColumn)];
+        if ($column->isSortable() && $column->hasRelation()) {
+            /** @var $relation Relation */
+            $relation = (new $this->model)->{$column->getRelationName()}();
+
+            if($relation instanceof HasMany || $relation instanceof BelongsToMany) {
+                throw new \Exception('Sorting by relation is not supported for HasMany and BelongsToMany relations');
+            }
+
+            $query->orderBy(
+                $relation->getRelated()->qualifyColumn($column->getRelationProperty()),
+                $this->sortDirection
+            );
+        } else {
+            $query->orderBy($this->sortColumn, $this->sortDirection);
+        }
 
         return $query;
     }
@@ -127,7 +148,23 @@ class Table implements Wireable
     {
         foreach ($this->columns as /** @var $column Column */ $column) {
             $query->when($column->isSearchable(),
-                fn(Builder $query) => $query->orWhere($column->getName(), 'ilike', "%{$this->search}%"));
+                function (Builder $query) use ($column) {
+                    if ($column->hasRelation()) {
+                        /** @var $relation Relation */
+                        $relation = (new $this->model)->{$column->getRelationName()}();
+
+                        if ($relation instanceof HasOne || $relation instanceof BelongsTo) {
+                            $query->orWhere($relation->getRelated()->qualifyColumn($column->getRelationProperty()),
+                                'ilike', "%{$this->search}%");
+                        } elseif ($relation instanceof HasMany || $relation instanceof BelongsToMany) {
+                            $query->orWhereHas($column->getRelationName(),
+                                fn(Builder $query) => $query->where($column->getRelationProperty(), 'ilike',
+                                    "%{$this->search}%"));
+                        }
+                    } else {
+                        $query->orWhere($column->getName(), 'ilike', "%{$this->search}%");
+                    }
+                });
         }
 
         return $query;
@@ -144,11 +181,49 @@ class Table implements Wireable
 
     public function getQuery(): Builder
     {
-        return ($this->model)::query();
+        $query = ($this->model)::query();
+        /** @var $model Model */
+        $model = new ($this->model);
+
+        $selects = [$model->qualifyColumn('*')];
+        foreach ($this->columns as /** @var $column Column */ $column) {
+            if ($column->hasRelation()) {
+                $path = explode('.', $column->getName());
+
+                $relationName = array_shift($path);
+
+                do {
+                    if ($model->isRelation($relationName)) {
+                        /** @var $relation Relation */
+                        $relation = $model->{$relationName}();
+
+                        $related = $model->{$relationName}()->getRelated();
+                        $relatedTable = $related->getTable();
+
+                        if ($relation instanceof HasOne || $relation instanceof BelongsTo) {
+                            $query->leftJoin(
+                                $relatedTable,
+                                $relation->getQualifiedParentKeyName(),
+                                '=',
+                                $relation->getQualifiedForeignKeyName()
+                            );
+                        }
+                    } else {
+                        $property = array_shift($path);
+                        $column = $model->qualifyColumn($property);
+                        $selects[] = "$column as '{$column->getName()}'";
+                    }
+                } while (count($path) > 1);
+
+            }
+        }
+
+        return $query->selectRaw(implode(', ', $selects));
     }
 
     public function getPaginatedModels(): LengthAwarePaginator
     {
+
         return $this->getQuery()
             ->when($this->search, fn($query) => $this->applySearch($query))
             ->when($this->sortColumn, fn($query) => $this->applySort($query))
@@ -171,6 +246,16 @@ class Table implements Wireable
     {
         $this->filters = $filters;
         return $this;
+    }
+
+    public function hasActionAt(ActionPosition $position): bool
+    {
+        return collect($this->actions)->filter(fn($action) => $action->getPosition() === $position)->isNotEmpty();
+    }
+
+    public function getActionsAt(ActionPosition $position): array
+    {
+        return collect($this->actions)->filter(fn($action) => $action->getPosition() === $position)->toArray();
     }
 
     public function actions(array $actions = []): static
@@ -202,7 +287,7 @@ class Table implements Wireable
     public function toLivewire(): array
     {
         return [
-            'name' => $this->model,
+            'name' => $this->name,
             'model' => $this->model,
             'columns' => $this->columns,
             'filters' => $this->filters,
@@ -237,7 +322,14 @@ class Table implements Wireable
 
     public function getFilterIndex(string $name): int
     {
-        return collect($this->filters)->search(fn($filter) => $filter->getName() === $name);
+        $index = collect($this->filters)->search(fn($filter) => $filter->getName() === $name);
+        return $index === false ? -1 : $index;
+    }
+
+    public function getColumnIndex(string $name): int
+    {
+        $index = collect($this->columns)->search(fn($column) => $column->getName() === $name);
+        return $index === false ? -1 : $index;
     }
 
     public function getFilters(): array

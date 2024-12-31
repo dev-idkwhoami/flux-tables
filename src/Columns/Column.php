@@ -6,6 +6,7 @@ use Idkwhoami\FluxTables\Enums\ColumnAlignment;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Collection;
+use Laravel\SerializableClosure\SerializableClosure;
 use Livewire\Wireable;
 
 abstract class Column implements Wireable
@@ -41,6 +42,31 @@ abstract class Column implements Wireable
         return $this->traverseModel($row, $this->getName());
     }
 
+    public function hasRelation(): bool
+    {
+        return str_contains($this->name, '.');
+    }
+
+    public function getRelationName(): ?string
+    {
+        if ($this->hasRelation()) {
+            $path = explode('.', $this->name);
+            return array_shift($path);
+        }
+
+        return null;
+    }
+
+    public function getRelationProperty(): ?string
+    {
+        if ($this->hasRelation()) {
+            $path = explode('.', $this->name);
+            return array_pop($path);
+        }
+
+        return null;
+    }
+
     protected function traverseModel(Model $model, string $property): mixed
     {
         /* Determine weather property wants to access an object */
@@ -55,11 +81,11 @@ abstract class Column implements Wireable
                 if ($relation === null) {
                     return null;
                 }
-                if($relation instanceof Model) {
+                if ($relation instanceof Model) {
                     return $this->traverseModel($relation, implode('.', $path));
                 }
 
-                if($relation instanceof Collection) {
+                if ($relation instanceof Collection) {
                     return $relation->map(fn($item) => $this->traverseModel($item, implode('.', $path)));
                 }
 
@@ -184,6 +210,7 @@ abstract class Column implements Wireable
             'toggleable' => $this->toggleable,
             'toggled' => $this->toggled,
             'alignment' => $this->alignment,
+            'transform' => $this->transform ? serialize(new SerializableClosure($this->transform)) : null,
         ];
     }
 
@@ -192,7 +219,7 @@ abstract class Column implements Wireable
         return new static(
             $value['view'],
             $value['name'],
-            null,
+            isset($value['transform']) ? unserialize($value['transform'])->getClosure() : null,
             $value['label'],
             $value['sortable'],
             $value['searchable'],
