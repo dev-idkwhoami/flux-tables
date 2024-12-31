@@ -21,12 +21,11 @@ abstract class Column implements Wireable
         protected bool $toggleable = false,
         public bool $toggled = false,
         protected ColumnAlignment $alignment = ColumnAlignment::Left,
-    ) {
-    }
+    ) {}
 
     public function render(Model $row): ?View
     {
-        if (!$this->isToggleable() || $this->isToggled()) {
+        if (! $this->isToggleable() || $this->isToggled()) {
             return view("flux-tables::{$this->view}", ['column' => $this, 'row' => $row]);
         }
 
@@ -51,6 +50,7 @@ abstract class Column implements Wireable
     {
         if ($this->hasRelation()) {
             $path = explode('.', $this->name);
+
             return array_shift($path);
         }
 
@@ -61,6 +61,7 @@ abstract class Column implements Wireable
     {
         if ($this->hasRelation()) {
             $path = explode('.', $this->name);
+
             return array_pop($path);
         }
 
@@ -86,7 +87,7 @@ abstract class Column implements Wireable
                 }
 
                 if ($relation instanceof Collection) {
-                    return $relation->map(fn($item) => $this->traverseModel($item, implode('.', $path)));
+                    return $relation->map(fn ($item) => $this->traverseModel($item, implode('.', $path)));
                 }
 
                 return null;

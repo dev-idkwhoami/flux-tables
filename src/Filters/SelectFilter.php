@@ -9,6 +9,7 @@ use Override;
 class SelectFilter extends Filter
 {
     protected string $keyColumn;
+
     protected string $valueColumn;
 
     protected bool $multiple = false;
@@ -23,9 +24,10 @@ class SelectFilter extends Filter
     #[Override]
     public function apply(Builder $query): Builder
     {
-        if (!$this->callback) {
+        if (! $this->callback) {
             return $query;
         }
+
         return ($this->callback)($query, collect($this->value)->toArray());
     }
 
@@ -34,6 +36,7 @@ class SelectFilter extends Filter
         $this->keyColumn = $keyColumn;
         $this->valueColumn = $valueColumn;
         $this->options = $this->resolve($options);
+
         return $this;
     }
 
@@ -43,6 +46,7 @@ class SelectFilter extends Filter
         $this->value = $multiple
             ? $this->value ?? []
             : $this->value ?? null;
+
         return $this;
     }
 

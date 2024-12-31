@@ -3,20 +3,17 @@
 namespace Idkwhoami\FluxTables\Actions;
 
 use Idkwhoami\FluxTables\Enums\ActionPosition;
-use Illuminate\Contracts\View\View;
 use Livewire\Wireable;
 
 abstract class Action implements Wireable
 {
-
     public function __construct(
         protected string $name,
         protected string $view,
         protected ?string $label,
         protected ?ActionPosition $position,
         protected ?string $group = null,
-    ) {
-    }
+    ) {}
 
     public function toLivewire(): array
     {
@@ -43,18 +40,21 @@ abstract class Action implements Wireable
     public function group(string $group): static
     {
         $this->group = $group;
+
         return $this;
     }
 
     public function position(ActionPosition $position): static
     {
         $this->position = $position;
+
         return $this;
     }
 
     public function label(string $label): static
     {
         $this->label = $label;
+
         return $this;
     }
 
@@ -82,5 +82,4 @@ abstract class Action implements Wireable
     {
         return $this->view;
     }
-
 }

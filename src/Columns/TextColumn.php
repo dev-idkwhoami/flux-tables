@@ -27,6 +27,7 @@ class TextColumn extends Column
     {
         $this->list = $list;
         $this->view = $list ? 'columns.list' : $this->view;
+
         return $this;
     }
 

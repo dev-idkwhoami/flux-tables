@@ -7,8 +7,11 @@ use Idkwhoami\FluxTables\Enums\ActionPosition;
 class ComponentAction extends Action
 {
     public array $form = [];
+
     public ?string $icon = null;
+
     public string $variant = 'primary';
+
     public bool $dismissable = false;
 
     protected array $rules = [];
@@ -29,34 +32,38 @@ class ComponentAction extends Action
         return new static($name);
     }
 
-
     public function component(string $component): static
     {
         $this->component = $component;
+
         return $this;
     }
 
     public function dismissable(bool $dismissable = true): static
     {
         $this->dismissable = $dismissable;
+
         return $this;
     }
 
     public function variant(string $variant): static
     {
         $this->variant = $variant;
+
         return $this;
     }
 
     public function icon(string $icon): static
     {
         $this->icon = $icon;
+
         return $this;
     }
 
     public function rules(array $rules): static
     {
         $this->rules = $rules;
+
         return $this;
     }
 
@@ -103,5 +110,4 @@ class ComponentAction extends Action
     {
         return $this->icon;
     }
-
 }

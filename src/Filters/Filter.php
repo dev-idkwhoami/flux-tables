@@ -15,8 +15,7 @@ abstract class Filter implements Wireable
         protected ?\Closure $callback = null,
         public mixed $value = null,
         public mixed $emptyValue = null,
-    ) {
-    }
+    ) {}
 
     public function getFilterValueSessionKey(string $table): string
     {
@@ -43,7 +42,7 @@ abstract class Filter implements Wireable
 
     public function apply(Builder $query): \Illuminate\Contracts\Database\Query\Builder
     {
-        if (!$this->callback) {
+        if (! $this->callback) {
             return $query;
         }
 
@@ -66,7 +65,7 @@ abstract class Filter implements Wireable
 
     public function hasValue(): bool
     {
-        return !empty($this->value);
+        return ! empty($this->value);
     }
 
     public function callback(\Closure $callback): static

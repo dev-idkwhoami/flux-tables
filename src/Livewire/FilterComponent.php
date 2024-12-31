@@ -11,6 +11,7 @@ class FilterComponent extends Component
     public Filter $filter;
 
     public string $name;
+
     public int $index;
 
     public function mount(Filter $filter, int $index, string $name): void

@@ -38,7 +38,7 @@ class Table implements Wireable
 
     public function __construct(string $model)
     {
-        if (!class_exists($model) || !is_subclass_of($model, Model::class)) {
+        if (! class_exists($model) || ! is_subclass_of($model, Model::class)) {
             throw new \InvalidArgumentException("Model $model is not a valid model class");
         }
 
@@ -51,6 +51,7 @@ class Table implements Wireable
         foreach ($values as $key => $value) {
             $this->{$key} = $value;
         }
+
         return $this;
     }
 
@@ -129,7 +130,7 @@ class Table implements Wireable
             /** @var $relation Relation */
             $relation = (new $this->model)->{$column->getRelationName()}();
 
-            if($relation instanceof HasMany || $relation instanceof BelongsToMany) {
+            if ($relation instanceof HasMany || $relation instanceof BelongsToMany) {
                 throw new \Exception('Sorting by relation is not supported for HasMany and BelongsToMany relations');
             }
 
@@ -158,7 +159,7 @@ class Table implements Wireable
                                 'ilike', "%{$this->search}%");
                         } elseif ($relation instanceof HasMany || $relation instanceof BelongsToMany) {
                             $query->orWhereHas($column->getRelationName(),
-                                fn(Builder $query) => $query->where($column->getRelationProperty(), 'ilike',
+                                fn (Builder $query) => $query->where($column->getRelationProperty(), 'ilike',
                                     "%{$this->search}%"));
                         }
                     } else {
@@ -173,7 +174,7 @@ class Table implements Wireable
     public function applyFilters(Builder $query): Builder
     {
         foreach ($this->filters as $filter) {
-            $query->when($filter->hasValue(), fn(Builder $query) => $filter->apply($query));
+            $query->when($filter->hasValue(), fn (Builder $query) => $filter->apply($query));
         }
 
         return $query;
@@ -225,9 +226,9 @@ class Table implements Wireable
     {
 
         return $this->getQuery()
-            ->when($this->search, fn($query) => $this->applySearch($query))
-            ->when($this->sortColumn, fn($query) => $this->applySort($query))
-            ->when(!empty($this->filters), fn($query) => $this->applyFilters($query))
+            ->when($this->search, fn ($query) => $this->applySearch($query))
+            ->when($this->sortColumn, fn ($query) => $this->applySort($query))
+            ->when(! empty($this->filters), fn ($query) => $this->applyFilters($query))
             ->paginate($this->perPage);
     }
 
@@ -239,34 +240,38 @@ class Table implements Wireable
     public function columns(array $columns = []): static
     {
         $this->columns = $columns;
+
         return $this;
     }
 
     public function filters(array $filters = []): static
     {
         $this->filters = $filters;
+
         return $this;
     }
 
     public function hasActionAt(ActionPosition $position): bool
     {
-        return collect($this->actions)->filter(fn($action) => $action->getPosition() === $position)->isNotEmpty();
+        return collect($this->actions)->filter(fn ($action) => $action->getPosition() === $position)->isNotEmpty();
     }
 
     public function getActionsAt(ActionPosition $position): array
     {
-        return collect($this->actions)->filter(fn($action) => $action->getPosition() === $position)->toArray();
+        return collect($this->actions)->filter(fn ($action) => $action->getPosition() === $position)->toArray();
     }
 
     public function actions(array $actions = []): static
     {
         $this->actions = $actions;
+
         return $this;
     }
 
     public function defaultSortColumn(string $column): static
     {
         $this->sortColumn = $column;
+
         return $this;
     }
 
@@ -274,6 +279,7 @@ class Table implements Wireable
     {
         $this->perPageOptions = $options;
         $this->perPage = $default ?? array_shift($options);
+
         return $this;
     }
 
@@ -281,6 +287,7 @@ class Table implements Wireable
     {
         session()->put("table:{$this->name}:perPage", $perPage);
         $this->perPage = $perPage;
+
         return $this;
     }
 
@@ -322,13 +329,15 @@ class Table implements Wireable
 
     public function getFilterIndex(string $name): int
     {
-        $index = collect($this->filters)->search(fn($filter) => $filter->getName() === $name);
+        $index = collect($this->filters)->search(fn ($filter) => $filter->getName() === $name);
+
         return $index === false ? -1 : $index;
     }
 
     public function getColumnIndex(string $name): int
     {
-        $index = collect($this->columns)->search(fn($column) => $column->getName() === $name);
+        $index = collect($this->columns)->search(fn ($column) => $column->getName() === $name);
+
         return $index === false ? -1 : $index;
     }
 
