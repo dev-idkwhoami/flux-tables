@@ -6,20 +6,15 @@ use Idkwhoami\FluxTables\Enums\ActionPosition;
 
 class ComponentAction extends Action
 {
-    public array $form = [];
-
-    public ?string $icon = null;
-
-    public string $variant = 'primary';
-
-    public bool $dismissable = false;
-
-    protected array $rules = [];
-
     protected function __construct(
         string $name,
         ?string $label = null,
         protected ?string $component = null,
+        public array $form = [],
+        protected array $rules = [],
+        public bool $dismissable = false,
+        public string $variant = 'primary',
+        public ?string $icon = null,
         ?ActionPosition $position = null,
         string $view = 'actions.form',
         ?string $group = null
@@ -70,12 +65,12 @@ class ComponentAction extends Action
     public function toLivewire(): array
     {
         return array_merge(parent::toLivewire(), [
+            'component' => $this->component,
             'form' => $this->form,
             'rules' => $this->rules,
             'dismissable' => $this->dismissable,
             'variant' => $this->variant,
             'icon' => $this->icon,
-            'component' => $this->component,
         ]);
     }
 
@@ -85,6 +80,11 @@ class ComponentAction extends Action
             $value['name'] ?? null,
             $value['label'] ?? null,
             $value['component'] ?? null,
+            $value['form'] ?? [],
+            $value['rules'] ?? [],
+            $value['dismissable'] ?? false,
+            $value['variant'] ?? 'primary',
+            $value['icon'] ?? null,
             isset($value['position']) ? ActionPosition::from($value['position']) : null,
             $value['view'] ?? null,
             $value['group'] ?? null,

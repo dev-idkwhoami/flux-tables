@@ -15,6 +15,8 @@ class TableComponent extends Component
 
     public ?Table $table = null;
 
+    protected $listeners = ['table.{table.name}.refresh' => '$refresh'];
+
     public function mount(string $model): void
     {
         $this->table = FluxTables::getTable($model);

@@ -3,6 +3,7 @@
 namespace Idkwhoami\FluxTables;
 
 use Illuminate\Database\Eloquent\Model;
+use Livewire\Component;
 
 /**
  * @property Table[] $tables
@@ -17,6 +18,15 @@ class FluxTables
         $this->tables[$name] = new Table($model);
 
         return $this->getTable($name);
+    }
+
+    public function refreshTable(Component $component, string $nameOrModelClass): void
+    {
+        $table = class_exists($nameOrModelClass) && is_subclass_of($nameOrModelClass, Model::class)
+            ? strtolower(class_basename($nameOrModelClass))
+            : $nameOrModelClass;
+
+        $component->dispatch("table.$table.refresh");
     }
 
     public function getTable(string $nameOrModelClass): Table

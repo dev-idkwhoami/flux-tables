@@ -18,7 +18,7 @@ class Table implements Wireable
 {
     protected string $model;
 
-    protected string $name;
+    public string $name;
 
     public array $columns = [];
 
