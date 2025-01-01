@@ -16,6 +16,11 @@ You can install the package via composer:
 composer require idkwhoami/flux-tables
 ```
 
+Now this artisan command
+```bash
+php artisan flux-tables
+```
+
 ## Usage
 
 In a service provider's `boot()` method:

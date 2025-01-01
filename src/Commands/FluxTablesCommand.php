@@ -8,11 +8,14 @@ class FluxTablesCommand extends Command
 {
     public $signature = 'flux-tables';
 
-    public $description = 'My command';
+    public $description = 'Prepare your app to use FluxTables';
 
     public function handle(): int
     {
-        $this->comment('All done');
+        $this->call('flux:icon', ['columns-3', 'filter-x', 'filter', 'search']);
+
+        $this->info('All done, simply add this to your tailwind content section and you are ready to go');
+        $this->comment('./vendor/livewire/flux-tables/resources/views/**/*.blade.php');
 
         return self::SUCCESS;
     }

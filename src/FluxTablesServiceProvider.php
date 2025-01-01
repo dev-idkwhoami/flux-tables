@@ -2,6 +2,7 @@
 
 namespace Idkwhoami\FluxTables;
 
+use Idkwhoami\FluxTables\Commands\FluxTablesCommand;
 use Idkwhoami\FluxTables\Livewire\ActionComponent;
 use Idkwhoami\FluxTables\Livewire\FilterComponent;
 use Idkwhoami\FluxTables\Livewire\TableComponent;
@@ -18,6 +19,9 @@ class FluxTablesServiceProvider extends ServiceProvider
     public function boot(): void
     {
         $this->loadViewsFrom(__DIR__.'/../resources/views', 'flux-tables');
+        $this->commands([
+            FluxTablesCommand::class,
+        ]);
 
         Livewire::component('flux-table', TableComponent::class);
         Livewire::component('flux-filter', FilterComponent::class);
