@@ -12,11 +12,14 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Pagination\LengthAwarePaginator;
+use Laravel\SerializableClosure\SerializableClosure;
 use Livewire\Wireable;
 
 class Table implements Wireable
 {
     protected string $model;
+
+    public ?\Closure $tableQuery = null;
 
     public string $name;
 
@@ -38,7 +41,7 @@ class Table implements Wireable
 
     public function __construct(string $model)
     {
-        if (! class_exists($model) || ! is_subclass_of($model, Model::class)) {
+        if (!class_exists($model) || !is_subclass_of($model, Model::class)) {
             throw new \InvalidArgumentException("Model $model is not a valid model class");
         }
 
@@ -46,7 +49,7 @@ class Table implements Wireable
         $this->name = strtolower(class_basename($model));
     }
 
-    public function fill(array $values): static
+    protected function fill(array $values): static
     {
         foreach ($values as $key => $value) {
             $this->{$key} = $value;
@@ -123,7 +126,7 @@ class Table implements Wireable
         $this->search = $search;
     }
 
-    public function applySort(Builder $query): Builder
+    protected function applySort(Builder $query): Builder
     {
         $column = $this->columns[$this->getColumnIndex($this->sortColumn)];
         if ($column->isSortable() && $column->hasRelation()) {
@@ -145,7 +148,7 @@ class Table implements Wireable
         return $query;
     }
 
-    public function applySearch(Builder $query): Builder
+    protected function applySearch(Builder $query): Builder
     {
         foreach ($this->columns as /** @var $column Column */ $column) {
             $query->when($column->isSearchable(),
@@ -159,7 +162,7 @@ class Table implements Wireable
                                 'ilike', "%{$this->search}%");
                         } elseif ($relation instanceof HasMany || $relation instanceof BelongsToMany) {
                             $query->orWhereHas($column->getRelationName(),
-                                fn (Builder $query) => $query->where($column->getRelationProperty(), 'ilike',
+                                fn(Builder $query) => $query->where($column->getRelationProperty(), 'ilike',
                                     "%{$this->search}%"));
                         }
                     } else {
@@ -171,18 +174,27 @@ class Table implements Wireable
         return $query;
     }
 
-    public function applyFilters(Builder $query): Builder
+    protected function applyFilters(Builder $query): Builder
     {
         foreach ($this->filters as $filter) {
-            $query->when($filter->hasValue(), fn (Builder $query) => $filter->apply($query));
+            $query->when($filter->hasValue(), fn(Builder $query) => $filter->apply($query));
         }
 
         return $query;
     }
 
-    public function getQuery(): Builder
+    public function query(\Closure $query): static
     {
-        $query = ($this->model)::query();
+        $this->tableQuery = $query;
+        return $this;
+    }
+
+    protected function getQuery(): Builder
+    {
+        $query = empty($this->tableQuery)
+            ? ($this->model)::query()
+            : ($this->tableQuery)();
+
         /** @var $model Model */
         $model = new ($this->model);
 
@@ -226,9 +238,9 @@ class Table implements Wireable
     {
 
         return $this->getQuery()
-            ->when($this->search, fn ($query) => $this->applySearch($query))
-            ->when($this->sortColumn, fn ($query) => $this->applySort($query))
-            ->when(! empty($this->filters), fn ($query) => $this->applyFilters($query))
+            ->when($this->search, fn($query) => $this->applySearch($query))
+            ->when($this->sortColumn, fn($query) => $this->applySort($query))
+            ->when(!empty($this->filters), fn($query) => $this->applyFilters($query))
             ->paginate($this->perPage);
     }
 
@@ -253,12 +265,12 @@ class Table implements Wireable
 
     public function hasActionAt(ActionPosition $position): bool
     {
-        return collect($this->actions)->filter(fn ($action) => $action->getPosition() === $position)->isNotEmpty();
+        return collect($this->actions)->filter(fn($action) => $action->getPosition() === $position)->isNotEmpty();
     }
 
     public function getActionsAt(ActionPosition $position): array
     {
-        return collect($this->actions)->filter(fn ($action) => $action->getPosition() === $position)->toArray();
+        return collect($this->actions)->filter(fn($action) => $action->getPosition() === $position)->toArray();
     }
 
     public function actions(array $actions = []): static
@@ -291,27 +303,6 @@ class Table implements Wireable
         return $this;
     }
 
-    public function toLivewire(): array
-    {
-        return [
-            'name' => $this->name,
-            'model' => $this->model,
-            'columns' => $this->columns,
-            'filters' => $this->filters,
-            'actions' => $this->actions,
-            'perPage' => $this->perPage,
-            'perPageOptions' => $this->perPageOptions,
-            'search' => $this->search,
-            'sortColumn' => $this->sortColumn,
-            'sortDirection' => $this->sortDirection,
-        ];
-    }
-
-    public static function fromLivewire($value)
-    {
-        return \Idkwhoami\FluxTables\Facades\FluxTables::getTable($value['name'])->fill($value);
-    }
-
     public function getActions(): array
     {
         return $this->actions;
@@ -329,14 +320,14 @@ class Table implements Wireable
 
     public function getFilterIndex(string $name): int
     {
-        $index = collect($this->filters)->search(fn ($filter) => $filter->getName() === $name);
+        $index = collect($this->filters)->search(fn($filter) => $filter->getName() === $name);
 
         return $index === false ? -1 : $index;
     }
 
     public function getColumnIndex(string $name): int
     {
-        $index = collect($this->columns)->search(fn ($column) => $column->getName() === $name);
+        $index = collect($this->columns)->search(fn($column) => $column->getName() === $name);
 
         return $index === false ? -1 : $index;
     }
@@ -379,5 +370,28 @@ class Table implements Wireable
     public function getSortDirection(): false|string
     {
         return $this->sortDirection ?? false;
+    }
+
+    public function toLivewire(): array
+    {
+        return [
+            'name' => $this->name,
+            'tableQuery' => empty($this->tableQuery) ? null : serialize(new SerializableClosure($this->tableQuery)),
+            'model' => $this->model,
+            'columns' => $this->columns,
+            'filters' => $this->filters,
+            'actions' => $this->actions,
+            'perPage' => $this->perPage,
+            'perPageOptions' => $this->perPageOptions,
+            'search' => $this->search,
+            'sortColumn' => $this->sortColumn,
+            'sortDirection' => $this->sortDirection,
+        ];
+    }
+
+    public static function fromLivewire($value): Table
+    {
+        $value['tableQuery'] = isset($value['tableQuery']) ? unserialize($value['tableQuery'])->getClosure() : null;
+        return \Idkwhoami\FluxTables\Facades\FluxTables::getTable($value['name'])->fill($value);
     }
 }
