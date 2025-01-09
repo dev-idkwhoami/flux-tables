@@ -203,7 +203,8 @@
                 x-on:mouseleave="hoveringVideo = false"
                 x-show="videoControlsVisible"
                 class="isolate z-10 absolute bottom-0 left-0 px-1 pb-2 w-full h-8">
-                <div class="z-20 w-full h-full bg-zinc-800/45 text-white rounded flex justify-between items-center gap-x-2">
+                <div
+                    class="z-20 w-full h-full bg-zinc-800/45 text-white rounded flex justify-between items-center gap-x-2">
                     <div class="px-2 content-center min-h-full cursor-pointer hover:bg-zinc-800/25 rounded">
                         <template x-if="!playing">
                             <flux:icon.play class="!size-4" x-on:click="$refs.player.play()"/>
@@ -263,5 +264,9 @@
                 </div>
             </div>
         </div>
+    @endif
+
+    @if($type === 'image')
+        <img class="max-w-full max-h-full object-contain" alt="{{ $src }}" src="{{ $src }}">
     @endif
 </div>

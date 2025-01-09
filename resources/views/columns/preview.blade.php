@@ -37,13 +37,10 @@
     </flux:modal.trigger>
 
     @teleport('body')
-    <flux:modal class="max-w-[85svw] min-w-[60svw] max-h-[85svh] h-min w-min overflow-hidden" :dismissible="false" name="{{ $modalId }}">
+    <flux:modal class="max-w-[85svw] min-w-[60svw] max-h-[85svh] h-min w-min overflow-hidden" :dismissible="false"
+                name="{{ $modalId }}">
         <div class="w-full h-full flex items-center justify-center box-border pt-6">
-            @if($type === 'image')
-                <img x-on:contextmenu.prevent class="max-w-full max-h-full object-contain" alt="{{ $value }}" src="{{ $src }}">
-            @else
-                {{ view('flux-tables::columns.preview.media', ['src' => $src, 'type' => $type]) }}
-            @endif
+            {{ view('flux-tables::columns.preview.media', ['src' => $src, 'type' => $type]) }}
         </div>
     </flux:modal>
     @endteleport
