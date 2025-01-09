@@ -1,6 +1,7 @@
 @php
     use Idkwhoami\FluxTables\Enums\ActionPosition;
     /**
+     * @var $this \Idkwhoami\FluxTables\Livewire\TableComponent
      * @var $action \Idkwhoami\FluxTables\Actions\Action
      * @var $column \Idkwhoami\FluxTables\Columns\Column
      * @var $filter \Idkwhoami\FluxTables\Filters\Filter
@@ -63,11 +64,13 @@
                              wire:click="resetFilters" icon="filter-x"/>
             </flux:tooltip>
         @endif
-        <flux:modal.trigger name="filters">
-            <flux:tooltip content="Apply filters">
-                <flux:button size="sm" variant="filled" icon="filter"/>
-            </flux:tooltip>
-        </flux:modal.trigger>
+        @if($this->table->hasFilters())
+            <flux:modal.trigger name="filters">
+                <flux:tooltip content="Apply filters">
+                    <flux:button size="sm" variant="filled" icon="filter"/>
+                </flux:tooltip>
+            </flux:modal.trigger>
+        @endif
         @if($this->table->hasSearchable())
             <div>
                 <flux:input

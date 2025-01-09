@@ -6,11 +6,11 @@ use Idkwhoami\FluxTables\Enums\ColumnAlignment;
 
 class TextColumn extends Column
 {
-    protected bool $list = false;
-
     public function __construct(
         ?string $view = null,
         ?string $name = null,
+        ?string $column = null,
+        ?string $placeholder = null,
         ?\Closure $transform = null,
         ?string $label = null,
         bool $sortable = false,
@@ -19,16 +19,13 @@ class TextColumn extends Column
         bool $toggled = false,
         ColumnAlignment $alignment = ColumnAlignment::Left
     ) {
-        parent::__construct($view, $name, $transform, $label, $sortable, $searchable,
+        parent::__construct($view, $name, $column, $placeholder, $transform, $label, $sortable, $searchable,
             $toggleable, $toggled, $alignment);
     }
 
-    public function list(bool $list = true): static
+    public static function fromLivewire($value): static
     {
-        $this->list = $list;
-        $this->view = $list ? 'columns.list' : $this->view;
-
-        return $this;
+        return self::make($value['name'])->fill(__CLASS__, $value);
     }
 
     public static function make(string $name): static

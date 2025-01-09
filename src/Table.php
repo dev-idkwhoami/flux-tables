@@ -3,6 +3,7 @@
 namespace Idkwhoami\FluxTables;
 
 use Idkwhoami\FluxTables\Columns\Column;
+use Idkwhoami\FluxTables\Columns\ListColumn;
 use Idkwhoami\FluxTables\Enums\ActionPosition;
 use Illuminate\Contracts\Database\Query\Builder;
 use Illuminate\Database\Eloquent\Model;
@@ -12,11 +13,16 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Facades\Log;
 use Laravel\SerializableClosure\SerializableClosure;
 use Livewire\Wireable;
 
 class Table implements Wireable
 {
+    protected array $closures = [
+        'tableQuery'
+    ];
+
     protected string $model;
 
     public ?\Closure $tableQuery = null;
@@ -52,7 +58,13 @@ class Table implements Wireable
     protected function fill(array $values): static
     {
         foreach ($values as $key => $value) {
-            $this->{$key} = $value;
+            if (in_array($key, $this->closures) && $value !== null) {
+                if ($unserialized = unserialize($value)) {
+                    $this->{$key} = $unserialized->getClosure();
+                }
+            } elseif (property_exists($this, $key)) {
+                $this->{$key} = $value;
+            }
         }
 
         return $this;
@@ -96,6 +108,11 @@ class Table implements Wireable
         return collect($this->filters)->filter->hasValue()->isNotEmpty();
     }
 
+    public function hasFilters(): bool
+    {
+        return !empty($this->filters);
+    }
+
     public function hasToggleableColumns(): bool
     {
         return collect($this->columns)->filter->isToggleable()->isNotEmpty();
@@ -128,7 +145,14 @@ class Table implements Wireable
 
     protected function applySort(Builder $query): Builder
     {
-        $column = $this->columns[$this->getColumnIndex($this->sortColumn)];
+        $columnIndex = $this->getColumnIndex($this->sortColumn);
+
+        if ($columnIndex === -1) {
+            Log::warning("Column \"{$this->sortColumn}\" is used for sorting even though it is not defined as a column");
+            return $query->orderBy($this->sortColumn, $this->sortDirection);
+        }
+
+        $column = $this->columns[$columnIndex];
         if ($column->isSortable() && $column->hasRelation()) {
             /** @var $relation Relation */
             $relation = (new $this->model)->{$column->getRelationName()}();
@@ -209,7 +233,7 @@ class Table implements Wireable
                     if ($model->isRelation($relationName)) {
                         /** @var $relation Relation */
                         $relation = $model->{$relationName}();
-
+                        /** @var Model $related */
                         $related = $model->{$relationName}()->getRelated();
                         $relatedTable = $related->getTable();
 
@@ -221,17 +245,21 @@ class Table implements Wireable
                                 $relation->getQualifiedForeignKeyName()
                             );
                         }
+
                     } else {
                         $property = array_shift($path);
-                        $column = $model->qualifyColumn($property);
-                        $selects[] = "$column as '{$column->getName()}'";
+                        $selectColumn = $model->qualifyColumn($property);
+                        $selects[] = "$selectColumn as \"{$column->getName()}\"";
                     }
                 } while (count($path) > 1);
 
             }
         }
 
-        return $query->selectRaw(implode(', ', $selects));
+        $query->selectRaw(implode(', ', $selects));
+        /*$query->dumpRawSql();*/
+
+        return $query;
     }
 
     public function getPaginatedModels(): LengthAwarePaginator
@@ -280,10 +308,10 @@ class Table implements Wireable
         return $this;
     }
 
-    public function defaultSortColumn(string $column): static
+    public function defaultSortColumn(string $column, string $sortDirection = 'asc'): static
     {
         $this->sortColumn = $column;
-
+        $this->sortDirection = $sortDirection;
         return $this;
     }
 
@@ -391,7 +419,6 @@ class Table implements Wireable
 
     public static function fromLivewire($value): Table
     {
-        $value['tableQuery'] = isset($value['tableQuery']) ? unserialize($value['tableQuery'])->getClosure() : null;
         return \Idkwhoami\FluxTables\Facades\FluxTables::getTable($value['name'])->fill($value);
     }
 }

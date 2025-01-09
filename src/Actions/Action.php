@@ -15,6 +15,16 @@ abstract class Action implements Wireable
         protected ?string $group = null,
     ) {}
 
+    public function fill(string $class, array $values): static
+    {
+        foreach ($values as $key => $value) {
+            if (property_exists($class, $key)) {
+                $this->{$key} = $value;
+            }
+        }
+        return $this;
+    }
+
     public function toLivewire(): array
     {
         return [

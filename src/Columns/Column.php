@@ -11,9 +11,15 @@ use Livewire\Wireable;
 
 abstract class Column implements Wireable
 {
+    protected array $closures = [
+        'transform'
+    ];
+
     protected function __construct(
         protected ?string $view = null,
         protected ?string $name = null,
+        protected ?string $column = null,
+        protected mixed $placeholder = null,
         protected ?\Closure $transform = null,
         protected ?string $label = null,
         protected bool $sortable = false,
@@ -21,11 +27,27 @@ abstract class Column implements Wireable
         protected bool $toggleable = false,
         public bool $toggled = false,
         protected ColumnAlignment $alignment = ColumnAlignment::Left,
-    ) {}
+    ) {
+        $this->column = $this->column ?? $this->name;
+    }
+
+    public function fill(string $class, array $values): static
+    {
+        foreach ($values as $key => $value) {
+            if (in_array($key, $this->closures) && $value !== null) {
+                if ($unserialized = unserialize($value)) {
+                    $this->transform = $unserialized->getClosure();
+                }
+            } elseif (property_exists($class, $key)) {
+                $this->{$key} = $value;
+            }
+        }
+        return $this;
+    }
 
     public function render(Model $row): ?View
     {
-        if (! $this->isToggleable() || $this->isToggled()) {
+        if (!$this->isToggleable() || $this->isToggled()) {
             return view("flux-tables::{$this->view}", ['column' => $this, 'row' => $row]);
         }
 
@@ -49,7 +71,7 @@ abstract class Column implements Wireable
     public function getRelationName(): ?string
     {
         if ($this->hasRelation()) {
-            $path = explode('.', $this->name);
+            $path = explode('.', $this->column);
 
             return array_shift($path);
         }
@@ -60,7 +82,7 @@ abstract class Column implements Wireable
     public function getRelationProperty(): ?string
     {
         if ($this->hasRelation()) {
-            $path = explode('.', $this->name);
+            $path = explode('.', $this->column);
 
             return array_pop($path);
         }
@@ -87,7 +109,7 @@ abstract class Column implements Wireable
                 }
 
                 if ($relation instanceof Collection) {
-                    return $relation->map(fn ($item) => $this->traverseModel($item, implode('.', $path)));
+                    return $relation->map(fn($item) => $this->traverseModel($item, implode('.', $path)));
                 }
 
                 return null;
@@ -95,6 +117,18 @@ abstract class Column implements Wireable
         }
 
         return $model->{$property};
+    }
+
+    public function column(string $column): static
+    {
+        $this->column = $column;
+        return $this;
+    }
+
+    public function placeholder(mixed $placeholder): static
+    {
+        $this->placeholder = $placeholder;
+        return $this;
     }
 
     public function alignment(ColumnAlignment $alignment): static
@@ -155,6 +189,16 @@ abstract class Column implements Wireable
         return $this->name;
     }
 
+    public function getPlaceholder(): mixed
+    {
+        return $this->placeholder;
+    }
+
+    public function getColumn(): string
+    {
+        return $this->column;
+    }
+
     public function isSearchable(): bool
     {
         return $this->searchable;
@@ -205,13 +249,15 @@ abstract class Column implements Wireable
         return [
             'view' => $this->view,
             'name' => $this->name,
+            'column' => $this->column,
+            'placeholder' => $this->placeholder,
+            'transform' => $this->transform ? serialize(new SerializableClosure($this->transform)) : null,
             'label' => $this->label,
             'sortable' => $this->sortable,
             'searchable' => $this->searchable,
             'toggleable' => $this->toggleable,
             'toggled' => $this->toggled,
             'alignment' => $this->alignment,
-            'transform' => $this->transform ? serialize(new SerializableClosure($this->transform)) : null,
         ];
     }
 
@@ -220,6 +266,8 @@ abstract class Column implements Wireable
         return new static(
             $value['view'],
             $value['name'],
+            $value['column'],
+            $value['placeholder'],
             isset($value['transform']) ? unserialize($value['transform'])->getClosure() : null,
             $value['label'],
             $value['sortable'],

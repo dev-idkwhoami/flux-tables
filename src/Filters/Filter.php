@@ -17,6 +17,16 @@ abstract class Filter implements Wireable
         public mixed $emptyValue = null,
     ) {}
 
+    public function fill(string $class, array $values): static
+    {
+        foreach ($values as $key => $value) {
+            if (property_exists($class, $key)) {
+                $this->{$key} = $value;
+            }
+        }
+        return $this;
+    }
+
     public function getFilterValueSessionKey(string $table): string
     {
         $class = strtolower(class_basename($this));
