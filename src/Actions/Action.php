@@ -7,6 +7,8 @@ use Livewire\Wireable;
 
 abstract class Action implements Wireable
 {
+    protected array $closures = [];
+
     public function __construct(
         protected string $name,
         protected string $view,
@@ -18,7 +20,11 @@ abstract class Action implements Wireable
     public function fill(string $class, array $values): static
     {
         foreach ($values as $key => $value) {
-            if (property_exists($class, $key)) {
+            if (in_array($key, $this->closures) && $value !== null) {
+                if ($unserialized = unserialize($value)) {
+                    $this->{$key} = $unserialized->getClosure();
+                }
+            } elseif (property_exists($class, $key)) {
                 $this->{$key} = $value;
             }
         }

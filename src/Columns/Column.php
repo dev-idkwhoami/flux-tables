@@ -36,7 +36,7 @@ abstract class Column implements Wireable
         foreach ($values as $key => $value) {
             if (in_array($key, $this->closures) && $value !== null) {
                 if ($unserialized = unserialize($value)) {
-                    $this->transform = $unserialized->getClosure();
+                    $this->{$key} = $unserialized->getClosure();
                 }
             } elseif (property_exists($class, $key)) {
                 $this->{$key} = $value;

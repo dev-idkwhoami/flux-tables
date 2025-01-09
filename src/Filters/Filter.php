@@ -8,6 +8,10 @@ use Livewire\Wireable;
 
 abstract class Filter implements Wireable
 {
+    protected array $closures = [
+        'callback'
+    ];
+
     public function __construct(
         protected ?string $name = null,
         protected ?string $label = null,
@@ -20,7 +24,11 @@ abstract class Filter implements Wireable
     public function fill(string $class, array $values): static
     {
         foreach ($values as $key => $value) {
-            if (property_exists($class, $key)) {
+            if (in_array($key, $this->closures) && $value !== null) {
+                if ($unserialized = unserialize($value)) {
+                    $this->{$key} = $unserialized->getClosure();
+                }
+            } elseif (property_exists($class, $key)) {
                 $this->{$key} = $value;
             }
         }
@@ -116,7 +124,7 @@ abstract class Filter implements Wireable
             'name' => $this->name,
             'label' => $this->label,
             'view' => $this->view,
-            'callback' => serialize(new SerializableClosure($this->callback)),
+            'callback' => ! empty($this->callback) ? serialize(new SerializableClosure($this->callback)) : null,
             'value' => $this->value,
         ];
     }
@@ -127,7 +135,7 @@ abstract class Filter implements Wireable
             $value['name'],
             $value['label'],
             $value['view'],
-            unserialize($value['callback'])->getClosure(),
+            isset($value['callback']) ? unserialize($value['callback'])->getClosure() : null,
             $value['value']
         );
     }
