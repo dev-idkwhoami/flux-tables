@@ -6,10 +6,12 @@
     /**
      * @var $column \Idkwhoami\FluxTables\Columns\Column
      */
-    $items = $column->resolveValue($row);
+    $items = $column->resolveValue($row) ?? [];
+    $placeholder = $column->getPlaceholder();
+    $count = count($items);
 @endphp
 <flux:cell :align="$column->getAlignment()->asCellAlignment()">
-    @if(count($items) > 1)
+    @if($count > 1)
         <details>
             <summary>{{ $items->pop() }}</summary>
             <ul class="list-none">
@@ -19,6 +21,6 @@
             </ul>
         </details>
     @else
-        {{ $items->pop() }}
+        {{ $items->pop() ?? $placeholder }}
     @endif
 </flux:cell>
