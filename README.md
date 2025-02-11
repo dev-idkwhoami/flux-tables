@@ -23,56 +23,8 @@ php artisan flux-tables
 
 ## Usage
 
-In a service provider's `boot()` method:
-```php
-FluxTables::create(User::class)
-            ->table(
-                fn (Table $table) => $table
-                    ->paginationOptions([5, 10, 20], 10)
-                    ->actions([
-                        ComponentAction::make('create')
-                            ->icon('plus')
-                            ->position(ActionPosition::TITLE_INLINE)
-                            ->component('create-user')
-                            ->label('Create User'),
-                    ])
-                    ->columns([
-                        TextColumn::make('name')
-                            ->searchable()
-                            ->sortable()
-                            ->label('Name'),
-                        TextColumn::make('contact.first_name')
-                            ->label('User')
-                            ->sortable()
-                            ->searchable(),
-                        TextColumn::make('teams.name')
-                            ->label('Teams')
-                            ->list()
-                            ->searchable(),
-                        TextColumn::make('updated_at')
-                            ->label('Last Update')
-                            ->transform(fn ($value) => $value->diffForHumans()),
-                        ViewColumn::make('actions')
-                            ->view('table.user-actions'),
-                    ])
-                    ->filters([
-                        EqualsFilter::make('name')
-                            ->label('Name equals')
-                            ->callback(fn (Builder $query, mixed $value) => $query->where('users.name', '=', $value)),
-                        SelectFilter::make('user')
-                            ->label('Select User')
-                            ->multiple()
-                            ->options(fn () => User::all())
-                            ->callback(fn (Builder $query, mixed $value) => $query->whereIn('users.id', $value)),
-                        DateRangeFilter::make('createdBetween')
-                            ->label('Created Between')
-                            ->callback(fn (
-                                Builder $query,
-                                mixed $value
-                            ) => count($value) == 2 ? $query->whereBetween('users.created_at', $value) : $query),
-                    ])
-            );
-```
+> [!IMPORTANT]
+> Coming soon
 
 ## Changelog
 

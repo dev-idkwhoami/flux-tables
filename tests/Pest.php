@@ -1,5 +1,5 @@
 <?php
 
-use Idkwhoami\FluxTables\Tests\TestCase;
+use Idkwhoami\FluxTables\Tests\PackageTestCase;
 
-uses(TestCase::class)->in(__DIR__);
+uses(PackageTestCase::class)->in(__DIR__);

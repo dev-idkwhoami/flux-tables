@@ -2,29 +2,54 @@
 
 namespace Idkwhoami\FluxTables;
 
-use Idkwhoami\FluxTables\Commands\FluxTablesCommand;
-use Idkwhoami\FluxTables\Livewire\ActionComponent;
-use Idkwhoami\FluxTables\Livewire\FilterComponent;
-use Idkwhoami\FluxTables\Livewire\TableComponent;
+use Idkwhoami\FluxTables\Livewire\ExampleTable;
+use Idkwhoami\FluxTables\Livewire\Filters\DateRange;
+use Idkwhoami\FluxTables\Livewire\Filters\Deleted;
 use Illuminate\Support\ServiceProvider;
 use Livewire\Livewire;
 
 class FluxTablesServiceProvider extends ServiceProvider
 {
-    public function register(): void
-    {
-        $this->app->singleton(FluxTables::class, fn () => new FluxTables);
-    }
-
     public function boot(): void
     {
+        $this->prepareConfig();
+        $this->prepareLocalization();
+
         $this->loadViewsFrom(__DIR__.'/../resources/views', 'flux-tables');
-        $this->commands([
-            FluxTablesCommand::class,
+
+        Livewire::component('flux-example-table', ExampleTable::class);
+        Livewire::component('flux-filter-deleted', Deleted::class);
+        Livewire::component('flux-filter-date-range', DateRange::class);
+    }
+
+    private function prepareConfig(): void
+    {
+        $this->publishes([
+            __DIR__.'/../config/flux-tables.php' => config_path('flux-tables.php'),
+        ], [
+            'flux-tables-config',
+            'flux-tables'
         ]);
 
-        Livewire::component('flux-table', TableComponent::class);
-        Livewire::component('flux-filter', FilterComponent::class);
-        Livewire::component('flux-action', ActionComponent::class);
+        $this->mergeConfigFrom(
+            __DIR__.'/../config/flux-tables.php',
+            'flux-tables'
+        );
     }
+
+    /**
+     * @return void
+     */
+    public function prepareLocalization(): void
+    {
+        $this->loadTranslationsFrom(__DIR__ . '/../lang', 'flux-tables');
+
+        $this->publishes([
+            __DIR__.'/../lang' => lang_path('vendor/flux-tables'),
+        ], [
+            'flux-tables-lang',
+            'flux-tables'
+        ]);
+    }
+
 }
