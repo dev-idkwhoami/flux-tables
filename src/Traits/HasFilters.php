@@ -22,19 +22,25 @@ trait HasFilters
     {
         return array_merge($this->listeners,
             [
-                'table:{table.name}:filter:update' => 'handleFilterUpdate'
+                'table:{table.name}:filter:update' => 'handleFilterUpdate',
             ]
         );
     }
 
-    public function handleFilterUpdate(string $filter, mixed $state): void
+    public function getFilterFromTable(string $filter): Filter|false
     {
         $filters = array_filter($this->table->getFilters(), fn($f) => $f->getName() === $filter);
         if (empty($filters)) {
-            return;
+            return false;
         }
-        $filterRef = array_shift($filters);
-        $filterRef->setValue(new FilterValue($state));
+        return array_shift($filters);
+    }
+
+    public function handleFilterUpdate(string $filter, mixed $state): void
+    {
+        if ($filterRef = $this->getFilterFromTable($filter)) {
+            $filterRef->setValue(new FilterValue($state));
+        }
     }
 
     public function getFilterModalName(): string
@@ -52,6 +58,20 @@ trait HasFilters
     public function hasActiveFilters(): bool
     {
         return Session::hasAny($this->getAllFilterSessionKeys());
+    }
+
+    /**
+     * @return Filter[]
+     */
+    public function getActiveFilters(): array
+    {
+        return array_filter($this->table->getFilters(), fn(Filter $f) => Session::has($f->filterValueSessionKey()));
+    }
+
+    public function resetFilter(string $filter): void
+    {
+        Session::forget($this->getFilterFromTable($filter)->filterValueSessionKey());
+        $this->dispatch("table:{$this->table->name}:filter:reset");
     }
 
     public function resetFilters(): void

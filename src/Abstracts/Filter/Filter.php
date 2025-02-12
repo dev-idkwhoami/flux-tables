@@ -5,7 +5,9 @@ namespace Idkwhoami\FluxTables\Abstracts\Filter;
 use Idkwhoami\FluxTables\Concretes\Filter\FilterValue;
 use Idkwhoami\FluxTables\Contracts\WireCompatible;
 use Illuminate\Contracts\Database\Query\Builder;
+use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\Session;
+use Illuminate\Support\HtmlString;
 use Livewire\Wireable;
 
 abstract class Filter implements Wireable
@@ -13,6 +15,7 @@ abstract class Filter implements Wireable
     use WireCompatible;
 
     public string $table;
+    protected string $label;
     protected mixed $default = null;
 
     protected final function __construct(
@@ -41,6 +44,17 @@ abstract class Filter implements Wireable
     public function getTable(): string
     {
         return $this->table;
+    }
+
+    public function getLabel(): string
+    {
+        return $this->label;
+    }
+
+    public function label(string $label): Filter
+    {
+        $this->label = $label;
+        return $this;
     }
 
     public function getDefault(): mixed
@@ -80,6 +94,8 @@ abstract class Filter implements Wireable
     {
         return Session::has($this->filterValueSessionKey());
     }
+
+    public abstract function renderPill(): string|HtmlString|View;
 
     /**
      * @return FilterValue

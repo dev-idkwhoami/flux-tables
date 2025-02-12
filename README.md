@@ -18,7 +18,7 @@ composer require idkwhoami/flux-tables
 
 Now this artisan command
 ```bash
-php artisan flux-tables
+php artisan flux:icon arrow-up-narrow-wide arrow-down-wide-narrow arrow-up-down columns-3 filter-x filter search circle-x circle-check view
 ```
 
 ## Usage

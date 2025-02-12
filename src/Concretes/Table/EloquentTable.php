@@ -6,7 +6,7 @@ use Idkwhoami\FluxTables\Abstracts\Table\Table;
 
 class EloquentTable extends Table
 {
-
+    public ?string $eloquentModel = null;
     protected ?string $label = null;
 
     public function getLabel(): string
@@ -25,5 +25,15 @@ class EloquentTable extends Table
         return !empty($this->label);
     }
 
+    public function getEloquentModel(): string
+    {
+        return $this->eloquentModel;
+    }
+
+    public function model(string $eloquentModel): EloquentTable
+    {
+        $this->eloquentModel = $eloquentModel;
+        return $this;
+    }
 
 }

@@ -2,9 +2,11 @@
 
 namespace Idkwhoami\FluxTables;
 
+use Idkwhoami\FluxTables\Console\Commands\InstallCommand;
 use Idkwhoami\FluxTables\Livewire\ExampleTable;
 use Idkwhoami\FluxTables\Livewire\Filters\DateRange;
 use Idkwhoami\FluxTables\Livewire\Filters\Deleted;
+use Idkwhoami\FluxTables\Livewire\Filters\Select;
 use Illuminate\Support\ServiceProvider;
 use Livewire\Livewire;
 
@@ -14,12 +16,25 @@ class FluxTablesServiceProvider extends ServiceProvider
     {
         $this->prepareConfig();
         $this->prepareLocalization();
+        $this->prepareCommands();
 
         $this->loadViewsFrom(__DIR__.'/../resources/views', 'flux-tables');
+
+        $this->publishes([
+            __DIR__.'/../resources/views/flux' => resource_path('views/flux'),
+        ], 'flux-tables-flux-views');
 
         Livewire::component('flux-example-table', ExampleTable::class);
         Livewire::component('flux-filter-deleted', Deleted::class);
         Livewire::component('flux-filter-date-range', DateRange::class);
+        Livewire::component('flux-filter-select', Select::class);
+    }
+
+    private function prepareCommands(): void
+    {
+        $this->commands([
+            InstallCommand::class
+        ]);
     }
 
     private function prepareConfig(): void
@@ -42,7 +57,7 @@ class FluxTablesServiceProvider extends ServiceProvider
      */
     public function prepareLocalization(): void
     {
-        $this->loadTranslationsFrom(__DIR__ . '/../lang', 'flux-tables');
+        $this->loadTranslationsFrom(__DIR__.'/../lang', 'flux-tables');
 
         $this->publishes([
             __DIR__.'/../lang' => lang_path('vendor/flux-tables'),

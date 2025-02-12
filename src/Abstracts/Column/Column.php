@@ -23,6 +23,10 @@ abstract class Column implements Wireable
      * @var bool
      */
     protected bool $searchable = false;
+    /**
+     * @var bool
+     */
+    protected bool $toggleable = true;
 
     protected final function __construct(
         protected string $name,
@@ -70,6 +74,16 @@ abstract class Column implements Wireable
     }
 
     /**
+     * @param  bool  $toggleable
+     * @return $this
+     */
+    public function toggleable(bool $toggleable): static
+    {
+        $this->toggleable = $toggleable;
+        return $this;
+    }
+
+    /**
      * @return string
      */
     public function getName(): string
@@ -99,6 +113,14 @@ abstract class Column implements Wireable
     public function isSortable(): bool
     {
         return $this->sortable;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isToggleable(): bool
+    {
+        return $this->toggleable;
     }
 
     /**

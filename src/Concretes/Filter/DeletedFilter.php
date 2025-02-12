@@ -5,6 +5,8 @@ namespace Idkwhoami\FluxTables\Concretes\Filter;
 use Idkwhoami\FluxTables\Abstracts\Filter\Filter;
 use Idkwhoami\FluxTables\Enums\DeletionState;
 use Illuminate\Contracts\Database\Query\Builder;
+use Illuminate\Contracts\View\View;
+use Illuminate\Support\HtmlString;
 
 class DeletedFilter extends Filter
 {
@@ -38,5 +40,10 @@ class DeletedFilter extends Filter
     public function component(): string
     {
         return 'flux-filter-deleted';
+    }
+
+    public function renderPill(): string|HtmlString|View
+    {
+        return DeletionState::from($this->getValue()->getValue())->getLabel();
     }
 }
