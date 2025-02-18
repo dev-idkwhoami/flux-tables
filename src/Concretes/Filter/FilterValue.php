@@ -6,7 +6,6 @@ use Livewire\Wireable;
 
 class FilterValue implements Wireable
 {
-
     /**
      * @var mixed|null $value
      */
@@ -15,7 +14,7 @@ class FilterValue implements Wireable
     /**
      * @param  mixed|null  $value
      */
-    public final function __construct(mixed $value = null)
+    final public function __construct(mixed $value = null)
     {
         $this->value = $value;
     }

@@ -7,10 +7,13 @@ use Illuminate\Support\Facades\Session;
 
 trait HasSorting
 {
-
     public ?string $sortingColumn = null;
     public ?string $sortingDirection = null;
 
+    /**
+     * @return void
+     * @throws \Exception
+     */
     public function mountHasSorting(): void
     {
         if (!property_exists($this, 'table')) {
@@ -22,24 +25,41 @@ trait HasSorting
         $this->sortingDirection = $direction;
     }
 
+    /**
+     * @return string
+     */
     public function sortingValueSessionKey(): string
     {
         return "table:{$this->table->name}:sorting";
     }
 
+    /**
+     * @param  Builder  $query
+     * @return void
+     */
     public function applySorting(Builder $query): void
     {
-        if (!empty($this->sortingColumn) && !empty($this->sortingDirection)) {
-            $query->orderBy($this->defaultSortingColumn(), $this->getSortingDirection());
+        if (!empty($this->sortingDirection)) {
+            $query->orderBy($query->qualifyColumn($this->getSortingColumn()), $this->getSortingDirection());
         }
     }
 
-    public abstract function defaultSortingColumn(): string;
+    /**
+     * @return string
+     */
+    abstract public function defaultSortingColumn(): string;
 
+    /**
+     * @param  string  $column
+     * @return void
+     */
     public function sort(string $column): void
     {
-        /* three states: asc, desc, and reset */
+        if (!$column) {
+            return;
+        }
 
+        /* three states: asc, desc, and reset */
         if ($this->sortingColumn === $column) {
             if ($this->sortingDirection === 'asc') {
                 $this->sortingDirection = 'desc';
@@ -57,6 +77,9 @@ trait HasSorting
         ]);
     }
 
+    /**
+     * @return void
+     */
     public function resetSorting(): void
     {
         $this->sortingColumn = null;
@@ -68,14 +91,28 @@ trait HasSorting
         ]);
     }
 
-    public function getSortingColumn(): ?string
+    /**
+     * @return string
+     */
+    public function getSortingColumn(): string
     {
         return empty($this->sortingColumn) ? $this->defaultSortingColumn() : $this->sortingColumn;
     }
 
-    public function getSortingDirection(): ?string
+    /**
+     * @return string|null
+     */
+    public function getRawSortingColumn(): ?string
     {
-        return $this->sortingDirection;
+        return $this->sortingColumn;
+    }
+
+    /**
+     * @return string
+     */
+    public function getSortingDirection(): string
+    {
+        return $this->sortingDirection ?? 'asc';
     }
 
 }

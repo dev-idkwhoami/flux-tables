@@ -18,11 +18,14 @@ abstract class Filter implements Wireable
     protected string $label;
     protected mixed $default = null;
 
-    protected final function __construct(
+    final protected function __construct(
         protected string $name,
     ) {
     }
 
+    /**
+     * @return string
+     */
     public function getName(): string
     {
         return $this->name;
@@ -46,22 +49,36 @@ abstract class Filter implements Wireable
         return $this->table;
     }
 
+    /**
+     * @return string
+     */
     public function getLabel(): string
     {
         return $this->label;
     }
 
+    /**
+     * @param  string  $label
+     * @return $this
+     */
     public function label(string $label): Filter
     {
         $this->label = $label;
         return $this;
     }
 
+    /**
+     * @return mixed
+     */
     public function getDefault(): mixed
     {
         return $this->default;
     }
 
+    /**
+     * @param  mixed  $default
+     * @return $this
+     */
     public function default(mixed $default): Filter
     {
         $this->default = $default;
@@ -80,12 +97,12 @@ abstract class Filter implements Wireable
      * @param  Builder  $query
      * @return void
      */
-    public abstract function apply(Builder $query): void;
+    abstract public function apply(Builder $query): void;
 
     /**
      * @return string
      */
-    public abstract function component(): string;
+    abstract public function component(): string;
 
     /**
      * @return bool
@@ -95,7 +112,10 @@ abstract class Filter implements Wireable
         return Session::has($this->filterValueSessionKey());
     }
 
-    public abstract function renderPill(): string|HtmlString|View;
+    /**
+     * @return string|HtmlString|View
+     */
+    abstract public function renderPill(): string|HtmlString|View;
 
     /**
      * @return FilterValue
@@ -105,6 +125,10 @@ abstract class Filter implements Wireable
         return new FilterValue(Session::get($this->filterValueSessionKey()));
     }
 
+    /**
+     * @param  FilterValue  $value
+     * @return void
+     */
     public function setValue(FilterValue $value): void
     {
         if ($value->getValue() === $this->getDefault()) {

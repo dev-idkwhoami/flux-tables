@@ -18,17 +18,28 @@ class Deleted extends Component
 
     public DeletionState $state;
 
+    /**
+     * @param  DeletionState  $state
+     * @return void
+     */
     public function updatedState(DeletionState $state): void
     {
         $this->dispatch("table:{$this->filter->getTable()}:filter:update", $this->filter->getName(), $state);
     }
 
+    /**
+     * @param  Filter  $filter
+     * @return void
+     */
     public function mount(Filter $filter): void
     {
         $this->filter = $filter;
         $this->state = $this->filter->hasValue() ? DeletionState::from($this->filter->getValue()->getValue()) : DeletionState::WithoutDeleted;
     }
 
+    /**
+     * @return View
+     */
     public function render(): View
     {
         return view('flux-tables::livewire.filters.deleted');

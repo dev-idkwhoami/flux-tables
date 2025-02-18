@@ -1,6 +1,6 @@
 <flux:select :label="$this->filter->getLabel()"
              searchable
-             placeholder="Select one or more {{ str($this->filter->getProperty())->plural() }}"
+             :placeholder="__('flux-tables::filter.select.placeholder', ['label' => str($this->filter->getProperty())->plural()])"
              wire:model.live="state"
              variant="listbox"
              selected-suffix="{{ str($this->filter->getProperty())->plural() }} selected"

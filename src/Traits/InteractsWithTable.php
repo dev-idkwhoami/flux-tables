@@ -7,7 +7,9 @@ namespace Idkwhoami\FluxTables\Traits;
  */
 trait InteractsWithTable
 {
-
+    /**
+     * @return string[]
+     */
     public function getListeners(): array
     {
         return array_merge($this->listeners, [
@@ -15,6 +17,9 @@ trait InteractsWithTable
         ]);
     }
 
+    /**
+     * @return void
+     */
     public function filterReset(): void
     {
         $this->reset(array_keys($this->except(['filter', 'table'])));

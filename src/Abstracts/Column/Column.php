@@ -28,7 +28,7 @@ abstract class Column implements Wireable
      */
     protected bool $toggleable = true;
 
-    protected final function __construct(
+    final protected function __construct(
         protected string $name,
     ) {
     }
@@ -125,7 +125,7 @@ abstract class Column implements Wireable
 
     /**
      * @param  object  $value
-     * @return string|HtmlString|View
+     * @return string|HtmlString|View|null
      */
-    public abstract function render(object $value): string|HtmlString|View;
+    abstract public function render(object $value): string|HtmlString|View|null;
 }

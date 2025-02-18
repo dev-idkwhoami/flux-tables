@@ -14,13 +14,20 @@ trait HasTables
     /**
      * @return Table|Table[]
      */
-    public abstract function tables(): Table|array;
+    abstract public function tables(): Table|array;
 
+    /**
+     * @param  string  $name
+     * @return Table
+     */
     public function getTable(string $name): Table
     {
-        return collect($this->tables)->firstOrFail(fn($table) => $table->name === $name);
+        return collect($this->tables)->firstOrFail(fn ($table) => $table->name === $name);
     }
 
+    /**
+     * @return void
+     */
     public function mountHasTable(): void
     {
         $concretes = $this->tables();

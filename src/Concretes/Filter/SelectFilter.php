@@ -3,14 +3,12 @@
 namespace Idkwhoami\FluxTables\Concretes\Filter;
 
 use Idkwhoami\FluxTables\Abstracts\Filter\PropertyFilter;
-use Idkwhoami\FluxTables\Enums\DeletionState;
 use Illuminate\Contracts\Database\Query\Builder;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\HtmlString;
 
 class SelectFilter extends PropertyFilter
 {
-
     /**
      * @inheritDoc
      */
@@ -35,8 +33,11 @@ class SelectFilter extends PropertyFilter
         return 'flux-filter-select';
     }
 
+    /**
+     * @inheritDoc
+     */
     public function renderPill(): string|HtmlString|View
     {
-        return join(", ",$this->getValue()->getValue());
+        return join(", ", $this->getValue()->getValue());
     }
 }

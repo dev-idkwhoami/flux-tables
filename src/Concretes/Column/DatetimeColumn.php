@@ -11,18 +11,28 @@ class DatetimeColumn extends PropertyColumn
 {
     protected string $format = 'm/d/Y H:i:s';
 
+    /**
+     * @return string
+     */
     public function getFormat(): string
     {
         return $this->format;
     }
 
+    /**
+     * @param  string  $format
+     * @return $this
+     */
     public function format(string $format): DatetimeColumn
     {
         $this->format = $format;
         return $this;
     }
 
-    public function render(object $value): string|HtmlString|View
+    /**
+     * @inheritDoc
+     */
+    public function render(object $value): string|HtmlString|View|null
     {
         $rawValue = $value->{$this->property};
         if ($rawValue instanceof \DateTimeInterface) {

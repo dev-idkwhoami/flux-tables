@@ -20,6 +20,7 @@ class Select extends Component
     #[Locked]
     public PropertyFilter $filter;
 
+    /** @var mixed[]|null */
     public ?array $state = [];
 
     public function updatedState(): void
@@ -35,6 +36,9 @@ class Select extends Component
         $this->state = $this->filter->hasValue() ? $this->filter->getValue()->getValue() : [];
     }
 
+    /**
+     * @return mixed[]
+     */
     #[Computed]
     public function options(): array
     {

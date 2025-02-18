@@ -3,7 +3,7 @@
 namespace Idkwhoami\FluxTables;
 
 use Idkwhoami\FluxTables\Console\Commands\InstallCommand;
-use Idkwhoami\FluxTables\Livewire\ExampleTable;
+use Idkwhoami\FluxTables\Livewire\SimpleTable;
 use Idkwhoami\FluxTables\Livewire\Filters\DateRange;
 use Idkwhoami\FluxTables\Livewire\Filters\Deleted;
 use Idkwhoami\FluxTables\Livewire\Filters\Select;
@@ -24,12 +24,15 @@ class FluxTablesServiceProvider extends ServiceProvider
             __DIR__.'/../resources/views/flux' => resource_path('views/flux'),
         ], 'flux-tables-flux-views');
 
-        Livewire::component('flux-example-table', ExampleTable::class);
+        Livewire::component('flux-simple-table', SimpleTable::class);
         Livewire::component('flux-filter-deleted', Deleted::class);
         Livewire::component('flux-filter-date-range', DateRange::class);
         Livewire::component('flux-filter-select', Select::class);
     }
 
+    /**
+     * @return void
+     */
     private function prepareCommands(): void
     {
         $this->commands([
@@ -37,6 +40,9 @@ class FluxTablesServiceProvider extends ServiceProvider
         ]);
     }
 
+    /**
+     * @return void
+     */
     private function prepareConfig(): void
     {
         $this->publishes([

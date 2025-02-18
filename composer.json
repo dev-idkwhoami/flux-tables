@@ -45,7 +45,7 @@
     },
     "scripts": {
         "pint": "./vendor/bin/pint",
-        "analyse": "./vendor/bin/phpstan analyse",
+        "analyse": "./vendor/bin/phpstan analyse --memory-limit 4G",
         "test": "./vendor/bin/pest"
     },
     "minimum-stability": "dev",

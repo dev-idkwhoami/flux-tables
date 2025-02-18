@@ -10,10 +10,10 @@
         dump(session()->all());
     @endphp
 
-    <div class="flex w-full flex-col space-y-4">
+    <div class="flex w-full flex-col space-y-2">
 
 
-        <div>
+        <div class="flex flex-col gap-y-2">
             <div class="flex gap-x-3">
                 @if($this->table->hasLabel())
                     <flux:heading class="content-center" level="1" size="xl">
@@ -38,44 +38,46 @@
                             </flux:menu.checkbox.group>
                         </flux:menu.submenu>
 
-                        <flux:menu.item wire:click.prevent="resetSorting" class="hover:text-orange-400">Reset Sorting</flux:menu.item>
+                        <flux:menu.item wire:click.prevent="resetSorting" class="hover:text-orange-400">Reset Sorting
+                        </flux:menu.item>
                     </flux:menu>
                 </flux:dropdown>
                 <flux:spacer/>
 
-                <div class="flex flex-col gap-y-1">
-                    <div class="flex w-2xl">
+                @if($this->table->hasFilters())
+                    <div class="flex items-center gap-x-2">
                         <flux:spacer/>
-                        <flux:input clearable size="sm" type="text" icon="search" wire:model.live.debounce="search"/>
+                        @if($this->hasActiveFilters())
+                            <flux:button wire:click.prevent="resetFilters"
+                                         class="hover:text-red-400"
+                                         size="sm"
+                                         square
+                                         icon="filter-x"
+                                         variant="filled"/>
+                        @endif
+
+                        <flux:modal.trigger :name="$this->getFilterModalName()">
+                            <flux:button size="sm" square icon="filter" variant="filled"/>
+                        </flux:modal.trigger>
                     </div>
-                    @if($this->table->hasFilters())
-                        <div class="flex items-center gap-x-2">
-                            <flux:spacer/>
-                            @if($this->hasActiveFilters())
-                                <div>
-                                    @foreach($this->getActiveFilters() as $filter)
-                                        <flux:badge size="sm" class="flex gap-x-1" variant="pill">
-                                            {!! $filter->renderPill() !!}
-                                            <flux:badge.close wire:click.prevent="resetFilter('{{ $filter->getName() }}')"/>
-                                        </flux:badge>
-                                    @endforeach
-                                </div>
-
-                                <flux:button wire:click.prevent="resetFilters"
-                                             class="hover:text-red-400"
-                                             size="sm"
-                                             square
-                                             icon="filter-x"
-                                             variant="filled"/>
-                            @endif
-
-                            <flux:modal.trigger :name="$this->getFilterModalName()">
-                                <flux:button size="sm" square icon="filter" variant="filled"/>
-                            </flux:modal.trigger>
-                        </div>
-                    @endif
+                @endif
+                <div class="w-42">
+                    <flux:input clearable size="sm" type="text" icon="search" wire:model.live.debounce="search"/>
                 </div>
             </div>
+            @if($this->hasActiveFilters())
+                <div class="flex gap-x-3">
+                    <flux:spacer/>
+                    <div>
+                        @foreach($this->getActiveFilters() as $filter)
+                            <flux:badge size="sm" class="flex gap-x-1" variant="pill">
+                                {!! $filter->renderPill() !!}
+                                <flux:badge.close wire:click.prevent="resetFilter('{{ $filter->getName() }}')"/>
+                            </flux:badge>
+                        @endforeach
+                    </div>
+                </div>
+            @endif
         </div>
 
 
@@ -99,9 +101,10 @@
                     <flux:column
                         @class(['hidden' => $this->isColumnToggled($column->getName())])
                         :sortable="$column->isSortable()"
-                        :sorted="$this->getSortingColumn() === $column->getProperty()"
+                        :sorted="$this->getRawSortingColumn() === $column->getSortableProperty()"
                         :direction="$this->getSortingDirection()"
-                        wire:click.prevent="sort('{{ $column->getProperty() }}')">
+                        :key="$column->getName()"
+                        wire:click.prevent="sort('{{ $column->isSortable() ? $column->getSortableProperty() : null }}')">
                         {{ $column->getLabel() }}
                     </flux:column>
                 @endforeach
@@ -129,7 +132,7 @@
 </div>
 
 @script
-<script>
+{{--<script>
     console.debug("Example table loading..");
 
     Alpine.data('exampleTable', () => ({
@@ -139,5 +142,5 @@
         },
 
     }));
-</script>
+</script>--}}
 @endscript

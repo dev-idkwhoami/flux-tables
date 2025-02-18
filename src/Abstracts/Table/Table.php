@@ -21,7 +21,7 @@ abstract class Table implements Wireable
      */
     protected array $filters = [];
 
-    protected final function __construct(
+    final protected function __construct(
         public string $name,
     ) {
     }
@@ -58,7 +58,7 @@ abstract class Table implements Wireable
      */
     public function filters(array $filters): Table
     {
-        $this->filters = array_map(fn($filter) => $filter->table($this->name), $filters);
+        $this->filters = array_map(fn ($filter) => $filter->table($this->name), $filters);
         return $this;
     }
 

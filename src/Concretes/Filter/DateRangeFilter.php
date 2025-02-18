@@ -48,6 +48,9 @@ class DateRangeFilter extends PropertyFilter
         return 'flux-filter-date-range';
     }
 
+    /**
+     * @inheritDoc
+     */
     public function renderPill(): string|HtmlString|View
     {
         $display = '';

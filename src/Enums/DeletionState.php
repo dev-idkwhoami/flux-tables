@@ -8,6 +8,9 @@ enum DeletionState: string
     case WithDeleted = 'with_deleted';
     case OnlyDeleted = 'only_deleted';
 
+    /**
+     * @return string
+     */
     public function getLabel(): string
     {
         return trans("flux-tables::filter.deleted.{$this->value}", []);
