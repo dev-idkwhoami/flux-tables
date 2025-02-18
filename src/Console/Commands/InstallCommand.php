@@ -8,7 +8,7 @@ class InstallCommand extends Command
 {
     protected $signature = 'flux-tables:install';
 
-    protected $description = 'Installs Flux Tables and prepared the project for using it.';
+    protected $description = 'Installs Flux Tables and prepares the project for using it.';
 
     public function handle(): void
     {
