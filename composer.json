@@ -9,7 +9,7 @@
     ],
     "homepage": "https://github.com/idkwhoami/flux-tables",
     "license": "MIT",
-    "version": "2.0.0",
+    "version": "2.0.1",
     "authors": [
         {
             "name": "idkwhoami"
@@ -44,6 +44,7 @@
         }
     },
     "scripts": {
+        "pretty": "./vendor/bin/pint --dirty",
         "pint": "./vendor/bin/pint",
         "analyse": "./vendor/bin/phpstan analyse --memory-limit 4G",
         "test": "./vendor/bin/pest"
