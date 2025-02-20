@@ -1,0 +1,11 @@
+parameters:
+    level: 8
+    treatPhpDocTypesAsCertain: false
+    paths:
+        - src
+    ignoreErrors:
+        -
+            messages:
+                - '#PHPDoc tag @var for variable \$relation contains generic class#'
+                - '#but does not specify its types: TRelatedModel, TDeclaringModel#'
+            path: src/Traits/HasEloquentTable.php
