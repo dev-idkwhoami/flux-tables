@@ -5,13 +5,14 @@
         * @var \Idkwhoami\FluxTables\Abstracts\Filter\Filter $filter
         * @var \Illuminate\Database\Eloquent\Model $model
         */
+        dump(session()->all())
     @endphp
 
     <div class="flex w-full flex-col space-y-2">
 
 
-        <div class="flex flex-col gap-y-2">
-            <div class="flex gap-x-3">
+        <div class="flex flex-col space-y-2">
+            <div class="flex space-x-3">
                 @if($this->table->hasLabel())
                     <flux:heading class="content-center" level="1" size="xl">
                         {{ $this->table->getLabel() }}
@@ -42,7 +43,7 @@
                 <flux:spacer/>
 
                 @if($this->table->hasFilters())
-                    <div class="flex items-center gap-x-2">
+                    <div class="flex items-center space-x-2">
                         <flux:spacer/>
                         @if($this->hasActiveFilters())
                             <flux:button wire:click.prevent="resetFilters"
@@ -63,11 +64,11 @@
                 </div>
             </div>
             @if($this->hasActiveFilters())
-                <div class="flex gap-x-3">
+                <div class="flex space-x-3">
                     <flux:spacer/>
                     <div>
                         @foreach($this->getActiveFilters() as $filter)
-                            <flux:badge size="sm" class="flex gap-x-1" variant="pill">
+                            <flux:badge size="sm" class="flex space-x-1" variant="pill">
                                 {!! $filter->renderPill() !!}
                                 <flux:badge.close wire:click.prevent="resetFilter('{{ $filter->getName() }}')"/>
                             </flux:badge>
@@ -93,9 +94,9 @@
 
         <flux:table :paginate="$this->models">
 
-            <flux:columns>
+            <flux:table.columns>
                 @foreach($this->table->getColumns() as $column)
-                    <flux:column
+                    <flux:table.column
                         @class(['hidden' => $this->isColumnToggled($column->getName())])
                         :sortable="$column->isSortable()"
                         :sorted="$this->getRawSortingColumn() === $column->getSortableProperty()"
@@ -103,24 +104,24 @@
                         :key="$column->getName()"
                         wire:click.prevent="sort('{{ $column->isSortable() ? $column->getSortableProperty() : null }}')">
                         {{ $column->getLabel() }}
-                    </flux:column>
+                    </flux:table.column>
                 @endforeach
-            </flux:columns>
+            </flux:table.columns>
 
-            <flux:rows>
+            <flux:table.rows>
                 @foreach($this->models as $model)
-                    <flux:row
+                    <flux:table.row
                         wire:loading.class="animate-pulse"
                         :key="$model->getKey()">
                         @foreach($this->table->getColumns() as $column)
-                            <flux:cell
+                            <flux:table.cell
                                 @class(['hidden' => $this->isColumnToggled($column->getName())])>
                                 {{ $column->render($model) }}
-                            </flux:cell>
+                            </flux:table.cell>
                         @endforeach
-                    </flux:row>
+                    </flux:table.row>
                 @endforeach
-            </flux:rows>
+            </flux:table.rows>
 
         </flux:table>
 

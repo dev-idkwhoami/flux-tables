@@ -6,8 +6,8 @@
              selected-suffix="{{ str($this->filter->getProperty())->plural() }} selected"
              multiple>
     @foreach($this->options as $value => $label)
-        <flux:option :$value>
+        <flux:select.option :$value>
             {{ $label }}
-        </flux:option>
+        </flux:select.option>
     @endforeach
 </flux:select>

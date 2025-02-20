@@ -15,26 +15,24 @@ class DeletedFilter extends Filter
      */
     public function apply(Builder $query): void
     {
-        $value = $this->getValue();
+        if($this->hasValue()) {
+            $value = $this->getValue();
 
-        if (empty($value->getValue())) {
-            return;
-        }
+            switch (DeletionState::from($value->getValue())) {
+                case DeletionState::WithoutDeleted:
+                    /** @phpstan-ignore method.notFound */
+                    $query->withoutTrashed();
+                    break;
+                case DeletionState::OnlyDeleted:
+                    /** @phpstan-ignore method.notFound */
+                    $query->onlyTrashed();
+                    break;
+                case DeletionState::WithDeleted:
+                    /** @phpstan-ignore method.notFound */
+                    $query->withTrashed();
+                    break;
 
-        switch (DeletionState::from($value->getValue())) {
-            case DeletionState::WithoutDeleted:
-                /** @phpstan-ignore method.notFound */
-                $query->withoutTrashed();
-                break;
-            case DeletionState::OnlyDeleted:
-                /** @phpstan-ignore method.notFound */
-                $query->onlyTrashed();
-                break;
-            case DeletionState::WithDeleted:
-                /** @phpstan-ignore method.notFound */
-                $query->withTrashed();
-                break;
-
+            }
         }
     }
 

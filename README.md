@@ -136,27 +136,27 @@ This is the component blade view. Depending on the features you can design them 
 
     <flux:table :paginate="$this->models">
 
-        <flux:columns>
+        <flux:table.columns>
             @foreach($this->table->getColumns() as $column)
-                <flux:column :key="$column->getName()">
+                <flux:table.column :key="$column->getName()">
                     {{ $column->getLabel() }}
-                </flux:column>
+                </flux:table.column>
             @endforeach
-        </flux:columns>
+        </flux:table.columns>
 
-        <flux:rows>
+        <flux:table.rows>
             @foreach($this->models as $model)
-                <flux:row
+                <flux:table.row
                     wire:loading.class="animate-pulse"
                     :key="$model->getKey()">
                     @foreach($this->table->getColumns() as $column)
-                        <flux:cell>
+                        <flux:table.cell>
                             {{ $column->render($model) }}
-                        </flux:cell>
+                        </flux:table.cell>
                     @endforeach
-                </flux:row>
+                </flux:table.row>
             @endforeach
-        </flux:rows>
+        </flux:table.rows>
 
     </flux:table>
 

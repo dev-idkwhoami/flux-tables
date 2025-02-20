@@ -14,15 +14,10 @@ class SelectFilter extends PropertyFilter
      */
     public function apply(Builder $query): void
     {
-        $filterValue = $this->getValue();
-
-        if (empty($filterValue->getValue())) {
-            return;
+        if ($this->hasValue()) {
+            $value = $this->getValue()->getValue();
+            $query->whereIn($this->property, $value);
         }
-
-        $value = $filterValue->getValue();
-
-        $query->whereIn($this->property, $value);
     }
 
     /**

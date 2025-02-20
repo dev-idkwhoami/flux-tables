@@ -2,41 +2,31 @@
 
 namespace Idkwhoami\FluxTables\Concretes\Filter;
 
-use Carbon\Carbon;
+use Flux\DateRange;
 use Idkwhoami\FluxTables\Abstracts\Filter\PropertyFilter;
 use Illuminate\Contracts\Database\Query\Builder;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\Blade;
+use Illuminate\Support\Facades\Session;
 use Illuminate\Support\HtmlString;
 
 class DateRangeFilter extends PropertyFilter
 {
+    public DateRange $range;
+
     /**
      * @inheritDoc
      */
     public function apply(Builder $query): void
     {
-        $filterValue = $this->getValue();
+        if ($this->hasValue()) {
+            $value = $this->getValue()?->getValue();
 
-        if (empty($filterValue->getValue())) {
-            return;
-        }
+            if (!($value instanceof DateRange)) {
+                throw new \Exception('Unable to apply date range filter without a valid value');
+            }
 
-        $value = $filterValue->getValue();
-
-        $start = Carbon::make($value[0]);
-        $end = Carbon::make($value[1]);
-
-        if ($start && $end) {
-            $query->whereBetween($this->property, [$start, $end]);
-        }
-
-        if ($start && !$end) {
-            $query->where($this->property, '>=', $start);
-        }
-
-        if (!$start && $end) {
-            $query->where($this->property, '<=', $end);
+            $query->whereBetween($this->property, $value);
         }
     }
 
@@ -49,30 +39,64 @@ class DateRangeFilter extends PropertyFilter
     }
 
     /**
+     * @inheritdoc
+     */
+    public function setValue(FilterValue $value): void
+    {
+        $range = $value->getValue();
+        parent::setValue(new FilterValue([array_shift($range), array_pop($range)]));
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function getValue(): FilterValue
+    {
+        $range = Session::get($this->filterValueSessionKey(), []);
+        return new FilterValue(new DateRange(array_shift($range), array_pop($range)));
+    }
+
+    /**
      * @inheritDoc
      */
     public function renderPill(): string|HtmlString|View
     {
-        $display = '';
-
         $value = $this->getValue()->getValue();
-        $start = Carbon::make($value[0]);
-        $end = Carbon::make($value[1]);
 
-        $format = 'm/d/Y';
-
-        if ($start && $end) {
-            $display = sprintf('%s - %s', $start->format($format), $end->format($format));
+        if (!($value instanceof DateRange)) {
+            throw new \Exception('Unable to display date range filter pill without a valid value');
         }
 
-        if (!$start && $end) {
-            $display = sprintf('until %s', $end->format($format));
+        $format = trans('flux-tables::formats.date') ?? 'm/d/Y';
+
+        $display = 'error';
+
+        if ($value->hasStart() && $value->hasEnd()) {
+            $display = trans(
+                'flux-tables::filter.date-range.between',
+                [
+                    'start' => $value->start()?->format($format),
+                    'end' => $value->end()?->format($format)
+                ]
+            );
+        }
+        if ($value->hasStart() && !$value->hasEnd()) {
+            $display = trans(
+                'flux-tables::filter.date-range.after',
+                ['start' => $value->start()?->format($format) ?? 'error']
+            );
+        }
+        if (!$value->hasStart() && $value->hasEnd()) {
+            $display = trans(
+                'flux-tables::filter.date-range.before',
+                ['end' => $value->end()?->format($format) ?? 'error']
+            );
         }
 
-        if ($start && !$end) {
-            $display = sprintf('from %s', $start->format($format));
-        }
-
-        return Blade::render('<span>{{ $filter->getLabel() }}:</span><span>{{ $display }}</span>', ['display' => $display, 'filter' => $this]);
+        return Blade::render(
+            '<span>{{ $filter->getLabel() }}:</span><span>{{ $display }}</span>',
+            ['display' => $display, 'filter' => $this]
+        );
     }
+
 }

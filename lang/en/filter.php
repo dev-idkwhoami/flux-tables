@@ -8,8 +8,9 @@ return [
         'only_deleted' => 'Only deleted records',
     ],
     'date-range' => [
-        'start' => 'Start date',
-        'end' => 'End date',
+        'between' => 'between :start and :end',
+        'after' => 'after :start',
+        'before' => 'before :start',
     ],
     'select' => [
         'placeholder' => 'Select one or more :label',

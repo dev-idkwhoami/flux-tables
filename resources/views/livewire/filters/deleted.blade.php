@@ -2,9 +2,9 @@
              class="w-full min-w-min"
              wire:model.live="state" variant="listbox" icon="trash-2">
     @foreach(\Idkwhoami\FluxTables\Enums\DeletionState::cases() as $state)
-        <flux:option :value="$state->value">
+        <flux:select.option :value="$state->value">
             {{ $state->getLabel() }}
-        </flux:option>
+        </flux:select.option>
     @endforeach
 </flux:select>
 

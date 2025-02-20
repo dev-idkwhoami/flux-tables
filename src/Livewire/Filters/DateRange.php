@@ -5,6 +5,8 @@ namespace Idkwhoami\FluxTables\Livewire\Filters;
 use Idkwhoami\FluxTables\Abstracts\Filter\Filter;
 use Idkwhoami\FluxTables\Traits\InteractsWithTable;
 use Illuminate\Contracts\View\View;
+use Illuminate\Support\Carbon;
+use Livewire\Attributes\Computed;
 use Livewire\Attributes\Locked;
 use Livewire\Component;
 
@@ -15,32 +17,30 @@ class DateRange extends Component
     #[Locked]
     public Filter $filter;
 
-    public ?string $start = null;
-    public ?string $end = null;
+    public \Flux\DateRange $range;
 
-    public function updated(string $property, mixed $value): void
+    public function updatedRange(): void
     {
-        $this->$property = $value === "" ? null : $value;
-
-        $state = [$this->start, $this->end];
-        $this->dispatch("table:{$this->filter->getTable()}:filter:update", $this->filter->getName(), $state);
+        $this->dispatch("table:{$this->filter->getTable()}:filter:update", $this->filter->getName(), $this->range);
     }
 
     public function mount(Filter $filter): void
     {
         $this->filter = $filter;
 
-        $value = $this->filter->getValue();
-        $range = array_slice($value->getValue() ?? [], 0, 2);
-
-        if (count($range) < 2) {
-            $range = array_fill(0, 2, null);
+        if ($this->filter->hasValue()) {
+            $value = $this->filter->getValue();
+            if ($value->getValue() instanceof \Flux\DateRange) {
+                $this->range = $value->getValue();
+            }
         }
-
-        $this->start = $range[0];
-        $this->end = $range[1];
     }
 
+    #[Computed]
+    public function weekStartDay(): int
+    {
+        return Carbon::getWeekStartsAt(app()->getLocale());
+    }
 
     public function render(): View
     {

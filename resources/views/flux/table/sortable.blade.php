@@ -5,7 +5,7 @@
 
 @php
     $classes = Flux::classes()
-        ->add('group/sortable flex items-center gap-1 -my-1 -ml-2 -mr-2 px-2 py-1 ')
+        ->add('group/sortable flex items-center space-x-1 space-y-1 -my-1 -ml-2 -mr-2 px-2 py-1 ')
         ->add('group-[]/right-align:flex-row-reverse group-[]/right-align:-mr-2 group-[]/right-align:-ml-8')
         ;
 @endphp
