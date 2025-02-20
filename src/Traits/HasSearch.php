@@ -14,6 +14,14 @@ trait HasSearch
 
     /**
      * @return void
+     */
+    public function updatedSearch(): void
+    {
+        $this->resetPage();
+    }
+
+    /**
+     * @return void
      * @throws \Exception
      */
     public function mountHasSearch(): void

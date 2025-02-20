@@ -1,13 +1,10 @@
-<div
-    x-data="exampleTable"
->
+<div>
     @php
         /**
         * @var \Idkwhoami\FluxTables\Abstracts\Column\Column $column
         * @var \Idkwhoami\FluxTables\Abstracts\Filter\Filter $filter
         * @var \Illuminate\Database\Eloquent\Model $model
         */
-        dump(session()->all());
     @endphp
 
     <div class="flex w-full flex-col space-y-2">
@@ -130,17 +127,3 @@
     </div>
 
 </div>
-
-@script
-{{--<script>
-    console.debug("Example table loading..");
-
-    Alpine.data('exampleTable', () => ({
-
-        init() {
-            console.debug("Example table loaded.");
-        },
-
-    }));
-</script>--}}
-@endscript
