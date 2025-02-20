@@ -46,4 +46,12 @@ class DateRange extends Component
     {
         return view('flux-tables::livewire.filters.date-range');
     }
+
+    public function restoreDefault(): void
+    {
+        $default = $this->filter->getDefault() ?? [];
+        if (!empty($default)) {
+            $this->range = new \Flux\DateRange(array_shift($default), array_pop($default));
+        }
+    }
 }

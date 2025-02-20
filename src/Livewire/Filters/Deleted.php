@@ -34,7 +34,9 @@ class Deleted extends Component
     public function mount(Filter $filter): void
     {
         $this->filter = $filter;
-        $this->state = $this->filter->hasValue() ? DeletionState::from($this->filter->getValue()->getValue()) : DeletionState::WithoutDeleted;
+        $this->state = $this->filter->hasValue()
+            ? DeletionState::from($this->filter->getValue()->getValue())
+            : DeletionState::tryFrom($this->filter->getDefault()) ?? DeletionState::WithoutDeleted;
     }
 
     /**
@@ -43,5 +45,10 @@ class Deleted extends Component
     public function render(): View
     {
         return view('flux-tables::livewire.filters.deleted');
+    }
+
+    public function restoreDefault(): void
+    {
+        $this->state = DeletionState::tryFrom($this->filter->getDefault()) ?? DeletionState::WithoutDeleted;
     }
 }

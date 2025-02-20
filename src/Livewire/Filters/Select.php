@@ -51,4 +51,9 @@ class Select extends Component
     {
         return view('flux-tables::livewire.filters.select');
     }
+
+    public function restoreDefault(): void
+    {
+        $this->state = $this->filter->getDefault() ?? [];
+    }
 }

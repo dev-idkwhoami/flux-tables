@@ -23,6 +23,9 @@ trait InteractsWithTable
     public function filterReset(): void
     {
         $this->reset(array_keys($this->except(['filter', 'table'])));
+        $this->restoreDefault();
     }
+
+    public abstract function restoreDefault(): void;
 
 }
