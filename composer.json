@@ -9,7 +9,7 @@
     ],
     "homepage": "https://github.com/idkwhoami/flux-tables",
     "license": "MIT",
-    "version": "2.0.1",
+    "version": "2.1.0",
     "authors": [
         {
             "name": "idkwhoami"
@@ -18,7 +18,8 @@
     "require": {
         "php": "^8.3",
         "illuminate/support": "^11.41",
-        "livewire/flux-pro": "^1.1"
+        "livewire/flux": "^2.0",
+        "livewire/flux-pro": "^2.0"
     },
     "require-dev": {
         "larastan/larastan": "^2.9",
