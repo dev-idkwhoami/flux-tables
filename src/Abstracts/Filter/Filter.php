@@ -14,8 +14,8 @@ abstract class Filter implements Wireable
 {
     use WireCompatible;
 
-    public string $table;
-    protected string $label;
+    public string $table = '';
+    protected string $label = '';
     protected mixed $default = null;
 
     final protected function __construct(

@@ -35,10 +35,14 @@ class DatetimeColumn extends PropertyColumn
     public function render(object $value): string|HtmlString|View|null
     {
         $rawValue = $value->{$this->property};
-        if ($rawValue instanceof \DateTimeInterface) {
-            return $rawValue->format($this->format);
+        if ($rawValue) {
+            if ($rawValue instanceof \DateTimeInterface) {
+                return $rawValue->format($this->format);
+            }
+
+            return Carbon::parse($rawValue)->format($this->format);
         }
 
-        return Carbon::parse($rawValue)->format($this->format);
+        return $this->getDefault();
     }
 }

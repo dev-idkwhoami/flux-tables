@@ -2,6 +2,8 @@
 
 namespace Idkwhoami\FluxTables\Contracts;
 
+use Laravel\SerializableClosure\SerializableClosure;
+
 trait WireCompatible
 {
     /**
@@ -24,9 +26,30 @@ trait WireCompatible
             if (!property_exists(static::class, $property)) {
                 throw new \InvalidArgumentException("Property {$property} does not exist");
             }
+
+            /*if(!$this->isPropertyInitialized($property)) {
+                throw new \InvalidArgumentException("Property {$property} is not initialized. All properties on WireCompatible classes must be initialized.");
+            }*/
+
+            if ($this->isPropertyClosure($property)) {
+                $deserialized = unserialize($value);
+                if (!$deserialized) {
+                    continue;
+                }
+                $value = $deserialized->getClosure();
+            }
+
             $this->{$property} = $value;
         }
         return $this;
+    }
+
+    /**
+     * @throws \ReflectionException
+     */
+    private function isPropertyClosure(string $property): bool
+    {
+        return (new \ReflectionProperty(static::class, $property))->getType()?->getName() === \Closure::class;
     }
 
     /**
@@ -34,7 +57,15 @@ trait WireCompatible
      */
     public function toLivewire(): array
     {
-        return get_object_vars($this);
+        $vars = get_object_vars($this);
+
+        foreach ($vars as $key => $value) {
+            if ($value instanceof \Closure) {
+                $vars[$key] = serialize(new SerializableClosure($value));
+            }
+        }
+
+        return $vars;
     }
 
     /**

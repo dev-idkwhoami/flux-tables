@@ -4,6 +4,7 @@ namespace Idkwhoami\FluxTables\Traits;
 
 use Idkwhoami\FluxTables\Abstracts\Filter\Filter;
 use Idkwhoami\FluxTables\Concretes\Filter\FilterValue;
+use Illuminate\Contracts\Database\Query\Builder;
 use Illuminate\Support\Facades\Session;
 
 /**
@@ -35,13 +36,23 @@ trait HasFilters
         );
     }
 
+    public function applyFilters(Builder $query): void
+    {
+        if ($this->table->hasFilters()) {
+            $query->tap(
+                fn(Builder $query) => collect($this->table->getFilters())
+                    ->each(fn($filter) => $filter->apply($query))
+            );
+        }
+    }
+
     /**
      * @param  string  $filter
      * @return Filter|null
      */
     public function getFilterFromTable(string $filter): ?Filter
     {
-        $filters = array_filter($this->table->getFilters(), fn ($f) => $f->getName() === $filter);
+        $filters = array_filter($this->table->getFilters(), fn($f) => $f->getName() === $filter);
         return array_shift($filters);
     }
 
@@ -71,7 +82,7 @@ trait HasFilters
     public function getAllFilterSessionKeys(): array
     {
         return $this->table->hasFilters()
-            ? array_map(fn (Filter $f) => $f->filterValueSessionKey(), $this->table->getFilters())
+            ? array_map(fn(Filter $f) => $f->filterValueSessionKey(), $this->table->getFilters())
             : [];
     }
 
@@ -88,7 +99,7 @@ trait HasFilters
      */
     public function getActiveFilters(): array
     {
-        return array_filter($this->table->getFilters(), fn (Filter $f) => Session::has($f->filterValueSessionKey()));
+        return array_filter($this->table->getFilters(), fn(Filter $f) => Session::has($f->filterValueSessionKey()));
     }
 
     /**

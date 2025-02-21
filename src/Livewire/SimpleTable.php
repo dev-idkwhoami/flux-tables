@@ -6,6 +6,7 @@ use Idkwhoami\FluxTables\Abstracts\Column\Column;
 use Idkwhoami\FluxTables\Abstracts\Filter\Filter;
 use Idkwhoami\FluxTables\Abstracts\Table\Table;
 use Idkwhoami\FluxTables\Concretes\Table\EloquentTable;
+use Idkwhoami\FluxTables\Traits\HasActions;
 use Idkwhoami\FluxTables\Traits\HasEloquentTable;
 use Idkwhoami\FluxTables\Traits\HasFilters;
 use Idkwhoami\FluxTables\Traits\HasSearch;
@@ -23,6 +24,7 @@ use Livewire\WithPagination;
 class SimpleTable extends Component
 {
     use HasEloquentTable;
+    use HasActions;
     use HasFilters;
     use HasToggleableColumns;
     use HasSearch;
@@ -61,17 +63,17 @@ class SimpleTable extends Component
         /** @var Builder $query */
         $query = ($this->eloquentModel)::query();
 
-        if ($this->table->hasFilters()) {
-            $query->tap(
-                fn (Builder $query) => collect($this->table->getFilters())
-                    ->each(fn ($filter) => $filter->apply($query))
-            );
-        }
         $this->applyColumns($query);
         $this->applyRelations($query);
+        $this->applyActions($query);
 
+        /*TODO default sorting not being applied default toggled columns also not being hidden */
+
+        $this->applyFilters($query);
         $this->applySorting($query);
         $this->applySearch($query);
+
+        $query->dumpRawSql();
 
         return $query;
     }

@@ -132,9 +132,11 @@ trait HasEloquentTable
      */
     public function applyColumns(Builder $query): void
     {
+        $model = new $this->eloquentModel();
+
         $nonRelationColumns = array_filter(
             $this->table->getColumns(),
-            fn (Column $c) => !$c instanceof PropertyColumn || !$c->hasRelation()
+            fn(Column $c) => !$c instanceof PropertyColumn || !$c->hasRelation()
         );
 
         if (!empty($nonRelationColumns)) {
@@ -144,6 +146,8 @@ trait HasEloquentTable
                 }
             }
         }
+
+        $query->selectRaw($query->qualifyColumn($model->getKeyName()));
     }
 
     /**
@@ -165,7 +169,7 @@ trait HasEloquentTable
     {
         return array_filter(
             $this->table->getColumns(),
-            fn (Column $c) => $c instanceof PropertyColumn && $c->hasRelation()
+            fn(Column $c) => $c instanceof PropertyColumn && $c->hasRelation()
         );
     }
 

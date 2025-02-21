@@ -96,15 +96,23 @@
 
             <flux:table.columns>
                 @foreach($this->table->getColumns() as $column)
-                    <flux:table.column
-                        @class(['hidden' => $this->isColumnToggled($column->getName())])
-                        :sortable="$column->isSortable()"
-                        :sorted="$this->getRawSortingColumn() === $column->getSortableProperty()"
-                        :direction="$this->getSortingDirection()"
-                        :key="$column->getName()"
-                        wire:click.prevent="sort('{{ $column->isSortable() ? $column->getSortableProperty() : null }}')">
-                        {{ $column->getLabel() }}
-                    </flux:table.column>
+                    @if($column->isSortable())
+                        <flux:table.column
+                            @class(['hidden' => $this->isColumnToggled($column->getName())])
+                            sortable
+                            :sorted="$this->getRawSortingColumn() === $column->getSortableProperty()"
+                            :direction="$this->getSortingDirection()"
+                            :key="$column->getName()"
+                            wire:click.prevent="sort('{{ $column->isSortable() ? $column->getSortableProperty() : null }}')">
+                            {{ $column->getLabel() }}
+                        </flux:table.column>
+                    @else
+                        <flux:table.column
+                            @class(['hidden' => $this->isColumnToggled($column->getName())])
+                            :key="$column->getName()">
+                            {{ $column->getLabel() }}
+                        </flux:table.column>
+                    @endif
                 @endforeach
             </flux:table.columns>
 

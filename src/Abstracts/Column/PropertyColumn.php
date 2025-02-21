@@ -11,6 +11,8 @@ abstract class PropertyColumn extends Column
     protected string $property = '';
     protected string $relation = '';
 
+    protected string $default = '';
+
     /**
      * @param  string  $property
      * @return $this
@@ -32,6 +34,12 @@ abstract class PropertyColumn extends Column
     public function relation(string $relation): PropertyColumn
     {
         $this->relation = $relation;
+        return $this;
+    }
+
+    public function default(string $default): PropertyColumn
+    {
+        $this->default = $default;
         return $this;
     }
 
@@ -76,6 +84,11 @@ abstract class PropertyColumn extends Column
     public function getRelationName(): string
     {
         return $this->relation;
+    }
+
+    public function getDefault(): string
+    {
+        return $this->default ?? '';
     }
 
 }
