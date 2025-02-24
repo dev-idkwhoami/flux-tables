@@ -13,6 +13,6 @@ enum DeletionState: string
      */
     public function getLabel(): string
     {
-        return trans("flux-tables::filter.deleted.{$this->value}", []);
+        return trans("flux-tables::filters/deleted.{$this->value}", []);
     }
 }

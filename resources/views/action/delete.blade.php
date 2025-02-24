@@ -8,7 +8,6 @@
 @if($action->isLink())
     <flux:button
         variant="ghost"
-        size="xs"
         class="hover:text-red-500 cursor-pointer"
         key="action-delete-{{ $id }}"
         icon="{{ $action->getIcon() }}"
