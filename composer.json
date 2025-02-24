@@ -1,77 +1,77 @@
 {
-    "name": "idkwhoami/flux-tables",
-    "description": "This package provides a reusable, configurable table livewire component styled using Flux",
-    "type": "library",
-    "keywords": [
-        "Idkwhoami",
-        "laravel",
-        "flux-tables"
-    ],
-    "homepage": "https://github.com/idkwhoami/flux-tables",
-    "license": "MIT",
-    "version": "2.1.1",
-    "authors": [
-        {
-            "name": "idkwhoami"
-        }
-    ],
-    "require": {
-        "php": "^8.3",
-        "illuminate/support": "^11.41",
-        "livewire/flux": "^2.0",
-        "livewire/flux-pro": "^2.0"
-    },
-    "require-dev": {
-        "larastan/larastan": "^2.9",
-        "laravel/pint": "^1.20",
-        "nunomaduro/collision": "^8.1.1||^7.10.0",
-        "orchestra/testbench": "^9.9",
-        "pestphp/pest": "^3.7",
-        "pestphp/pest-plugin-arch": "^3.0",
-        "pestphp/pest-plugin-laravel": "^3.0",
-        "phpstan/extension-installer": "^1.3",
-        "phpstan/phpstan": "^1.12",
-        "phpstan/phpstan-deprecation-rules": "^1.1",
-        "phpstan/phpstan-phpunit": "^1.3"
-    },
-    "autoload": {
-        "psr-4": {
-            "Idkwhoami\\FluxTables\\": "src/"
-        }
-    },
-    "autoload-dev": {
-        "psr-4": {
-            "Idkwhoami\\FluxTables\\Tests\\": "tests/"
-        }
-    },
-    "scripts": {
-        "pretty": "./vendor/bin/pint --dirty",
-        "pint": "./vendor/bin/pint",
-        "analyse": "./vendor/bin/phpstan analyse --memory-limit 4G",
-        "test": "./vendor/bin/pest"
-    },
-    "minimum-stability": "dev",
-    "prefer-stable": true,
-    "config": {
-        "sort-packages": true,
-        "preferred-install": "dist",
-        "optimize-autoloader": false,
-        "allow-plugins": {
-            "pestphp/pest-plugin": true,
-            "phpstan/extension-installer": true
-        }
-    },
-    "extra": {
-        "laravel": {
-            "providers": [
-                "Idkwhoami\\FluxTables\\FluxTablesServiceProvider"
-            ]
-        }
-    },
-    "repositories": {
-        "flux-pro": {
-            "type": "composer",
-            "url": "https://composer.fluxui.dev"
-        }
+  "name": "idkwhoami/flux-tables",
+  "description": "This package provides a reusable, configurable table livewire component styled using Flux",
+  "type": "library",
+  "keywords": [
+    "Idkwhoami",
+    "laravel",
+    "flux-tables"
+  ],
+  "homepage": "https://github.com/idkwhoami/flux-tables",
+  "license": "MIT",
+  "version": "2.1.1",
+  "authors": [
+    {
+      "name": "idkwhoami"
     }
+  ],
+  "require": {
+    "php": "^8.3",
+    "livewire/flux": "^2.0",
+    "livewire/flux-pro": "^2.0"
+  },
+  "require-dev": {
+    "illuminate/support": "^11.41",
+    "larastan/larastan": "^2.9",
+    "laravel/pint": "^1.20",
+    "nunomaduro/collision": "^8.1.1||^7.10.0",
+    "orchestra/testbench": "^9.9",
+    "pestphp/pest": "^3.7",
+    "pestphp/pest-plugin-arch": "^3.0",
+    "pestphp/pest-plugin-laravel": "^3.1",
+    "phpstan/extension-installer": "^1.3",
+    "phpstan/phpstan": "^1.12",
+    "phpstan/phpstan-deprecation-rules": "^1.1",
+    "phpstan/phpstan-phpunit": "^1.3"
+  },
+  "autoload": {
+    "psr-4": {
+      "Idkwhoami\\FluxTables\\": "src/"
+    }
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "Idkwhoami\\FluxTables\\Tests\\": "tests/"
+    }
+  },
+  "scripts": {
+    "pretty": "./vendor/bin/pint --dirty",
+    "pint": "./vendor/bin/pint",
+    "analyse": "./vendor/bin/phpstan analyse --memory-limit 4G",
+    "test": "./vendor/bin/pest"
+  },
+  "minimum-stability": "dev",
+  "prefer-stable": true,
+  "config": {
+    "sort-packages": true,
+    "preferred-install": "dist",
+    "optimize-autoloader": false,
+    "allow-plugins": {
+      "pestphp/pest-plugin": true,
+      "phpstan/extension-installer": true
+    }
+  },
+  "extra": {
+    "laravel": {
+      "providers": [
+        "Idkwhoami\\FluxTables\\FluxTablesServiceProvider"
+      ]
+    }
+  },
+  "repositories": {
+    "flux-pro": {
+      "type": "composer",
+      "url": "https://composer.fluxui.dev"
+    }
+  }
 }
