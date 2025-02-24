@@ -21,7 +21,7 @@ class DateRange extends Component
 
     public function updatedRange(): void
     {
-        $this->dispatch("table:{$this->filter->getTable()}:filter:update", $this->filter->getName(), $this->range);
+        $this->dispatch("flux-tables::table:{$this->filter->getTable()}:filter:update", $this->filter->getName(), $this->range);
     }
 
     public function mount(Filter $filter): void

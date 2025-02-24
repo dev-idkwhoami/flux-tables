@@ -42,10 +42,13 @@ trait HasToggleableColumns
      */
     public function toggleableColumnsValueSessionKey(): string
     {
-        return "table:{$this->table->name}:toggledColumns";
+        return "flux-tables::table:{$this->table->name}:toggledColumns";
     }
 
     /**
+     * A string array with the column's names which should be toggled by default.
+     * These names are the 'name' property each column has set through the ```Column::make(string $name)``` function.
+     *
      * @return string[]
      */
     abstract public function defaultToggledColumns(): array;

@@ -23,7 +23,7 @@
 
                     <flux:menu>
 
-                        <flux:menu.submenu heading="Toggle Columns">
+                        <flux:menu.submenu :heading="__('flux-tables::table/toggleable.dropdown')">
                             <flux:menu.checkbox.group>
                                 @foreach($this->getToggleableColumns() as $column)
                                     <flux:menu.checkbox
@@ -36,7 +36,8 @@
                             </flux:menu.checkbox.group>
                         </flux:menu.submenu>
 
-                        <flux:menu.item wire:click.prevent="resetSorting" class="hover:text-orange-400">Reset Sorting
+                        <flux:menu.item wire:click.prevent="resetSorting" class="hover:text-orange-400">
+                            {{ __('flux-tables::table/sorting.reset') }}
                         </flux:menu.item>
                     </flux:menu>
                 </flux:dropdown>
@@ -100,10 +101,10 @@
                         <flux:table.column
                             @class(['hidden' => $this->isColumnToggled($column->getName())])
                             sortable
-                            :sorted="$this->getRawSortingColumn() === $column->getSortableProperty()"
+                            :sorted="$this->getSortingColumn() === $column->getSortableProperty()"
                             :direction="$this->getSortingDirection()"
                             :key="$column->getName()"
-                            wire:click.prevent="sort('{{ $column->isSortable() ? $column->getSortableProperty() : null }}')">
+                            wire:click.prevent="sort('{{ $column->getSortableProperty() }}')">
                             {{ $column->getLabel() }}
                         </flux:table.column>
                     @else

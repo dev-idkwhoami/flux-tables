@@ -24,7 +24,7 @@ class Deleted extends Component
      */
     public function updatedState(DeletionState $state): void
     {
-        $this->dispatch("table:{$this->filter->getTable()}:filter:update", $this->filter->getName(), $state);
+        $this->dispatch("flux-tables::table:{$this->filter->getTable()}:filter:update", $this->filter->getName(), $state);
     }
 
     /**

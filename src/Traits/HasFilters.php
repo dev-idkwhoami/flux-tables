@@ -31,7 +31,7 @@ trait HasFilters
         return array_merge(
             $this->listeners,
             [
-                'table:{table.name}:filter:update' => 'handleFilterUpdate',
+                'flux-tables::table:{table.name}:filter:update' => 'handleFilterUpdate',
             ]
         );
     }
@@ -73,7 +73,7 @@ trait HasFilters
      */
     public function getFilterModalName(): string
     {
-        return "table:{$this->table->name}:filter:modal";
+        return "flux-tables::table:{$this->table->name}:filter:modal";
     }
 
     /**
@@ -111,7 +111,7 @@ trait HasFilters
         $filter = $this->getFilterFromTable($filter);
         if ($filter) {
             Session::forget($filter->filterValueSessionKey());
-            $this->dispatch("table:{$this->table->name}:filter:reset");
+            $this->dispatch("flux-tables::table:{$this->table->name}:filter:reset");
         }
     }
 
@@ -121,6 +121,6 @@ trait HasFilters
     public function resetFilters(): void
     {
         Session::forget($this->getAllFilterSessionKeys());
-        $this->dispatch("table:{$this->table->name}:filter:reset");
+        $this->dispatch("flux-tables::table:{$this->table->name}:filter:reset");
     }
 }

@@ -32,20 +32,7 @@ class DeleteAction implements TableAction
 
     public function render(Action $action, mixed $id): string|HtmlString|View|null
     {
-        if ($action->isLink()) {
-            return Blade::render('<flux:button
-            variant="ghost"
-            size="xs"
-            class="hover:text-red-500"
-            :key="\'action-{{ $id }}\'"
-            icon="{{ $action->getIcon() }}"
-            wire:click.prevent="callAction(\'{{ $id }}\', \'{{ base64_encode($action->getAction()) }}\')">
-                {{ $action->getLabel() }}
-            </flux:button>',
-                ['id' => $id, 'action' => $action]
-            );
-        }
-        return Blade::render('not link');
+        return view('flux-tables::action.delete', compact(['action', 'id']));
     }
 
     public function modifyQuery(Builder $query): void

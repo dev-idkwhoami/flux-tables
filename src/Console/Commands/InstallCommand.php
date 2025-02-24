@@ -13,6 +13,6 @@ class InstallCommand extends Command
     public function handle(): void
     {
         $this->call('vendor:publish', ['--tag' => 'flux-tables-flux-views']);
-        $this->call('flux:icon', ['icons' => ['arrow-up-narrow-wide', 'arrow-down-wide-narrow', 'arrow-up-down', 'filter', 'filter-x', 'chevron-down', 'search']]);
+        $this->call('flux:icon', ['icons' => ['arrow-up-narrow-wide', 'arrow-down-wide-narrow', 'arrow-up-down', 'filter', 'filter-x', 'chevron-down', 'search', 'ellipsis']]);
     }
 }

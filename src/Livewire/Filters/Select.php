@@ -25,7 +25,7 @@ class Select extends Component
 
     public function updatedState(): void
     {
-        $this->dispatch("table:{$this->filter->getTable()}:filter:update", $this->filter->getName(), $this->state);
+        $this->dispatch("flux-tables::table:{$this->filter->getTable()}:filter:update", $this->filter->getName(), $this->state);
     }
 
     public function mount(EloquentTable $table, PropertyFilter $filter): void

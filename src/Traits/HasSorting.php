@@ -30,7 +30,7 @@ trait HasSorting
      */
     public function sortingValueSessionKey(): string
     {
-        return "table:{$this->table->name}:sorting";
+        return "flux-tables::table:{$this->table->name}:sorting";
     }
 
     /**
@@ -39,15 +39,15 @@ trait HasSorting
      */
     public function applySorting(Builder $query): void
     {
-        if (!empty($this->sortingDirection)) {
-            $query->orderBy($query->qualifyColumn($this->getSortingColumn()), $this->getSortingDirection());
-        }
+        $query->orderBy($query->qualifyColumn($this->getSortingColumn()), $this->getSortingDirection());
     }
 
     /**
      * @return string
      */
     abstract public function defaultSortingColumn(): string;
+
+    abstract public function defaultSortingDirection(): string;
 
     /**
      * @param  string  $column
@@ -112,7 +112,12 @@ trait HasSorting
      */
     public function getSortingDirection(): string
     {
-        return $this->sortingDirection ?? 'asc';
+        return empty($this->sortingDirection) ? $this->defaultSortingDirection() : $this->sortingDirection;
+    }
+
+    public function getRawSortingDirection(): ?string
+    {
+        return $this->sortingDirection;
     }
 
 }

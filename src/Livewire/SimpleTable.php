@@ -34,13 +34,30 @@ class SimpleTable extends Component
     #[Locked]
     public string $title = '';
 
+    #[Locked]
+    public string $defaultSortingColumn = '';
+    #[Locked]
+    public string $defaultSortingDirection = '';
+    #[Locked]
+    public array $defaultToggledColumns = [];
+
     /**
      * @param  string  $title
+     * @param  string  $defaultSortingColumn
+     * @param  string[]  $defaultToggledColumns
+     * @param  string  $defaultSortingDirection
      * @return void
      */
-    public function mount(string $title): void
-    {
+    public function mount(
+        string $title,
+        string $defaultSortingColumn = 'created_at',
+        array $defaultToggledColumns = ['deleted_at', 'created_at'],
+        string $defaultSortingDirection = 'desc'
+    ): void {
         $this->title = $title;
+        $this->defaultSortingColumn = $defaultSortingColumn;
+        $this->defaultToggledColumns = $defaultToggledColumns;
+        $this->defaultSortingDirection = $defaultSortingDirection;
     }
 
     /**
@@ -66,8 +83,6 @@ class SimpleTable extends Component
         $this->applyColumns($query);
         $this->applyRelations($query);
         $this->applyActions($query);
-
-        /*TODO default sorting not being applied default toggled columns also not being hidden */
 
         $this->applyFilters($query);
         $this->applySorting($query);
@@ -112,7 +127,7 @@ class SimpleTable extends Component
      */
     public function defaultSortingColumn(): string
     {
-        return 'created_at';
+        return $this->defaultSortingColumn;
     }
 
     /**
@@ -120,8 +135,11 @@ class SimpleTable extends Component
      */
     public function defaultToggledColumns(): array
     {
-        return [
-            'created_at'
-        ];
+        return $this->defaultToggledColumns;
+    }
+
+    public function defaultSortingDirection(): string
+    {
+        return $this->defaultSortingDirection;
     }
 }

@@ -13,7 +13,7 @@ trait InteractsWithTable
     public function getListeners(): array
     {
         return array_merge($this->listeners, [
-            'table:{filter.table}:filter:reset' => 'filterReset'
+            'flux-tables::table:{filter.table}:filter:reset' => 'filterReset'
         ]);
     }
 
