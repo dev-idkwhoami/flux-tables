@@ -8,7 +8,7 @@
 @if($action->isLink())
     <flux:button
         variant="ghost"
-        key="action-delete-{{ $id }}"
+        key="action-restore-{{ $id }}"
         icon="{{ $action->getIcon() }}"
         wire:click.prevent="callAction('{{ $id }}', '{{ base64_encode($action->getAction()) }}')">
         {{ $action->getLabel() }}
@@ -17,7 +17,7 @@
     <flux:menu.item
         variant="danger"
         icon="{{ $action->getIcon() }}"
-        key="action-delete-{{ $id }}"
+        key="action-restore-{{ $id }}"
         wire:click.prevent="callAction('{{ $id }}', '{{ base64_encode($action->getAction()) }}')">
         {{ $action->getLabel() }}
     </flux:menu.item>

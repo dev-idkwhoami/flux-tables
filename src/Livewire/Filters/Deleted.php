@@ -4,14 +4,14 @@ namespace Idkwhoami\FluxTables\Livewire\Filters;
 
 use Idkwhoami\FluxTables\Abstracts\Filter\Filter;
 use Idkwhoami\FluxTables\Enums\DeletionState;
-use Idkwhoami\FluxTables\Traits\InteractsWithTable;
+use Idkwhoami\FluxTables\Traits\TableFilter;
 use Illuminate\Contracts\View\View;
 use Livewire\Attributes\Locked;
 use Livewire\Component;
 
 class Deleted extends Component
 {
-    use InteractsWithTable;
+    use TableFilter;
 
     #[Locked]
     public Filter $filter;

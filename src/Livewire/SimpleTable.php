@@ -12,7 +12,7 @@ use Idkwhoami\FluxTables\Traits\HasFilters;
 use Idkwhoami\FluxTables\Traits\HasSearch;
 use Idkwhoami\FluxTables\Traits\HasSorting;
 use Idkwhoami\FluxTables\Traits\HasToggleableColumns;
-use Illuminate\Contracts\Database\Query\Builder;
+use Illuminate\Contracts\Database\Eloquent\Builder;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Model;
@@ -31,6 +31,14 @@ class SimpleTable extends Component
     use HasSorting;
     use WithPagination;
 
+    /** @var array<string, string> $listeners */
+    protected $listeners = [
+        'flux-tables::table:refresh' => '$refresh'
+    ];
+
+    #[Locked]
+    protected bool $verbose = false;
+
     #[Locked]
     public string $title = '';
 
@@ -38,6 +46,8 @@ class SimpleTable extends Component
     public string $defaultSortingColumn = '';
     #[Locked]
     public string $defaultSortingDirection = '';
+
+    /** @var string[] $defaultToggledColumns */
     #[Locked]
     public array $defaultToggledColumns = [];
 
@@ -46,18 +56,21 @@ class SimpleTable extends Component
      * @param  string  $defaultSortingColumn
      * @param  string[]  $defaultToggledColumns
      * @param  string  $defaultSortingDirection
+     * @param  bool  $verbose
      * @return void
      */
     public function mount(
         string $title,
         string $defaultSortingColumn = 'created_at',
         array $defaultToggledColumns = ['deleted_at', 'created_at'],
-        string $defaultSortingDirection = 'desc'
+        string $defaultSortingDirection = 'desc',
+        bool $verbose = false
     ): void {
         $this->title = $title;
         $this->defaultSortingColumn = $defaultSortingColumn;
         $this->defaultToggledColumns = $defaultToggledColumns;
         $this->defaultSortingDirection = $defaultSortingDirection;
+        $this->verbose = $verbose;
     }
 
     /**
@@ -88,8 +101,6 @@ class SimpleTable extends Component
         $this->applySorting($query);
         $this->applySearch($query);
 
-        $query->dumpRawSql();
-
         return $query;
     }
 
@@ -102,7 +113,9 @@ class SimpleTable extends Component
     {
         $sql = $this->getQuery();
 
-        /*$sql->dumpRawSql();*/
+        if ($this->verbose) {
+            $sql->dumpRawSql();
+        }
 
         return $sql->paginate();
     }

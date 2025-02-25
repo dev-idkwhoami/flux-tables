@@ -22,7 +22,7 @@ class ActionColumn extends Column
     }
 
     protected bool $dropdown = false;
-    /** @var array */
+    /** @var Action[] */
     protected array $actions = [];
 
     /**
@@ -48,11 +48,11 @@ class ActionColumn extends Column
      */
     public function render(object $value): string|HtmlString|View|null
     {
-        if(!($value instanceof Model)) {
+        if (!($value instanceof Model)) {
             throw new \Exception('Unable to render action column without a valid value');
         }
 
-        $actions = array_filter($this->actions, fn(Action $action) => $action->hasAccess(Auth::user(), $value));
+        $actions = array_filter($this->actions, fn (Action $action) => $action->hasAccess(Auth::user(), $value));
 
         return view('flux-tables::column.actions', compact(['actions', 'value']));
     }

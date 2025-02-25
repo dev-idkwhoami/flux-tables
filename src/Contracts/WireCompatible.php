@@ -49,7 +49,14 @@ trait WireCompatible
      */
     private function isPropertyClosure(string $property): bool
     {
-        return (new \ReflectionProperty(static::class, $property))->getType()?->getName() === \Closure::class;
+        $reflectionProperty = new \ReflectionProperty(static::class, $property);
+        $type = $reflectionProperty->getType();
+
+        if (!($type instanceof \ReflectionNamedType)) {
+            throw new \InvalidArgumentException("Property {$property} does not have a typehint");
+        }
+
+        return $type->getName() === \Closure::class;
     }
 
     /**

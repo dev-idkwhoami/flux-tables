@@ -5,7 +5,7 @@
         * @var \Idkwhoami\FluxTables\Abstracts\Filter\Filter $filter
         * @var \Illuminate\Database\Eloquent\Model $model
         */
-        dump(session()->all())
+        //dump(session()->all())
     @endphp
 
     <div class="flex w-full flex-col space-y-2">

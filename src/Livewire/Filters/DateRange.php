@@ -3,7 +3,7 @@
 namespace Idkwhoami\FluxTables\Livewire\Filters;
 
 use Idkwhoami\FluxTables\Abstracts\Filter\Filter;
-use Idkwhoami\FluxTables\Traits\InteractsWithTable;
+use Idkwhoami\FluxTables\Traits\TableFilter;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Carbon;
 use Livewire\Attributes\Computed;
@@ -12,7 +12,7 @@ use Livewire\Component;
 
 class DateRange extends Component
 {
-    use InteractsWithTable;
+    use TableFilter;
 
     #[Locked]
     public Filter $filter;

@@ -2,7 +2,7 @@
 
 namespace Idkwhoami\FluxTables\Traits;
 
-use Illuminate\Contracts\Database\Query\Builder;
+use Illuminate\Contracts\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Session;
 
 trait HasSorting

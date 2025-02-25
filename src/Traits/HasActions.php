@@ -2,15 +2,15 @@
 
 namespace Idkwhoami\FluxTables\Traits;
 
-use Idkwhoami\FluxTables\Abstracts\Action\Action;
+use Idkwhoami\FluxTables\Abstracts\Action\DirectAction;
+use Idkwhoami\FluxTables\Abstracts\Action\ModalAction;
 use Idkwhoami\FluxTables\Abstracts\Column\Column;
 use Idkwhoami\FluxTables\Concretes\Column\ActionColumn;
 use Idkwhoami\FluxTables\Contracts\TableAction;
-use Illuminate\Contracts\Database\Query\Builder;
+use Illuminate\Contracts\Database\Eloquent\Builder;
 
 trait HasActions
 {
-
     /**
      * @return void
      * @throws \Exception
@@ -24,11 +24,12 @@ trait HasActions
 
     public function applyActions(Builder $query): void
     {
-        $columns = array_filter($this->table->getColumns(), fn(Column $column) => $column instanceof ActionColumn);
+        $columns = array_filter($this->table->getColumns(), fn (Column $column) => $column instanceof ActionColumn);
         /** @var ActionColumn $column */
         foreach ($columns as $column) {
-            /** @var Action $action */
-            foreach ($column->getActions() as $action) {
+            $actions = array_filter($column->getActions(), fn ($tableAction) => !($tableAction instanceof ModalAction));
+            /** @var DirectAction $action */
+            foreach ($actions as $action) {
                 /** @var TableAction $actionable */
                 $actionable = new ($action->getAction());
 
@@ -43,8 +44,12 @@ trait HasActions
 
     public function callAction(mixed $id, string $action): void
     {
-        $action = base64_decode($action);
-        (new $action)->handle($this->table, $id);
+        $action = new (base64_decode($action))();
+
+        /** @var TableAction $action */
+        if ($action instanceof TableAction) {
+            $action->handle($this->table, $id);
+        }
     }
 
 }

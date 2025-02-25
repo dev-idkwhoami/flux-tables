@@ -7,7 +7,7 @@ use Idkwhoami\FluxTables\Abstracts\Column\PropertyColumn;
 use Idkwhoami\FluxTables\Abstracts\Filter\Filter;
 use Idkwhoami\FluxTables\Abstracts\Table\Table;
 use Idkwhoami\FluxTables\Concretes\Table\EloquentTable;
-use Illuminate\Contracts\Database\Query\Builder;
+use Illuminate\Contracts\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
@@ -132,11 +132,12 @@ trait HasEloquentTable
      */
     public function applyColumns(Builder $query): void
     {
+        /** @var Model $model */
         $model = new $this->eloquentModel();
 
         $nonRelationColumns = array_filter(
             $this->table->getColumns(),
-            fn(Column $c) => !$c instanceof PropertyColumn || !$c->hasRelation()
+            fn (Column $c) => !$c instanceof PropertyColumn || !$c->hasRelation()
         );
 
         if (!empty($nonRelationColumns)) {
@@ -169,7 +170,7 @@ trait HasEloquentTable
     {
         return array_filter(
             $this->table->getColumns(),
-            fn(Column $c) => $c instanceof PropertyColumn && $c->hasRelation()
+            fn (Column $c) => $c instanceof PropertyColumn && $c->hasRelation()
         );
     }
 

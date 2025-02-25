@@ -2,30 +2,13 @@
 
 namespace Idkwhoami\FluxTables\Traits;
 
-/**
- * @property array $listeners
- */
+use Idkwhoami\FluxTables\Livewire\SimpleTable;
+
 trait InteractsWithTable
 {
-    /**
-     * @return string[]
-     */
-    public function getListeners(): array
+    final public function refreshTable(string $tableComponent = SimpleTable::class): void
     {
-        return array_merge($this->listeners, [
-            'flux-tables::table:{filter.table}:filter:reset' => 'filterReset'
-        ]);
+        $this->dispatch('flux-tables::table:refresh')->to($tableComponent);
     }
-
-    /**
-     * @return void
-     */
-    public function filterReset(): void
-    {
-        $this->reset(array_keys($this->except(['filter', 'table'])));
-        $this->restoreDefault();
-    }
-
-    public abstract function restoreDefault(): void;
 
 }

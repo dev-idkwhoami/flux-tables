@@ -1,4 +1,5 @@
 <?php
+
 return [
     'placeholder' => 'Select a state',
     'without_deleted' => 'Without deleted records',

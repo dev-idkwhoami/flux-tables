@@ -15,7 +15,7 @@ class DeletedFilter extends Filter
      */
     public function apply(Builder $query): void
     {
-        if($this->hasValue()) {
+        if ($this->hasValue()) {
             $value = $this->getValue();
 
             switch (DeletionState::from($value->getValue())) {

@@ -20,7 +20,7 @@ class DateRangeFilter extends PropertyFilter
     public function apply(Builder $query): void
     {
         if ($this->hasValue()) {
-            $value = $this->getValue()?->getValue();
+            $value = $this->getValue()->getValue();
 
             if (!($value instanceof DateRange)) {
                 throw new \Exception('Unable to apply date range filter without a valid value');
@@ -75,8 +75,8 @@ class DateRangeFilter extends PropertyFilter
             $display = trans(
                 'flux-tables::filter.date-range.between',
                 [
-                    'start' => $value->start()?->format($format),
-                    'end' => $value->end()?->format($format)
+                    'start' => $value->start()?->format($format) ?? 'error',
+                    'end' => $value->end()?->format($format) ?? 'error'
                 ]
             );
         }

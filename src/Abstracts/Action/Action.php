@@ -9,19 +9,19 @@ use Illuminate\Foundation\Auth\User;
 use Illuminate\Support\HtmlString;
 use Livewire\Wireable;
 
-class Action implements Wireable
+abstract class Action implements Wireable
 {
     use WireCompatible;
 
-    protected string $action = '';
     protected string $label = '';
     protected string $icon = '';
 
-    protected bool $link = true;
+    protected bool $link = false;
 
     protected ?\Closure $visibleClosure = null;
+    protected ?\Closure $accessClosure = null;
 
-    protected function __construct(
+    final protected function __construct(
         protected string $name,
     ) {
     }
@@ -41,15 +41,15 @@ class Action implements Wireable
         return ($this->visibleClosure)($model);
     }
 
-    public function getAction(): string
+    public function access(\Closure $access): static
     {
-        return $this->action;
+        $this->accessClosure = $access;
+        return $this;
     }
 
-    public function action(string $action): static
+    public function hasAccess(?User $user, Model $model): bool
     {
-        $this->action = $action;
-        return $this;
+        return $this->accessClosure ? ($this->accessClosure)($user, $model) : true;
     }
 
     public function getIcon(): string
@@ -79,20 +79,12 @@ class Action implements Wireable
         return $this->link;
     }
 
-    public function link(bool $link): static
+    public function link(bool $link = true): static
     {
         $this->link = $link;
         return $this;
     }
 
-    public function hasAccess(?User $user, Model $model): bool
-    {
-        return (new $this->action)->hasAccess($user, $model);
-    }
-
-    public function render(mixed $id): string|HtmlString|View|null
-    {
-        return (new $this->action)->render($this, $id);
-    }
+    abstract public function render(mixed $id): string|HtmlString|View|null;
 
 }
