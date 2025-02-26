@@ -32,7 +32,6 @@
     :variant="$modalVariant"
     @class([$modalClasses])
     :name="$action->modalUniqueName($id)">
-    @dump($action->modalUniqueName($id))
     @livewire($action->getComponent(), ['action' => $action, 'id' => $id], key($action->modalUniqueName($id)))
 </flux:modal>
 @endteleport
