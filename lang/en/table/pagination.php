@@ -1,5 +1,6 @@
 <?php
 
 return [
-    'dropdown' => 'Items per page'
+    'dropdown' => 'Pagination',
+    'items' => ':number per page'
 ];

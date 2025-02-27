@@ -43,7 +43,7 @@
                                         wire:click.prevent="setPaginationValue({{ $value }})"
                                         :checked="$this->getPaginationValue() === $value"
                                         :$value>
-                                        {{ $value }}
+                                        {{ __('flux-tables::table/pagination.items', ['number' => $value]) }}
                                     </flux:menu.radio>
                                 @endforeach
                             </flux:menu.radio.group>
