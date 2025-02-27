@@ -36,6 +36,19 @@
                             </flux:menu.checkbox.group>
                         </flux:menu.submenu>
 
+                        <flux:menu.submenu :heading="__('flux-tables::table/pagination.dropdown')">
+                            <flux:menu.radio.group>
+                                @foreach($this->getPaginationOptions() as $value)
+                                    <flux:menu.radio
+                                        wire:click.prevent="setPaginationValue({{ $value }})"
+                                        :checked="$this->getPaginationValue() === $value"
+                                        :$value>
+                                        {{ $value }}
+                                    </flux:menu.radio>
+                                @endforeach
+                            </flux:menu.radio.group>
+                        </flux:menu.submenu>
+
                         <flux:menu.item wire:click.prevent="resetSorting" class="hover:text-orange-400">
                             {{ __('flux-tables::table/sorting.reset') }}
                         </flux:menu.item>

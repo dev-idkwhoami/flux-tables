@@ -73,7 +73,7 @@ class DateRangeFilter extends PropertyFilter
 
         if ($value->hasStart() && $value->hasEnd()) {
             $display = trans(
-                'flux-tables::filter.date-range.between',
+                'flux-tables::filters/dateRange.between',
                 [
                     'start' => $value->start()?->format($format) ?? 'error',
                     'end' => $value->end()?->format($format) ?? 'error'
@@ -82,13 +82,13 @@ class DateRangeFilter extends PropertyFilter
         }
         if ($value->hasStart() && !$value->hasEnd()) {
             $display = trans(
-                'flux-tables::filter.date-range.after',
+                'flux-tables::filters/dateRange.after',
                 ['start' => $value->start()?->format($format) ?? 'error']
             );
         }
         if (!$value->hasStart() && $value->hasEnd()) {
             $display = trans(
-                'flux-tables::filter.date-range.before',
+                'flux-tables::filters/dateRange.before',
                 ['end' => $value->end()?->format($format) ?? 'error']
             );
         }

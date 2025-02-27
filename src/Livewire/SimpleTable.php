@@ -7,6 +7,7 @@ use Idkwhoami\FluxTables\Abstracts\Filter\Filter;
 use Idkwhoami\FluxTables\Abstracts\Table\Table;
 use Idkwhoami\FluxTables\Concretes\Table\EloquentTable;
 use Idkwhoami\FluxTables\Traits\HasActions;
+use Idkwhoami\FluxTables\Traits\HasDynamicPagination;
 use Idkwhoami\FluxTables\Traits\HasEloquentTable;
 use Idkwhoami\FluxTables\Traits\HasFilters;
 use Idkwhoami\FluxTables\Traits\HasSearch;
@@ -29,6 +30,7 @@ class SimpleTable extends Component
     use HasToggleableColumns;
     use HasSearch;
     use HasSorting;
+    use HasDynamicPagination;
     use WithPagination;
 
     /** @var array<string, string> $listeners */
@@ -117,7 +119,7 @@ class SimpleTable extends Component
             $sql->dumpRawSql();
         }
 
-        return $sql->paginate();
+        return $sql->paginate($this->getPaginationValue());
     }
 
     /**
@@ -154,5 +156,17 @@ class SimpleTable extends Component
     public function defaultSortingDirection(): string
     {
         return $this->defaultSortingDirection;
+    }
+
+    public function getPaginationOptions(): array
+    {
+        return [
+            10, 15, 25, 50
+        ];
+    }
+
+    public function defaultPaginationValue(): int
+    {
+        return 10;
     }
 }

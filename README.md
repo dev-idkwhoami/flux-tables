@@ -166,7 +166,7 @@ This is the component blade view. Depending on the features you can design them 
 
 ## TODO
 
-- Interactive pagination amount on simple table
+- Nothing for now
 
 ## Changelog
 
