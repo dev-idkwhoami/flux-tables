@@ -2,11 +2,7 @@
 
 namespace Idkwhoami\FluxTables\Traits;
 
-use Idkwhoami\FluxTables\Abstracts\Column\Column;
-use Idkwhoami\FluxTables\Abstracts\Column\PropertyColumn;
-use Illuminate\Contracts\Database\Query\Builder;
 use Illuminate\Support\Facades\Session;
-use Livewire\Attributes\Url;
 
 trait HasDynamicPagination
 {
@@ -52,11 +48,11 @@ trait HasDynamicPagination
     /**
      * @return int[]
      */
-    public abstract function getPaginationOptions(): array;
+    abstract public function getPaginationOptions(): array;
 
     /**
      * @return int
      */
-    public abstract function defaultPaginationValue(): int;
+    abstract public function defaultPaginationValue(): int;
 
 }
