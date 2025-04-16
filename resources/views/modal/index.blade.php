@@ -1,9 +1,10 @@
 @props([
     'action',
     'id' => null,
-    'modalClasses' => 'max-w-3/5',
-    'modalVariant' => 'bare',
-    'modalPosition' => 'right'
+    'modalClasses' => 'md:w-96',
+    'modalVariant' => null,
+    'modalPosition' => null,
+    'dismissible' => false,
 ])
 @php
     /** @var \Idkwhoami\FluxTables\Abstracts\Action\ModalAction $action */
@@ -30,7 +31,9 @@
 <flux:modal
     :position="$modalPosition"
     :variant="$modalVariant"
-    @class([$modalClasses])
+    :dismissible="$dismissible"
+    {{ $attributes->class([$modalClasses]) }}
+    {{ $attributes->whereStartsWith('wire:model') }}
     :name="$action->modalUniqueName($id)">
     @livewire($action->getComponent(), ['action' => $action, 'id' => $id], key($action->modalUniqueName($id)))
 </flux:modal>

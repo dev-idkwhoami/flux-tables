@@ -7,9 +7,10 @@ use Illuminate\Support\HtmlString;
 
 class ModalAction extends Action
 {
-    protected string $modalVariant = 'bare';
-    protected string $modalClasses = 'max-w-3/5';
-    protected string $modalPosition = 'right';
+    protected string $modalClasses = 'md:w-96';
+    protected ?string $modalVariant = 'default';
+    protected ?string $modalPosition = null;
+    protected bool $dismissible = false;
     protected string $component = '';
 
     public function modalUniqueName(mixed $id): string
@@ -26,6 +27,12 @@ class ModalAction extends Action
     public function modalClasses(string $classes): static
     {
         $this->modalClasses = $classes;
+        return $this;
+    }
+
+    public function dismissible(bool $dismissible = true): static
+    {
+        $this->dismissible = $dismissible;
         return $this;
     }
 
@@ -58,7 +65,14 @@ class ModalAction extends Action
 
     public function render(mixed $id): string|HtmlString|View|null
     {
-        return view('flux-tables::modal.index', ['action' => $this, 'id' => $id]);
+        return view('flux-tables::modal.index', [
+            'action' => $this,
+            'id' => $id,
+            'modalClasses' => $this->modalClasses,
+            'modalVariant' => $this->modalVariant,
+            'modalPosition' => $this->modalPosition,
+            'dismissible' => $this->dismissible
+        ]);
     }
 
 }
