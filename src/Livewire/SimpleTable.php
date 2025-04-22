@@ -52,6 +52,10 @@ class SimpleTable extends Component
     /** @var string[] $defaultToggledColumns */
     #[Locked]
     public array $defaultToggledColumns = [];
+    #[Locked]
+    public ?string $createText = null;
+    #[Locked]
+    public ?string $create = null;
 
     /**
      * @param  string  $title
@@ -66,12 +70,16 @@ class SimpleTable extends Component
         string $defaultSortingColumn = 'created_at',
         array $defaultToggledColumns = ['deleted_at', 'created_at'],
         string $defaultSortingDirection = 'desc',
+        ?string $create = null,
+        ?string $createText = null,
         bool $verbose = false
     ): void {
         $this->title = $title;
         $this->defaultSortingColumn = $defaultSortingColumn;
         $this->defaultToggledColumns = $defaultToggledColumns;
         $this->defaultSortingDirection = $defaultSortingDirection;
+        $this->create = $create;
+        $this->createText = $createText;
         $this->verbose = $verbose;
     }
 
@@ -133,6 +141,8 @@ class SimpleTable extends Component
         return EloquentTable::make(strtolower(class_basename($model)))
             ->label($this->title)
             ->model($model)
+            ->createComponent($this->create)
+            ->createText($this->createText)
             ->filters($filters)
             ->columns($columns);
     }

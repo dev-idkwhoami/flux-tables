@@ -11,7 +11,7 @@
     <div class="flex w-full flex-col space-y-2">
 
 
-        <div class="flex flex-col space-y-2">
+        <div class="flex flex-col space-y-3">
             <div class="flex space-x-3">
                 @if($this->table->hasLabel())
                     <flux:heading class="content-center" level="1" size="xl">
@@ -55,6 +55,22 @@
                     </flux:menu>
                 </flux:dropdown>
                 <flux:spacer/>
+                @if($this->table->hasCreate())
+                    <div class="flex items-center">
+                        <flux:modal.trigger :name="$this->table->getCreateModalName()">
+                            <flux:button size="sm" icon="plus" variant="primary">
+                                {{ $this->table->getCreateText() }}
+                            </flux:button>
+                        </flux:modal.trigger>
+
+                        <flux:modal class="p-2" :name="$this->table->getCreateModalName()">
+                            @livewire($this->table->getCreateComponent(), ['table' => $this->table, 'modal' => $this->table->getCreateModalName()], key($this->table->getCreateComponent() . '-key'))
+                        </flux:modal>
+                    </div>
+                @endif
+            </div>
+            <div class="flex space-x-3">
+                <flux:spacer/>
 
                 @if($this->table->hasFilters())
                     <div class="flex items-center space-x-2">
@@ -77,9 +93,9 @@
                     <flux:input clearable size="sm" type="text" icon="search" wire:model.live.debounce="search"/>
                 </div>
             </div>
-            @if($this->hasActiveFilters())
-                <div class="flex space-x-3">
-                    <flux:spacer/>
+            <div class="flex space-x-3">
+                <flux:spacer/>
+                @if($this->hasActiveFilters())
                     <div>
                         @foreach($this->getActiveFilters() as $filter)
                             <flux:badge size="sm" class="flex space-x-1" variant="pill">
@@ -88,8 +104,8 @@
                             </flux:badge>
                         @endforeach
                     </div>
-                </div>
-            @endif
+                @endif
+            </div>
         </div>
 
 
