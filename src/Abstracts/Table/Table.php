@@ -41,7 +41,7 @@ abstract class Table implements Wireable
      */
     public function getColumns(): array
     {
-        return $this->columns;
+        return array_filter($this->columns, fn (Column $c) => $c->shouldBeVisible($this));
     }
 
     /**

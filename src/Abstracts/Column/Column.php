@@ -2,8 +2,11 @@
 
 namespace Idkwhoami\FluxTables\Abstracts\Column;
 
+use Closure;
+use Idkwhoami\FluxTables\Abstracts\Table\Table;
 use Idkwhoami\FluxTables\Contracts\WireCompatible;
 use Illuminate\Contracts\View\View;
+use Illuminate\Support\Facades\Context;
 use Illuminate\Support\HtmlString;
 use Livewire\Wireable;
 
@@ -27,6 +30,10 @@ abstract class Column implements Wireable
      * @var bool
      */
     protected bool $toggleable = true;
+    /**
+     * @var Closure|bool
+     */
+    protected Closure|bool $visible = true;
 
     final protected function __construct(
         protected string $name,
@@ -83,6 +90,12 @@ abstract class Column implements Wireable
         return $this;
     }
 
+    public function visible(bool|Closure $visible = true): static
+    {
+        $this->visible = $visible;
+        return $this;
+    }
+
     /**
      * @return string
      */
@@ -121,6 +134,23 @@ abstract class Column implements Wireable
     public function isToggleable(): bool
     {
         return $this->toggleable;
+    }
+
+    public function contextKey(string $key): string
+    {
+        return "flux-tables::context::columns::{$this->name}::{$key}::value";
+    }
+
+    public function shouldBeVisible(Table $table): bool
+    {
+        if ($this->visible instanceof Closure) {
+            if (!Context::hasHidden($this->contextKey('visible'))) {
+                Context::addHidden($this->contextKey('visible'), $this->visible->call($this, $table, $this));
+            }
+            return Context::getHidden($this->contextKey('visible'));
+        }
+
+        return $this->visible;
     }
 
     /**

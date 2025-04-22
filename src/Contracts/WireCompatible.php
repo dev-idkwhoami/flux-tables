@@ -2,7 +2,11 @@
 
 namespace Idkwhoami\FluxTables\Contracts;
 
+use Closure;
 use Laravel\SerializableClosure\SerializableClosure;
+use ReflectionException;
+use ReflectionNamedType;
+use ReflectionUnionType;
 
 trait WireCompatible
 {
@@ -31,12 +35,16 @@ trait WireCompatible
                 throw new \InvalidArgumentException("Property {$property} is not initialized. All properties on WireCompatible classes must be initialized.");
             }*/
 
-            if ($this->isPropertyClosure($property)) {
-                $deserialized = unserialize($value);
-                if (!$deserialized) {
+            if ($this->isPropertyClosure($property) && is_string($value)) {
+                try {
+                    $deserialized = unserialize($value);
+                    if ($deserialized) {
+                        $value = $deserialized->getClosure();
+                    }
+                } catch (\Throwable) {
+                    $this->{$property} = $value;
                     continue;
                 }
-                $value = $deserialized->getClosure();
             }
 
             $this->{$property} = $value;
@@ -45,18 +53,26 @@ trait WireCompatible
     }
 
     /**
-     * @throws \ReflectionException
+     * @throws ReflectionException
      */
     private function isPropertyClosure(string $property): bool
     {
         $reflectionProperty = new \ReflectionProperty(static::class, $property);
         $type = $reflectionProperty->getType();
 
-        if (!($type instanceof \ReflectionNamedType)) {
-            throw new \InvalidArgumentException("Property {$property} does not have a typehint");
+        if ($type instanceof ReflectionNamedType) {
+            return $type->getName() === Closure::class;
         }
 
-        return $type->getName() === \Closure::class;
+        if ($type instanceof ReflectionUnionType) {
+            foreach ($type->getTypes() as $type) {
+                if ($type instanceof ReflectionNamedType && $type->getName() === Closure::class) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
     }
 
     /**
