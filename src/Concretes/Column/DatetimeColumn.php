@@ -10,6 +10,7 @@ use Illuminate\Support\HtmlString;
 class DatetimeColumn extends PropertyColumn
 {
     protected string $format = 'm/d/Y H:i:s';
+    protected bool $readable = false;
 
     /**
      * @return string
@@ -29,6 +30,17 @@ class DatetimeColumn extends PropertyColumn
         return $this;
     }
 
+    public function isReadable(): bool
+    {
+        return $this->readable;
+    }
+
+    public function humanReadable(bool $readable = true): DatetimeColumn
+    {
+        $this->readable = $readable;
+        return $this;
+    }
+
     /**
      * @inheritDoc
      */
@@ -37,9 +49,11 @@ class DatetimeColumn extends PropertyColumn
         $rawValue = $value->{$this->property};
         if ($rawValue) {
             if ($rawValue instanceof \DateTimeInterface) {
+                if ($this->isReadable()) {
+                    return \Illuminate\Support\Carbon::parse($rawValue)->diffForHumans();
+                }
                 return $rawValue->format($this->format);
             }
-
             return Carbon::parse($rawValue)->format($this->format);
         }
 
