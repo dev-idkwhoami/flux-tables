@@ -13,8 +13,15 @@ class InstallCommand extends Command
     public function handle(): void
     {
         $this->call('vendor:publish', ['--tag' => 'flux-tables-flux-views']);
-        $this->call('flux:icon', ['icons' => ['arrow-up-narrow-wide', 'arrow-down-wide-narrow', 'arrow-up-down', 'filter', 'filter-x', 'chevron-down', 'search', 'ellipsis']]);
+        $this->call('flux:icon', [
+            'icons' => [
+                'arrow-up-narrow-wide', 'arrow-down-wide-narrow', 'arrow-up-down', 'funnel', 'funnel-x', 'chevron-down',
+                'search', 'ellipsis'
+            ]
+        ]);
 
-        $this->info('⚠️ Please add the following into your app.css \n @import "../../vendor/idkwhoami/flux-tables/dist/flux-tables.css";\n This is required so vite can compile the packages classes.');
+        $this->info('⚠️ Please add the following into your app.css This is required so vite can compile the packages classes.');
+        $this->comment('⚠️ @import "../../vendor/idkwhoami/flux-tables/dist/flux-tables.css";');
+        $this->info('⚠️ This is required so vite can compile the packages classes.');
     }
 }
