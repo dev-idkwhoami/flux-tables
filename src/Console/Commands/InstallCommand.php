@@ -20,7 +20,7 @@ class InstallCommand extends Command
             ]
         ]);
 
-        $this->info('⚠️ Please add the following into your app.css This is required so vite can compile the packages classes.');
+        $this->info('⚠️ Please add the following into your app.css:');
         $this->comment('⚠️ @import "../../vendor/idkwhoami/flux-tables/dist/flux-tables.css";');
         $this->info('⚠️ This is required so vite can compile the packages classes.');
     }
