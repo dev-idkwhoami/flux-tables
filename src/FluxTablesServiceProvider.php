@@ -3,6 +3,7 @@
 namespace Idkwhoami\FluxTables;
 
 use Idkwhoami\FluxTables\Console\Commands\InstallCommand;
+use Idkwhoami\FluxTables\Livewire\Filters\Boolean;
 use Idkwhoami\FluxTables\Livewire\Filters\ValuePresent;
 use Idkwhoami\FluxTables\Livewire\SimpleTable;
 use Idkwhoami\FluxTables\Livewire\Filters\DateRange;
@@ -30,6 +31,7 @@ class FluxTablesServiceProvider extends ServiceProvider
         Livewire::component('flux-filter-date-range', DateRange::class);
         Livewire::component('flux-filter-select', Select::class);
         Livewire::component('flux-filter-value-present', ValuePresent::class);
+        Livewire::component('flux-filter-boolean', Boolean::class);
     }
 
     /**
