@@ -13,7 +13,6 @@ use Illuminate\Support\HtmlString;
 interface TableAction
 {
     public function modifyQuery(Builder $query): void;
-
     public function hasAccess(?User $user, Model $model): bool;
     public function handle(EloquentTable $table, mixed $id): void;
     public function render(Action $action, mixed $id): string|HtmlString|View|null;

@@ -4,13 +4,14 @@ namespace Idkwhoami\FluxTables\Abstracts\Column;
 
 use Closure;
 use Idkwhoami\FluxTables\Abstracts\Table\Table;
+use Idkwhoami\FluxTables\Contracts\HasContext;
 use Idkwhoami\FluxTables\Contracts\WireCompatible;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\Context;
 use Illuminate\Support\HtmlString;
 use Livewire\Wireable;
 
-abstract class Column implements Wireable
+abstract class Column implements Wireable, HasContext
 {
     use WireCompatible;
 
@@ -136,7 +137,7 @@ abstract class Column implements Wireable
         return $this->toggleable;
     }
 
-    public function contextKey(string $key): string
+    public function contextKey(string $key, mixed $id = null): string
     {
         return "flux-tables::context::columns::{$this->name}::{$key}::value";
     }
