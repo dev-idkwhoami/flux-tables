@@ -92,7 +92,9 @@ class SimpleTable extends Component
             }
         }
 
-        $component->dispatch('flux-tables::table:refresh')->to(SimpleTable::class);
+        if ($component) {
+            $component->dispatch('flux-tables::table:refresh')->to(SimpleTable::class);
+        }
     }
 
     /**
