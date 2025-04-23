@@ -80,12 +80,12 @@
                                          class="hover:text-red-400"
                                          size="sm"
                                          square
-                                         icon="filter-x"
+                                         icon="funnel-x"
                                          variant="filled"/>
                         @endif
 
                         <flux:modal.trigger :name="$this->getFilterModalName()">
-                            <flux:button size="sm" square icon="filter" variant="filled"/>
+                            <flux:button size="sm" square icon="funnel" variant="filled"/>
                         </flux:modal.trigger>
                     </div>
                 @endif
