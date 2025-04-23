@@ -83,6 +83,18 @@ class SimpleTable extends Component
         $this->verbose = $verbose;
     }
 
+    public static function reload(Component $component = null): void
+    {
+        if (!$component) {
+            $trace = debug_backtrace(DEBUG_BACKTRACE_PROVIDE_OBJECT, 2);
+            if (isset($trace[1]['object']) && $trace[1]['object'] instanceof Component) {
+                $component = $trace[1]['object'];
+            }
+        }
+
+        $component->dispatch('flux-tables::table:refresh')->to(SimpleTable::class);
+    }
+
     /**
      * @return View
      */

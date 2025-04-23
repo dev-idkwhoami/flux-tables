@@ -15,7 +15,7 @@
 <div class="flex justify-end space-x-2">
     @foreach($linkActions as $action)
         @if($action->shouldBeVisible($value))
-            {!! $action->render($value?->id) !!}
+            {!! $action->render($value?->{$value->getKeyName()}) !!}
         @endif
     @endforeach
 
@@ -25,7 +25,7 @@
 
             <flux:menu>
                 @foreach($dropdownActions as $action)
-                    {!! $action->render($value?->id) !!}
+                    {!! $action->render($value?->{$value->getKeyName()}) !!}
                 @endforeach
             </flux:menu>
         </flux:dropdown>
