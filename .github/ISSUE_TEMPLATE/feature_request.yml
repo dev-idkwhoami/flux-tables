@@ -8,14 +8,6 @@ body:
           value: |
               Thank you for suggesting a new feature! Please fill out the information below to help us understand your request.
     - type: textarea
-      id: feature-description
-      attributes:
-          label: Feature Description
-          description: Provide a clear and concise description of the feature you'd like to see added.
-          placeholder: I would like to see...
-      validations:
-          required: true
-    - type: textarea
       id: use-case
       attributes:
           label: Use Case
