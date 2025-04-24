@@ -17,9 +17,11 @@ class ListColumn extends PropertyColumn
      */
     public function render(object $value): string|HtmlString|View|null
     {
-        $effectiveValue = $this->hasRelation() && $value instanceof Model
-            ? $this->getRelationValue($value)
-            : $value->{$this->property} ?? '';
+        if(!($value instanceof Model)) {
+            throw new \Exception('Unable to render list column without a valid value');
+        }
+
+        $effectiveValue = $this->getValue($value);
 
         if ($effectiveValue === self::JSON_AGG_EMPTY_VALUE) {
             return '';

@@ -5,6 +5,7 @@ namespace Idkwhoami\FluxTables\Concretes\Column;
 use Carbon\Carbon;
 use Idkwhoami\FluxTables\Abstracts\Column\PropertyColumn;
 use Illuminate\Contracts\View\View;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\HtmlString;
 
 class DatetimeColumn extends PropertyColumn
@@ -46,7 +47,11 @@ class DatetimeColumn extends PropertyColumn
      */
     public function render(object $value): string|HtmlString|View|null
     {
-        $rawValue = $value->{$this->property};
+        if(!($value instanceof Model)) {
+            throw new \Exception('Unable to render datetime column without a valid value');
+        }
+
+        $rawValue = $this->getValue($value);
         if ($rawValue) {
             if ($rawValue instanceof \DateTimeInterface) {
                 if ($this->isReadable()) {

@@ -14,8 +14,10 @@ class TextColumn extends PropertyColumn
      */
     public function render(object $value): string|HtmlString|View|null
     {
-        return $this->hasRelation() && $value instanceof Model
-            ? $this->getRelationValue($value)
-            : $value->{$this->property} ?? '';
+        if (!($value instanceof Model)) {
+            throw new \Exception('Unable to render text column without a valid value');
+        }
+
+        return $this->getValue($value) ?? '';
     }
 }

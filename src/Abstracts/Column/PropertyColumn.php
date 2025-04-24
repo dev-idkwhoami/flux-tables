@@ -52,6 +52,13 @@ abstract class PropertyColumn extends Column
         return $model->{$this->getSortableProperty()};
     }
 
+    public function getValue(Model $model): mixed
+    {
+        return $this->hasRelation()
+            ? $this->getRelationValue($model)
+            : $model->{$this->property};
+    }
+
     /**
      * @return string
      */

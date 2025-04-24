@@ -3,7 +3,7 @@
     'value',
     'component'
 ])
-<div class="">
+<div>
     @php
         if (!($value instanceof \Illuminate\Database\Eloquent\Model)) {
             $type = get_class($value);
