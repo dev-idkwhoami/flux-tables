@@ -127,8 +127,6 @@ class SimpleTable extends Component
         $this->applySorting($query);
         $this->applySearch($query);
 
-        $query->dumpRawSql();
-
         return $query;
     }
 
