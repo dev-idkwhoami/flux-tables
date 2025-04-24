@@ -2,11 +2,14 @@
 
 namespace Idkwhoami\FluxTables\Abstracts\Column;
 
+use Closure;
 use Illuminate\Database\Eloquent\Model;
 
 abstract class PropertyColumn extends Column
 {
     public const string RELATION_SPACER = '_';
+
+    protected ?Closure $transform = null;
 
     protected bool $count = false;
 
@@ -27,6 +30,17 @@ abstract class PropertyColumn extends Column
 
         $this->property = $property;
         return $this;
+    }
+
+    public function transform(?Closure $transform): PropertyColumn
+    {
+        $this->transform = $transform;
+        return $this;
+    }
+
+    public function getTransform(): ?Closure
+    {
+        return $this->transform;
     }
 
     /**
@@ -77,9 +91,15 @@ abstract class PropertyColumn extends Column
 
     public function getValue(Model $model): mixed
     {
-        return $this->hasRelation() && !$this->hasCount()
+        $rawValue = $this->hasRelation() && !$this->hasCount()
             ? $this->getRelationValue($model)
             : $model->{$this->property};
+
+        if ($this->transform) {
+            return $this->transform->call($this, $rawValue, $model);
+        }
+
+        return $rawValue;
     }
 
     /**
