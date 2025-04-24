@@ -8,6 +8,8 @@ abstract class PropertyColumn extends Column
 {
     public const string RELATION_SPACER = '_';
 
+    protected bool $count = false;
+
     protected string $property = '';
     protected string $relation = '';
 
@@ -37,6 +39,27 @@ abstract class PropertyColumn extends Column
         return $this;
     }
 
+    public function count(bool $count = true): PropertyColumn
+    {
+        $this->count = $count;
+        return $this;
+    }
+
+    public function hasCount(): bool
+    {
+        return $this->count;
+    }
+
+    public function getIdColumn(string $table, Model $model): string
+    {
+        return sprintf('"%s".%s', $table, $model->getKeyName());
+    }
+
+    public function getCountProperty(): string
+    {
+        return sprintf("%s_count", $this->getRelationName());
+    }
+
     public function default(string $default): PropertyColumn
     {
         $this->default = $default;
@@ -54,7 +77,7 @@ abstract class PropertyColumn extends Column
 
     public function getValue(Model $model): mixed
     {
-        return $this->hasRelation()
+        return $this->hasRelation() && !$this->hasCount()
             ? $this->getRelationValue($model)
             : $model->{$this->property};
     }

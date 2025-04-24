@@ -137,7 +137,7 @@ trait HasEloquentTable
 
         $nonRelationColumns = array_filter(
             $this->table->getColumns(),
-            fn (Column $c) => !$c instanceof PropertyColumn || !$c->hasRelation()
+            fn(Column $c) => !$c instanceof PropertyColumn || !$c->hasRelation()
         );
 
         if (!empty($nonRelationColumns)) {
@@ -170,7 +170,7 @@ trait HasEloquentTable
     {
         return array_filter(
             $this->table->getColumns(),
-            fn (Column $c) => $c instanceof PropertyColumn && $c->hasRelation()
+            fn(Column $c) => $c instanceof PropertyColumn && $c->hasRelation()
         );
     }
 
@@ -311,13 +311,17 @@ trait HasEloquentTable
             'left'
         );
 
-        $query->selectRaw(
-            sprintf(
-                'json_agg(%s) as %s',
-                sprintf('"%s".%s', $table, $column->getProperty()),
-                $column->getSortableProperty()
-            )
-        );
+        if ($column->hasCount()) {
+            $this->addCountSelect($query, $column, $table, $model);
+        } else {
+            $query->selectRaw(
+                sprintf(
+                    'json_agg(%s) as %s',
+                    sprintf('"%s".%s', $table, $column->getProperty()),
+                    $column->getSortableProperty()
+                )
+            );
+        }
 
         return [$intermediateTable, $table];
     }
@@ -357,19 +361,41 @@ trait HasEloquentTable
             'left'
         );
 
-        $query->selectRaw(
-            sprintf(
-                'json_agg(%s) as %s',
-                sprintf('"%s".%s', $table, $column->getProperty()),
-                $column->getSortableProperty()
-            )
-        );
+        if ($column->hasCount()) {
+            $this->addCountSelect($query, $column, $table, $model);
+        } else {
+            $query->selectRaw(
+                sprintf(
+                    'json_agg(%s) as %s',
+                    sprintf('"%s".%s', $table, $column->getProperty()),
+                    $column->getSortableProperty()
+                )
+            );
+        }
 
         $query->groupByRaw(
             sprintf('"%s".%s', $table, $relation->getForeignKeyName())
         );
 
         return $table;
+    }
+
+    /**
+     * @param  Builder  $query
+     * @param  PropertyColumn  $column
+     * @param  string  $table
+     * @param  Model  $model
+     * @return void
+     */
+    public function addCountSelect(Builder $query, PropertyColumn $column, string $table, Model $model): void
+    {
+        $query->selectRaw(
+            sprintf(
+                "COUNT(%s) as %s",
+                $column->getIdColumn($table, $model),
+                $column->getCountProperty()
+            )
+        );
     }
 
 }

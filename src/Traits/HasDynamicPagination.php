@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\Session;
 trait HasDynamicPagination
 {
     protected int $perPage = 10;
+    protected string $pageName = 'page';
 
     /**
      * @return void
@@ -19,6 +20,7 @@ trait HasDynamicPagination
         }
 
         $this->perPage = $this->getPaginationValue();
+        $this->setPaginationName($this->pageName);
     }
 
     /**
@@ -35,6 +37,32 @@ trait HasDynamicPagination
         Session::put($this->paginationOptionValueSessionKey(), $this->perPage);
 
         return $this;
+    }
+
+    /**
+     * @return string
+     */
+    public function paginationPaginationNameSessionKey(): string
+    {
+        return "flux-tables::table:{$this->table->name}:page-name";
+    }
+
+    /**
+     * Should be set if more than one table with pagination is used on the same page.
+     *
+     * @param  string  $pageName
+     * @return $this
+     */
+    public function setPaginationName(string $pageName): static
+    {
+        $this->pageName = $pageName;
+        Session::put($this->paginationPaginationNameSessionKey(), $this->pageName);
+        return $this;
+    }
+
+    public function getPaginationName(): string
+    {
+        return Session::get($this->paginationPaginationNameSessionKey(), $this->pageName);
     }
 
     /**

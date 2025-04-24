@@ -67,6 +67,7 @@ class SimpleTable extends Component
      */
     public function mount(
         string $title,
+        string $pageName = 'page',
         string $defaultSortingColumn = 'created_at',
         array $defaultToggledColumns = ['deleted_at', 'created_at'],
         string $defaultSortingDirection = 'desc',
@@ -75,6 +76,7 @@ class SimpleTable extends Component
         bool $verbose = false
     ): void {
         $this->title = $title;
+        $this->pageName = $pageName;
         $this->defaultSortingColumn = $defaultSortingColumn;
         $this->defaultToggledColumns = $defaultToggledColumns;
         $this->defaultSortingDirection = $defaultSortingDirection;
@@ -125,6 +127,8 @@ class SimpleTable extends Component
         $this->applySorting($query);
         $this->applySearch($query);
 
+        $query->dumpRawSql();
+
         return $query;
     }
 
@@ -141,7 +145,7 @@ class SimpleTable extends Component
             $sql->dumpRawSql();
         }
 
-        return $sql->paginate($this->getPaginationValue());
+        return $sql->paginate($this->getPaginationValue(), pageName: $this->getPaginationName());
     }
 
     /**
