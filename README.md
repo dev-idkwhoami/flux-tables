@@ -25,30 +25,76 @@ This will use the `flux:icon` artisan command to fetch the [Lucide](https://luci
 
 ## Usage
 
-The very basic usage example is as follows:
+The basic usage example is as follows:
 
 ```php
-$columns = [
-    \Idkwhoami\FluxTables\Concretes\Column\TextColumn::make('name')
-        ->label('Username')
-        ->property('name')
-        ->searchable()
-        ->sortable(),
-];
-
 $filters = [
     \Idkwhoami\FluxTables\Concretes\Filter\DeletedFilter::make('deleted')
-        ->label('Deleted')
+        ->label('Deletion State')
         ->default(\Idkwhoami\FluxTables\Enums\DeletionState::WithoutDeleted->value),
+    \Idkwhoami\FluxTables\Concretes\Filter\DateRangeFilter::make('created')
+        ->property('created_at')
+        ->label('Created'),
+    \Idkwhoami\FluxTables\Concretes\Filter\ValuePresentFilter::make('email_verified')
+        ->property('email_verified_at')
+        ->label('Exclude unverified')
+        ->description('Hide all users that haven\'t verified their email address.')
+        ->pillContent('Unverified excluded'),
+    \Idkwhoami\FluxTables\Concretes\Filter\BooleanFilter::make('banned')
+        ->property('banned'),
+];
+
+$columns = [
+    \Idkwhoami\FluxTables\Concretes\Column\ComponentColumn::make('name')
+        ->label('Username')
+        ->sortable()
+        ->searchable()
+        ->component('columns.user-name-input')
+        ->property('name'),
+    \Idkwhoami\FluxTables\Concretes\Column\DatetimeColumn::make('created')
+        ->humanReadable()
+        ->label("Created")
+        ->sortable()
+        ->property('created_at'),
+    \Idkwhoami\FluxTables\Concretes\Column\TextColumn::make('posts')
+        ->count()
+        ->label('Posts')
+        ->relation('posts')
+        ->property('posts_count'),
+    \Idkwhoami\FluxTables\Concretes\Column\DatetimeColumn::make('email_verified')
+        ->label("Email Verified At")
+        ->sortable()
+        ->property('email_verified_at'),
+    \Idkwhoami\FluxTables\Concretes\Column\BooleanColumn::make('banned')
+        ->label('Banned')
+        ->property('banned'),
+    \Idkwhoami\FluxTables\Concretes\Column\DatetimeColumn::make('deleted')
+        ->label("Deleted")
+        ->default('n/a')
+        ->property('deleted_at'),
+    \Idkwhoami\FluxTables\Concretes\Column\ActionColumn::make('actions')
+        ->actions([
+            Idkwhoami\FluxTables\Abstracts\Action\ModalAction::make('open')
+                ->label('Open')
+                ->icon('arrow-top-right-on-square')
+                ->link()
+                ->component('user-delete-confirmation'),
+            Idkwhoami\FluxTables\Abstracts\Action\DirectAction::make('delete')
+                ->visible(fn(\Illuminate\Database\Eloquent\Model $model) => auth()->user()->isNot($model) && !$model->deleted_at)
+                ->label('Delete')
+                ->icon('trash-2')
+                ->action(\Idkwhoami\FluxTables\Concretes\Action\DeleteAction::class),
+            Idkwhoami\FluxTables\Abstracts\Action\DirectAction::make('restore')
+                ->visible(fn(\Illuminate\Database\Eloquent\Model $model) => auth()->user()->isNot($model) && $model->deleted_at)
+                ->label('Restore')
+                ->icon('rotate-ccw')
+                ->action(\Idkwhoami\FluxTables\Concretes\Action\RestoreAction::class),
+        ]),
 ];
 ```
 
 ```bladehtml
-    @php
-        <!-- PHP Code Above -->
-    @endphp
-
-    <livewire:flux-simple-table title="Users" :$columns :$filters :model="\App\Models\User::class"/>
+<livewire:flux-simple-table title="Users" :model="\App\Models\User::class" :default-toggled-columns="['created']" :$filters :$columns />
 ```
 
 This will use the "generic" table component supplied by the package.
