@@ -1,5 +1,6 @@
 @props([
     'action',
+    'route',
     'id' => null
 ])
 @php
@@ -7,18 +8,20 @@
 @endphp
 @if($action->isLink())
     <flux:button
+        as="a"
+        :href="route($route)"
         :variant="$action->getVariant()"
         key="action-delete-{{ $id }}"
-        icon="{{ $action->getIcon() }}"
-        wire:click.prevent="callAction('{{ $id }}', '{{ base64_encode($action->getAction()) }}')">
+        icon="{{ $action->getIcon() }}">
         {{ $action->getLabel() }}
     </flux:button>
 @else
     <flux:menu.item
+        as="a"
+        :href="route($route)"
         :variant="$action->getVariant()"
         icon="{{ $action->getIcon() }}"
-        key="action-delete-{{ $id }}"
-        wire:click.prevent="callAction('{{ $id }}', '{{ base64_encode($action->getAction()) }}')">
+        key="action-delete-{{ $id }}">
         {{ $action->getLabel() }}
     </flux:menu.item>
 @endif

@@ -12,14 +12,14 @@
 <flux:modal.trigger :name="$action->modalUniqueName($id)">
     @if($action->isLink())
         <flux:button
-            variant="ghost"
+            :variant="$action->getVariant()"
             key="modal-action-{{ $id }}"
             icon="{{ $action->getIcon() }}">
             {{ $action->getLabel() }}
         </flux:button>
     @else
         <flux:menu.item
-            variant="danger"
+            :variant="$action->getVariant()"
             icon="{{ $action->getIcon() }}"
             key="modal-action-{{ $id }}">
             {{ $action->getLabel() }}

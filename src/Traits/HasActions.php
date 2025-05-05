@@ -5,8 +5,8 @@ namespace Idkwhoami\FluxTables\Traits;
 use Idkwhoami\FluxTables\Abstracts\Action\DirectAction;
 use Idkwhoami\FluxTables\Abstracts\Action\ModalAction;
 use Idkwhoami\FluxTables\Abstracts\Column\Column;
+use Idkwhoami\FluxTables\Abstracts\Table\TableAction;
 use Idkwhoami\FluxTables\Concretes\Column\ActionColumn;
-use Idkwhoami\FluxTables\Contracts\TableAction;
 use Illuminate\Contracts\Database\Eloquent\Builder;
 
 trait HasActions

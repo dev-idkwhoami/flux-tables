@@ -3,8 +3,9 @@
 namespace Idkwhoami\FluxTables\Concretes\Action;
 
 use Idkwhoami\FluxTables\Abstracts\Action\Action;
+use Idkwhoami\FluxTables\Abstracts\Action\DirectAction;
+use Idkwhoami\FluxTables\Abstracts\Table\TableAction;
 use Idkwhoami\FluxTables\Concretes\Table\EloquentTable;
-use Idkwhoami\FluxTables\Contracts\TableAction;
 use Illuminate\Contracts\Database\Eloquent\Builder;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Model;
@@ -12,8 +13,13 @@ use Illuminate\Foundation\Auth\User;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\HtmlString;
 
-class DeleteAction implements TableAction
+class DeleteAction extends TableAction
 {
+    public function configureAction(DirectAction $action): void
+    {
+        $action->variant('danger');
+    }
+
     public function hasAccess(?User $user, Model $model): bool
     {
         if (!$user) {

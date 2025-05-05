@@ -19,6 +19,7 @@ abstract class Action implements Wireable, HasContext
 
     protected string $label = '';
     protected string $icon = '';
+    protected ?string $variant = null;
 
     protected bool $link = false;
 
@@ -28,6 +29,30 @@ abstract class Action implements Wireable, HasContext
     final protected function __construct(
         protected string $name,
     ) {
+    }
+
+    public function getVariant(): ?string
+    {
+        return $this->variant;
+    }
+
+    public function variant(?string $variant): Action
+    {
+        $this->variant = $variant;
+        return $this;
+    }
+
+    public function ensureVariantCompatibility(): void
+    {
+        if ($this->variant !== null) {
+            if (!$this->link && !in_array($this->variant, ['default', 'danger'])) {
+                throw new \Exception('TableAction Link variant must be either default or danger');
+            }
+
+            if ($this->link && !in_array($this->variant, ['outline','filled','danger','primary','ghost','subtle'])) {
+                throw new \Exception('TableAction Variant must be either outline, filled, danger, primary, ghost, subtle');
+            }
+        }
     }
 
     public function visible(Closure|bool $visible = true): static
@@ -40,7 +65,10 @@ abstract class Action implements Wireable, HasContext
     {
         if ($this->visible instanceof Closure) {
             if (!Context::hasHidden($this->contextKey('visible', $model->{$model->getKeyName()}))) {
-                Context::addHidden($this->contextKey('visible', $model->{$model->getKeyName()}), $this->visible->call($this, $model, $this));
+                Context::addHidden(
+                    $this->contextKey('visible', $model->{$model->getKeyName()}),
+                    $this->visible->call($this, $model, $this)
+                );
             }
 
             return Context::getHidden($this->contextKey('visible', $model->{$model->getKeyName()}));
@@ -59,7 +87,10 @@ abstract class Action implements Wireable, HasContext
     {
         if ($this->access instanceof Closure) {
             if (!Context::hasHidden($this->contextKey('access', $model->{$model->getKeyName()}))) {
-                Context::addHidden($this->contextKey('access', $model->{$model->getKeyName()}), $this->access->call($this, $user, $model, $this));
+                Context::addHidden(
+                    $this->contextKey('access', $model->{$model->getKeyName()}),
+                    $this->access->call($this, $user, $model, $this)
+                );
             }
             return Context::getHidden($this->contextKey('access', $model->{$model->getKeyName()}));
         }

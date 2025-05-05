@@ -63,8 +63,13 @@ class ModalAction extends Action
         return $this->component;
     }
 
+    /**
+     * @throws \Exception
+     */
     public function render(mixed $id): string|HtmlString|View|null
     {
+        $this->ensureVariantCompatibility();
+
         return view('flux-tables::modal.index', [
             'action' => $this,
             'id' => $id,
