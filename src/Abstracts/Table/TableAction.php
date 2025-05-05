@@ -11,15 +11,17 @@ use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Foundation\Auth\User;
 use Illuminate\Support\HtmlString;
+use Illuminate\Support\Str;
 use Livewire\Wireable;
 
 abstract class TableAction implements Wireable
 {
     use WireCompatible;
 
-    final protected function __construct(
-        public string $name,
+    final public function __construct(
+        public ?string $name = null,
     ) {
+        $this->name ??= Str::snake(class_basename($this));
     }
 
     public function configureAction(DirectAction $action): void
@@ -28,8 +30,11 @@ abstract class TableAction implements Wireable
     }
 
     public abstract function modifyQuery(Builder $query): void;
+
     public abstract function hasAccess(?User $user, Model $model): bool;
+
     public abstract function handle(EloquentTable $table, mixed $id): void;
+
     public abstract function render(Action $action, mixed $id): string|HtmlString|View|null;
 
 }

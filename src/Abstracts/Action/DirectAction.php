@@ -10,9 +10,20 @@ class DirectAction extends Action
 {
     protected TableAction|string|null $action = null;
 
-    public function getAction(): TableAction|string|null
+    public function getActionable(): TableAction|string|null
     {
-        return $this->action;
+        $action = $this->action;
+
+        if (is_string($action)) {
+            $action = (new $this->action("table_action_$this->name"));
+        }
+
+        return $action;
+    }
+
+    public function getAction(): string
+    {
+        return is_string($this->action) ? $this->action : get_class($this->action);
     }
 
     public function action(string|TableAction $action): static
@@ -26,11 +37,7 @@ class DirectAction extends Action
      */
     public function render(mixed $id): string|HtmlString|View|null
     {
-        $action = $this->action;
-
-        if (is_string($action)) {
-            $action = (new $this->action());
-        }
+        $action = $this->getActionable();
 
         if (!($action instanceof TableAction)) {
             throw new \Exception('Unable to render direct action without a valid action');

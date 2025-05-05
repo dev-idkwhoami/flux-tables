@@ -9,19 +9,21 @@
 @if($action->isLink())
     <flux:button
         as="a"
+        {{ $attributes }}
         :href="route($route)"
         :variant="$action->getVariant()"
-        key="action-delete-{{ $id }}"
+        key="action-route-{{ $id }}"
         icon="{{ $action->getIcon() }}">
         {{ $action->getLabel() }}
     </flux:button>
 @else
     <flux:menu.item
         as="a"
+        {{ $attributes }}
         :href="route($route)"
         :variant="$action->getVariant()"
         icon="{{ $action->getIcon() }}"
-        key="action-delete-{{ $id }}">
+        key="action-route-{{ $id }}">
         {{ $action->getLabel() }}
     </flux:menu.item>
 @endif

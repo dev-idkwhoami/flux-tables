@@ -2,6 +2,7 @@
 
 namespace Idkwhoami\FluxTables\Traits;
 
+use Idkwhoami\FluxTables\Abstracts\Action\Action;
 use Idkwhoami\FluxTables\Abstracts\Action\DirectAction;
 use Idkwhoami\FluxTables\Abstracts\Action\ModalAction;
 use Idkwhoami\FluxTables\Abstracts\Column\Column;
@@ -24,14 +25,14 @@ trait HasActions
 
     public function applyActions(Builder $query): void
     {
-        $columns = array_filter($this->table->getColumns(), fn (Column $column) => $column instanceof ActionColumn);
+        $columns = array_filter($this->table->getColumns(), fn(Column $column) => $column instanceof ActionColumn);
         /** @var ActionColumn $column */
         foreach ($columns as $column) {
-            $actions = array_filter($column->getActions(), fn ($tableAction) => !($tableAction instanceof ModalAction));
+            $actions = array_filter($column->getActions(), fn($tableAction) => !($tableAction instanceof ModalAction));
             /** @var DirectAction $action */
             foreach ($actions as $action) {
                 /** @var TableAction $actionable */
-                $actionable = new ($action->getAction());
+                $actionable = $action->getActionable();
 
                 if (!($actionable instanceof TableAction)) {
                     continue;

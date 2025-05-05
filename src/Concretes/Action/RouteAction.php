@@ -10,14 +10,22 @@ use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Foundation\Auth\User;
 use Illuminate\Support\HtmlString;
+use Illuminate\View\ComponentAttributeBag;
 
 class RouteAction extends TableAction
 {
     protected string $route;
+    protected bool $navigate = false;
 
     public function route(string $route): RouteAction
     {
         $this->route = $route;
+        return $this;
+    }
+
+    public function navigate(bool $navigate = true): RouteAction
+    {
+        $this->navigate = $navigate;
         return $this;
     }
 
@@ -27,6 +35,7 @@ class RouteAction extends TableAction
             'action' => $action,
             'id' => $id,
             'route' => $this->route,
+            'attributes' => new ComponentAttributeBag(['wire:navigate' => $this->navigate])
         ]);
     }
 
