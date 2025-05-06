@@ -130,10 +130,10 @@
                         <flux:table.column
                             @class(['hidden' => $this->isColumnToggled($column->getName())])
                             sortable
-                            :sorted="$this->getSortingColumn() === $column->getSortableProperty()"
+                            :sorted="$this->getSortingColumn() === $column->getName()"
                             :direction="$this->getSortingDirection()"
                             :key="$column->getName()"
-                            wire:click.prevent="sort('{{ $column->getSortableProperty() }}')">
+                            wire:click.prevent="sort('{{ $column->getName() }}')">
                             {{ $column->getLabel() }}
                         </flux:table.column>
                     @else

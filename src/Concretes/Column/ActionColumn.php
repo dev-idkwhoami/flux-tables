@@ -4,6 +4,7 @@ namespace Idkwhoami\FluxTables\Concretes\Column;
 
 use Idkwhoami\FluxTables\Abstracts\Action\Action;
 use Idkwhoami\FluxTables\Abstracts\Column\Column;
+use Idkwhoami\FluxTables\Abstracts\Table\Table;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Auth;
@@ -24,6 +25,12 @@ class ActionColumn extends Column
     protected bool $dropdown = false;
     /** @var Action[] */
     protected array $actions = [];
+
+    public function tableInitialized(Table $table): void
+    {
+        parent::tableInitialized($table);
+        array_walk($this->actions, fn(Action $action) => $action->tableInitialized($table));
+    }
 
     /**
      * @param  Action[]  $actions
@@ -52,7 +59,7 @@ class ActionColumn extends Column
             throw new \Exception('Unable to render action column without a valid value');
         }
 
-        $actions = array_filter($this->actions, fn (Action $action) => $action->hasAccess(Auth::user(), $value));
+        $actions = array_filter($this->actions, fn(Action $action) => $action->hasAccess(Auth::user(), $value));
 
         return view('flux-tables::column.actions', compact(['actions', 'value']));
     }

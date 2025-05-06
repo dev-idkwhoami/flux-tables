@@ -42,7 +42,7 @@ trait HasToggleableColumns
      */
     public function toggleableColumnsValueSessionKey(): string
     {
-        return "flux-tables::table:{$this->table->name}:toggledColumns";
+        return "flux-tables::table::{$this->table->name}::toggledColumns";
     }
 
     /**

@@ -15,6 +15,8 @@ abstract class Column implements Wireable, HasContext
 {
     use WireCompatible;
 
+    protected ?string $table = null;
+
     /**
      * @var string|null
      */
@@ -39,6 +41,11 @@ abstract class Column implements Wireable, HasContext
     final protected function __construct(
         protected string $name,
     ) {
+    }
+
+    public function tableInitialized(Table $table): void
+    {
+        $this->table = $table->name;
     }
 
     /**
@@ -97,6 +104,11 @@ abstract class Column implements Wireable, HasContext
         return $this;
     }
 
+    public function getTable(): ?string
+    {
+        return $this->table;
+    }
+
     /**
      * @return string
      */
@@ -127,6 +139,11 @@ abstract class Column implements Wireable, HasContext
     public function isSortable(): bool
     {
         return $this->sortable;
+    }
+
+    public function getOrderByColumn(): string
+    {
+        return $this->name;
     }
 
     /**

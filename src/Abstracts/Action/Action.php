@@ -3,6 +3,7 @@
 namespace Idkwhoami\FluxTables\Abstracts\Action;
 
 use Closure;
+use Idkwhoami\FluxTables\Abstracts\Table\Table;
 use Idkwhoami\FluxTables\Contracts\HasContext;
 use Idkwhoami\FluxTables\Contracts\WireCompatible;
 use Illuminate\Contracts\View\View;
@@ -17,6 +18,8 @@ abstract class Action implements Wireable, HasContext
 {
     use WireCompatible;
 
+    protected ?string $table = null;
+
     protected string $label = '';
     protected string $icon = '';
     protected ?string $variant = null;
@@ -29,6 +32,11 @@ abstract class Action implements Wireable, HasContext
     final protected function __construct(
         protected string $name,
     ) {
+    }
+
+    public function tableInitialized(Table $table): void
+    {
+        $this->table = $table->name;
     }
 
     public function getVariant(): ?string
@@ -136,6 +144,11 @@ abstract class Action implements Wireable, HasContext
     {
         $this->link = $link;
         return $this;
+    }
+
+    public function getTable(): string
+    {
+        return $this->table;
     }
 
     abstract public function render(mixed $id): string|HtmlString|View|null;

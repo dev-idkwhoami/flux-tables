@@ -44,7 +44,7 @@ trait HasDynamicPagination
      */
     public function paginationPaginationNameSessionKey(): string
     {
-        return "flux-tables::table:{$this->table->name}:page-name";
+        return "flux-tables::table::{$this->table->name}::page-name";
     }
 
     /**

@@ -3,11 +3,13 @@
 namespace Idkwhoami\FluxTables\Abstracts\Action;
 
 use Idkwhoami\FluxTables\Abstracts\Table\Operation;
+use Idkwhoami\FluxTables\Abstracts\Table\Table;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\HtmlString;
 
 class DirectAction extends Action
 {
+    private ?Operation $handle = null;
     protected string $operation;
 
     public function getOperationId(): string
@@ -15,10 +17,17 @@ class DirectAction extends Action
         return $this->operation;
     }
 
+    public function tableInitialized(Table $table): void
+    {
+        Operation::store($table->name, $this->handle);
+        $this->operation = $this->handle->uniqueId($table->name);
+
+        parent::tableInitialized($table);
+    }
+
     public function operation(Operation $operation): static
     {
-        Operation::store($operation);
-        $this->operation = $operation->uniqueId();
+        $this->handle = $operation;
         return $this;
     }
 

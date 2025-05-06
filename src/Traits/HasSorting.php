@@ -2,6 +2,7 @@
 
 namespace Idkwhoami\FluxTables\Traits;
 
+use Idkwhoami\FluxTables\Concretes\Column\JsonColumn;
 use Illuminate\Contracts\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Session;
 
@@ -23,6 +24,30 @@ trait HasSorting
         [$column, $direction] = Session::get($this->sortingValueSessionKey(), [null, null]);
         $this->sortingColumn = $column;
         $this->sortingDirection = $direction;
+
+        $columnAliases = [];
+        $columnCasts = [];
+        foreach ($this->table->getColumns() as $column) {
+            if ($column->isSortable()) {
+                $columnAliases[$column->getName()] = $column->getOrderByColumn();
+            }
+            if ($column instanceof JsonColumn) {
+                $columnCasts[$column->getName()] = $column->getType();
+            }
+        }
+
+        Session::put($this->columnAliasSessionKey(), $columnAliases);
+        Session::put($this->columnCastSessionKey(), $columnCasts);
+    }
+
+    public function columnAliasSessionKey(): string
+    {
+        return "flux-tables::table::{$this->table->name}::columns";
+    }
+
+    public function columnCastSessionKey(): string
+    {
+        return "flux-tables::table::{$this->table->name}::casts";
     }
 
     /**
@@ -39,7 +64,22 @@ trait HasSorting
      */
     public function applySorting(Builder $query): void
     {
-        $query->orderBy($query->qualifyColumn($this->getSortingColumn()), $this->getSortingDirection());
+        $columnAliases = Session::get($this->columnAliasSessionKey());
+        $sortingColumn = $columnAliases[$this->getSortingColumn()] ?? $this->defaultSortingColumn();
+        $columnCasts = Session::get($this->columnCastSessionKey());
+        $columnCast = $columnCasts[$this->getSortingColumn()] ?? 'text';
+
+        if (str_contains($sortingColumn, '::json')) {
+            $query->orderByRaw(
+                sprintf("%s %s",
+                    sprintf("(\"%s\".%s)::%s", $query->getModel()->getTable(), $sortingColumn, $columnCast),
+                    $this->getSortingDirection()
+                )
+            );
+            return;
+        }
+
+        $query->orderBy($query->qualifyColumn($sortingColumn), $this->getSortingDirection());
     }
 
     /**

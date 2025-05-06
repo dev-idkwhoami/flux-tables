@@ -33,6 +33,7 @@ abstract class Table implements Wireable
     public function columns(array $columns): Table
     {
         $this->columns = $columns;
+        array_walk($this->columns, fn (Column $column) => $column->tableInitialized($this));
         return $this;
     }
 

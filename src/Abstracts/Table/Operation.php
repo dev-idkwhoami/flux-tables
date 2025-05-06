@@ -38,19 +38,19 @@ abstract class Operation implements Wireable
 
     public abstract function render(Action $action, mixed $id): string|HtmlString|View|null;
 
-    final public function sessionKey(): string
+    final public function sessionKey(?string $table): string
     {
-        return "flux-tables::table::operations::{$this->name}::context";
+        return "flux-tables::table::{$table}::operations::{$this->name}::context";
     }
 
-    final public function uniqueId(): string
+    final public function uniqueId(?string $table): string
     {
-        return encrypt($this->sessionKey(), false);
+        return encrypt($this->sessionKey($table), false);
     }
 
-    final public static function store(Operation $operation): void
+    final public static function store(?string $table, Operation $operation): void
     {
-        Session::put($operation->sessionKey(), $operation);
+        Session::put($operation->sessionKey($table), $operation);
     }
 
     final public static function get(string $operation): static

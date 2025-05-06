@@ -69,6 +69,16 @@ abstract class PropertyColumn extends Column
         return sprintf('"%s".%s', $table, $model->getKeyName());
     }
 
+    public function getGroupByColumn(): string
+    {
+        return $this->property;
+    }
+
+    public function getOrderByColumn(): string
+    {
+        return $this->getSortableProperty();
+    }
+
     public function getCountProperty(): string
     {
         return sprintf("%s_count", $this->getRelationName());
