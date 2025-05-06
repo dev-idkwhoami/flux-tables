@@ -4,13 +4,29 @@ namespace Idkwhoami\FluxTables\Traits;
 
 use Idkwhoami\FluxTables\Abstracts\Column\Column;
 use Idkwhoami\FluxTables\Abstracts\Column\PropertyColumn;
-use Illuminate\Contracts\Database\Query\Builder;
+use Illuminate\Contracts\Database\Eloquent\Builder;
+use Livewire\Attributes\Locked;
 use Livewire\Attributes\Url;
 
 trait HasSearch
 {
-    #[Url(as: 's', except: '')]
+    #[Locked]
+    public string $searchName = 'search';
+
+    #[Url]
     public string $search = '';
+
+    public function queryStringHasSearch(): array
+    {
+        return [
+            'search' => [
+                'except' => '',
+                'as' => $this->searchName,
+                'keep' => false,
+                'history' => true,
+            ]
+        ];
+    }
 
     /**
      * @return void
@@ -34,13 +50,13 @@ trait HasSearch
     /**
      * @return string[]
      */
-    public function getSearchableProperties(): array
+    public function getSearchableProperties(Builder $query): array
     {
         return array_map(
-            fn (PropertyColumn $c) => $c->getProperty(),
+            fn(PropertyColumn $c) => $query->qualifyColumn($c->getProperty()),
             array_filter(
                 $this->table->getColumns(),
-                fn (Column $c) => $c->isSearchable() && $c instanceof PropertyColumn
+                fn(Column $c) => $c->isSearchable() && $c instanceof PropertyColumn
             )
         );
     }
@@ -52,7 +68,7 @@ trait HasSearch
     public function applySearch(Builder $query): void
     {
         if (!empty($this->search)) {
-            $query->whereAny($this->getSearchableProperties(), 'ilike', '%'.$this->search.'%');
+            $query->whereAny($this->getSearchableProperties($query), 'ilike', '%'.$this->search.'%');
         }
     }
 

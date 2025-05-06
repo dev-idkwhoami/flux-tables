@@ -68,6 +68,7 @@ class SimpleTable extends Component
     public function mount(
         string $title,
         string $pageName = 'page',
+        string $searchName = 'search',
         string $defaultSortingColumn = 'created_at',
         array $defaultToggledColumns = ['deleted_at', 'created_at'],
         string $defaultSortingDirection = 'desc',
@@ -77,6 +78,7 @@ class SimpleTable extends Component
     ): void {
         $this->title = $title;
         $this->pageName = $pageName;
+        $this->searchName = $searchName;
         $this->defaultSortingColumn = $defaultSortingColumn;
         $this->defaultToggledColumns = $defaultToggledColumns;
         $this->defaultSortingDirection = $defaultSortingDirection;
