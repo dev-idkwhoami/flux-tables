@@ -55,7 +55,7 @@ trait HasSorting
      */
     public function sortingValueSessionKey(): string
     {
-        return "flux-tables::table:{$this->table->name}:sorting";
+        return "flux-tables::table::{$this->table->name}::sorting";
     }
 
     /**
