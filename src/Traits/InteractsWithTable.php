@@ -2,6 +2,7 @@
 
 namespace Idkwhoami\FluxTables\Traits;
 
+use Flux\Flux;
 use Idkwhoami\FluxTables\Abstracts\Action\ModalAction;
 use Idkwhoami\FluxTables\Livewire\SimpleTable;
 use Illuminate\Database\Eloquent\Model;
@@ -18,6 +19,11 @@ trait InteractsWithTable
     }
 
     public abstract function getModel(): Model;
+
+    final public function closeModal(): void
+    {
+        Flux::modal($this->action->modalUniqueName($this->id))->close();
+    }
 
     final public function refreshTable(string $tableComponent = SimpleTable::class): void
     {
