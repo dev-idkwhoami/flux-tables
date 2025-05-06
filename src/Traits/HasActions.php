@@ -6,6 +6,7 @@ use Idkwhoami\FluxTables\Abstracts\Action\Action;
 use Idkwhoami\FluxTables\Abstracts\Action\DirectAction;
 use Idkwhoami\FluxTables\Abstracts\Action\ModalAction;
 use Idkwhoami\FluxTables\Abstracts\Column\Column;
+use Idkwhoami\FluxTables\Abstracts\Table\Operation;
 use Idkwhoami\FluxTables\Abstracts\Table\TableAction;
 use Idkwhoami\FluxTables\Concretes\Column\ActionColumn;
 use Illuminate\Contracts\Database\Eloquent\Builder;
@@ -31,26 +32,15 @@ trait HasActions
             $actions = array_filter($column->getActions(), fn($tableAction) => !($tableAction instanceof ModalAction));
             /** @var DirectAction $action */
             foreach ($actions as $action) {
-                /** @var TableAction $actionable */
-                $actionable = $action->getActionable();
-
-                if (!($actionable instanceof TableAction)) {
-                    continue;
-                }
-
-                $actionable->modifyQuery($query);
+                Operation::get($action->getOperationId())
+                    ->modifyQuery($query);
             }
         }
     }
 
-    public function callAction(mixed $id, string $action): void
+    public function callAction(mixed $id, string $operation): void
     {
-        $action = new (base64_decode($action))();
-
-        /** @var TableAction $action */
-        if ($action instanceof TableAction) {
-            $action->handle($this->table, $id);
-        }
+        Operation::get($operation)->handle($this->table, $id);
     }
 
 }

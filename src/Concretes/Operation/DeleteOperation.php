@@ -1,9 +1,10 @@
 <?php
 
-namespace Idkwhoami\FluxTables\Concretes\Action;
+namespace Idkwhoami\FluxTables\Concretes\Operation;
 
 use Idkwhoami\FluxTables\Abstracts\Action\Action;
-use Idkwhoami\FluxTables\Abstracts\Table\TableAction;
+use Idkwhoami\FluxTables\Abstracts\Action\DirectAction;
+use Idkwhoami\FluxTables\Abstracts\Table\Operation;
 use Idkwhoami\FluxTables\Concretes\Table\EloquentTable;
 use Illuminate\Contracts\Database\Eloquent\Builder;
 use Illuminate\Contracts\View\View;
@@ -12,23 +13,28 @@ use Illuminate\Foundation\Auth\User;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\HtmlString;
 
-class RestoreAction extends TableAction
+class DeleteOperation extends Operation
 {
+    public function configureAction(DirectAction $action): void
+    {
+        $action->variant('danger');
+    }
+
     public function hasAccess(?User $user, Model $model): bool
     {
         if (!$user) {
             return false;
         }
 
-        return $user->can('restore', $model);
+        return $user->can('delete', $model);
     }
 
     public function handle(EloquentTable $table, mixed $id): void
     {
-        $model = $table->eloquentModel::withTrashed()->findorFail($id);
+        $model = $table->eloquentModel::findOrFail($id);
 
         if (Gate::allows('delete', $model)) {
-            $model->restore();
+            $model->delete();
         }
     }
 
@@ -40,7 +46,6 @@ class RestoreAction extends TableAction
     public function modifyQuery(Builder $query): void
     {
         $column = $query->qualifyColumn('deleted_at');
-
         if (!str_contains($query->toRawSql(), $column)) {
             $query->selectRaw($column);
         }

@@ -10,7 +10,7 @@
         :variant="$action->getVariant()"
         key="action-delete-{{ $id }}"
         icon="{{ $action->getIcon() }}"
-        wire:click.prevent="callAction('{{ $id }}', '{{ base64_encode($action->getAction()) }}')">
+        wire:click.prevent="callAction('{{ $id }}', '{{ $action->getOperationId() }}')">
         {{ $action->getLabel() }}
     </flux:button>
 @else
@@ -18,7 +18,7 @@
         :variant="$action->getVariant()"
         icon="{{ $action->getIcon() }}"
         key="action-delete-{{ $id }}"
-        wire:click.prevent="callAction('{{ $id }}', '{{ base64_encode($action->getAction()) }}')">
+        wire:click.prevent="callAction('{{ $id }}', '{{ $action->getOperationId() }}')">
         {{ $action->getLabel() }}
     </flux:menu.item>
 @endif

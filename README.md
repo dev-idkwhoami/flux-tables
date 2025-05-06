@@ -83,18 +83,18 @@ $columns = [
                 ->visible(fn(\Illuminate\Database\Eloquent\Model $model) => auth()->user()->isNot($model) && !$model->deleted_at)
                 ->label('Delete')
                 ->icon('trash-2')
-                ->action(\Idkwhoami\FluxTables\Concretes\Action\DeleteAction::class),
+                ->operation(\Idkwhoami\FluxTables\Concretes\Operation\DeleteOperation::make('delete')),
             Idkwhoami\FluxTables\Abstracts\Action\DirectAction::make('restore')
                 ->visible(fn(\Illuminate\Database\Eloquent\Model $model) => auth()->user()->isNot($model) && $model->deleted_at)
                 ->label('Restore')
                 ->icon('rotate-ccw')
-                ->action(\Idkwhoami\FluxTables\Concretes\Action\RestoreAction::class),
+                ->operation(\Idkwhoami\FluxTables\Concretes\Operation\RestoreOperation::make('restore')),
         ]),
 ];
 ```
 
 ```bladehtml
-<livewire:flux-simple-table title="Users" :model="\App\Models\User::class" :default-toggled-columns="['created']" :$filters :$columns />
+<livewire:flux-simple-table create="user-create-form" title="Users" :model="\App\Models\User::class" :default-toggled-columns="['created']" :$filters :$columns />
 ```
 
 This will use the "generic" table component supplied by the package.

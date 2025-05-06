@@ -1,9 +1,9 @@
 <?php
 
-namespace Idkwhoami\FluxTables\Concretes\Action;
+namespace Idkwhoami\FluxTables\Concretes\Operation;
 
 use Idkwhoami\FluxTables\Abstracts\Action\Action;
-use Idkwhoami\FluxTables\Abstracts\Table\TableAction;
+use Idkwhoami\FluxTables\Abstracts\Table\Operation;
 use Idkwhoami\FluxTables\Concretes\Table\EloquentTable;
 use Illuminate\Contracts\Database\Eloquent\Builder;
 use Illuminate\Contracts\View\View;
@@ -12,18 +12,18 @@ use Illuminate\Foundation\Auth\User;
 use Illuminate\Support\HtmlString;
 use Illuminate\View\ComponentAttributeBag;
 
-class RouteAction extends TableAction
+class RouteOperation extends Operation
 {
     protected string $route;
     protected bool $navigate = false;
 
-    public function route(string $route): RouteAction
+    public function route(string $route): RouteOperation
     {
         $this->route = $route;
         return $this;
     }
 
-    public function navigate(bool $navigate = true): RouteAction
+    public function navigate(bool $navigate = true): RouteOperation
     {
         $this->navigate = $navigate;
         return $this;

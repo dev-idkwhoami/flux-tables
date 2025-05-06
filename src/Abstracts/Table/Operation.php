@@ -10,11 +10,12 @@ use Illuminate\Contracts\Database\Eloquent\Builder;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Foundation\Auth\User;
+use Illuminate\Support\Facades\Session;
 use Illuminate\Support\HtmlString;
 use Illuminate\Support\Str;
 use Livewire\Wireable;
 
-abstract class TableAction implements Wireable
+abstract class Operation implements Wireable
 {
     use WireCompatible;
 
@@ -36,5 +37,31 @@ abstract class TableAction implements Wireable
     public abstract function handle(EloquentTable $table, mixed $id): void;
 
     public abstract function render(Action $action, mixed $id): string|HtmlString|View|null;
+
+    final public function sessionKey(): string
+    {
+        return "flux-tables::table::operations::{$this->name}::context";
+    }
+
+    final public function uniqueId(): string
+    {
+        return encrypt($this->sessionKey(), false);
+    }
+
+    final public static function store(Operation $operation): void
+    {
+        Session::put($operation->sessionKey(), $operation);
+    }
+
+    final public static function get(string $operation): static
+    {
+        $operation = decrypt($operation, false);
+
+        if(Session::has($operation) === false) {
+            throw new \Exception("Operation {$operation} not found");
+        }
+
+        return Session::get($operation);
+    }
 
 }

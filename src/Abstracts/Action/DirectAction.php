@@ -2,33 +2,23 @@
 
 namespace Idkwhoami\FluxTables\Abstracts\Action;
 
-use Idkwhoami\FluxTables\Abstracts\Table\TableAction;
+use Idkwhoami\FluxTables\Abstracts\Table\Operation;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\HtmlString;
 
 class DirectAction extends Action
 {
-    protected TableAction|string|null $action = null;
+    protected string $operation;
 
-    public function getActionable(): TableAction|string|null
+    public function getOperationId(): string
     {
-        $action = $this->action;
-
-        if (is_string($action)) {
-            $action = (new $this->action("table_action_$this->name"));
-        }
-
-        return $action;
+        return $this->operation;
     }
 
-    public function getAction(): string
+    public function operation(Operation $operation): static
     {
-        return is_string($this->action) ? $this->action : get_class($this->action);
-    }
-
-    public function action(string|TableAction $action): static
-    {
-        $this->action = $action;
+        Operation::store($operation);
+        $this->operation = $operation->uniqueId();
         return $this;
     }
 
@@ -37,16 +27,16 @@ class DirectAction extends Action
      */
     public function render(mixed $id): string|HtmlString|View|null
     {
-        $action = $this->getActionable();
+        $operation = Operation::get($this->operation);
 
-        if (!($action instanceof TableAction)) {
-            throw new \Exception('Unable to render direct action without a valid action');
+        if (!$operation) {
+            throw new \Exception('Unable to render direct action without a valid operation');
         }
 
-        $action->configureAction($this);
+        $operation->configureAction($this);
         $this->ensureVariantCompatibility();
 
-        return $action->render($this, $id);
+        return $operation->render($this, $id);
     }
 
 }
