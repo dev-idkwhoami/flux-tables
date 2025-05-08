@@ -4,7 +4,7 @@ namespace Idkwhoami\FluxTables\Abstracts\Filter;
 
 use Idkwhoami\FluxTables\Concretes\Filter\FilterValue;
 use Idkwhoami\FluxTables\Contracts\WireCompatible;
-use Illuminate\Contracts\Database\Query\Builder;
+use Illuminate\Contracts\Database\Eloquent\Builder;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\HtmlString;

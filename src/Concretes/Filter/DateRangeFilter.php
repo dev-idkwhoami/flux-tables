@@ -4,7 +4,7 @@ namespace Idkwhoami\FluxTables\Concretes\Filter;
 
 use Flux\DateRange;
 use Idkwhoami\FluxTables\Abstracts\Filter\PropertyFilter;
-use Illuminate\Contracts\Database\Query\Builder;
+use Illuminate\Contracts\Database\Eloquent\Builder;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\Session;
@@ -26,7 +26,13 @@ class DateRangeFilter extends PropertyFilter
                 throw new \Exception('Unable to apply date range filter without a valid value');
             }
 
-            $query->whereBetween($this->property, $value);
+            if (!$value->hasEnd()) {
+                $query->whereDate($query->qualifyColumn($this->property), $value->start());
+            }
+
+            if ($value->hasStart() && $value->hasEnd()) {
+                $query->whereBetween($query->qualifyColumn($this->property), [$value->start()->startOfDay(), $value->end()->endOfDay()]);
+            }
         }
     }
 
@@ -82,14 +88,8 @@ class DateRangeFilter extends PropertyFilter
         }
         if ($value->hasStart() && !$value->hasEnd()) {
             $display = trans(
-                'flux-tables::filters/dateRange.after',
-                ['start' => $value->start()?->format($format) ?? 'error']
-            );
-        }
-        if (!$value->hasStart() && $value->hasEnd()) {
-            $display = trans(
-                'flux-tables::filters/dateRange.before',
-                ['end' => $value->end()?->format($format) ?? 'error']
+                'flux-tables::filters/dateRange.on',
+                ['date' => $value->start()?->format($format) ?? 'error']
             );
         }
 
