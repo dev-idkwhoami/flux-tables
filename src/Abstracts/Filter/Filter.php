@@ -2,21 +2,29 @@
 
 namespace Idkwhoami\FluxTables\Abstracts\Filter;
 
+use Closure;
+use Idkwhoami\FluxTables\Abstracts\Table\Table;
 use Idkwhoami\FluxTables\Concretes\Filter\FilterValue;
+use Idkwhoami\FluxTables\Contracts\HasContext;
 use Idkwhoami\FluxTables\Contracts\WireCompatible;
 use Illuminate\Contracts\Database\Eloquent\Builder;
 use Illuminate\Contracts\View\View;
+use Illuminate\Support\Facades\Context;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\HtmlString;
 use Livewire\Wireable;
 
-abstract class Filter implements Wireable
+abstract class Filter implements Wireable, HasContext
 {
     use WireCompatible;
 
     public string $table = '';
     protected string $label = '';
     protected mixed $default = null;
+    /**
+     * @var Closure|bool
+     */
+    protected Closure|bool $visible = true;
 
     final protected function __construct(
         protected string $name,
@@ -83,6 +91,34 @@ abstract class Filter implements Wireable
     {
         $this->default = $default;
         return $this;
+    }
+
+    public function visible(Closure|bool $visible): Filter
+    {
+        $this->visible = $visible;
+        return $this;
+    }
+
+    public function getVisible(): bool|Closure
+    {
+        return $this->visible;
+    }
+
+    public function shouldBeVisible(Table $table): bool
+    {
+        if ($this->visible instanceof Closure) {
+            if (!Context::hasHidden($this->contextKey('visible'))) {
+                Context::addHidden($this->contextKey('visible'), $this->visible->call($this, $table, $this));
+            }
+            return Context::getHidden($this->contextKey('visible'));
+        }
+
+        return $this->visible;
+    }
+
+    public function contextKey(string $key, mixed $id = null): string
+    {
+        return "flux-tables::context::filters::{$this->name}::{$key}::value";
     }
 
     /**
