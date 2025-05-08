@@ -8,6 +8,9 @@ This package is a simple wrapper around [Flux UI](http://fluxui.dev) for a quick
 > This package is NOT "in development". If I need to extend it i will do so. Feel free to fork it or use it as is.
 But feature requests are probably being ignored. Same for pull requests
 
+> [!WARNING]
+> This package is meant to be used in combination with a PostgreSQL database as it provides utils that most databases dont have. For example json path walking & vectors.
+
 ## Installation
 
 You can install the package via composer:
