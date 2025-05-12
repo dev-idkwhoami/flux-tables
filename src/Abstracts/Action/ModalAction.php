@@ -2,10 +2,14 @@
 
 namespace Idkwhoami\FluxTables\Abstracts\Action;
 
+use Closure;
+use Idkwhoami\FluxTables\Contracts\HasContext;
 use Illuminate\Contracts\View\View;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Context;
 use Illuminate\Support\HtmlString;
 
-class ModalAction extends Action
+class ModalAction extends Action implements HasContext
 {
     protected string $modalClasses = 'md:w-96';
     protected ?string $modalVariant = 'default';
@@ -13,14 +17,25 @@ class ModalAction extends Action
     protected bool $dismissible = false;
     protected string $component = '';
 
+    protected ?Closure $modelQuery = null;
+    protected ?Closure $componentData = null;
+
     public function modalUniqueName(mixed $id): string
     {
-        return str($this->label)->lower()->snake()->append('-', md5($this->component), '-', strval($id), '-modal')->toString();
+        return str($this->label)->lower()->snake()->append('-', md5($this->component), '-', strval($id),
+            '-modal')->toString();
     }
 
-    public function component(string $component): static
+    public function modelQuery(Closure $modelQuery): static
+    {
+        $this->modelQuery = $modelQuery;
+        return $this;
+    }
+
+    public function component(string $component, Closure $componentData = null): static
     {
         $this->component = $component;
+        $this->componentData = $componentData;
         return $this;
     }
 
@@ -58,9 +73,43 @@ class ModalAction extends Action
         return $this;
     }
 
+    public function getModel(mixed $id): ?Model
+    {
+        if (!is_null($id) && !is_null($this->modelQuery)) {
+            Context::addIf($this->contextKey('model', $id), $this->modelQuery->call($this, $id, $this));
+        }
+
+        return Context::get($this->contextKey('model', $id));
+    }
+
     public function getComponent(): string
     {
         return $this->component;
+    }
+
+    /**
+     * @return array<string, mixed>
+     * @throws \Exception
+     */
+    public function getComponentData(mixed $id): array
+    {
+        $modelOrId = $id;
+
+        if(!is_null($this->modelQuery)) {
+            $modelOrId = $this->getModel($id) ?? $id;
+        }
+
+        $data = $this->componentData?->call($this, $modelOrId, $this) ?? [];
+
+        if (!is_array($data)) {
+            throw new \Exception('Component data must return an array.');
+        }
+
+        if (isset($data['action']) || isset($data['id']) || (isset($data['model']) && $modelOrId instanceof Model)) {
+            throw new \Exception('Component data cannot contain  \'action\', \'model\' or \'id\' keys.');
+        }
+
+        return $data;
     }
 
     /**

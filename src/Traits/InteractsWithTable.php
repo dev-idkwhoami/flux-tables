@@ -12,10 +12,16 @@ trait InteractsWithTable
     public ModalAction $action;
     public mixed $id;
 
-    public function mountInteractsWithTable(ModalAction $action, mixed $id): void
+    public function mountInteractsWithTable(ModalAction $action, mixed $id, mixed ...$args): void
     {
         $this->id = $id;
         $this->action = $action;
+
+        foreach ($args as $property => $value) {
+            if (property_exists($this, $property)) {
+                $this->$property = $value;
+            }
+        }
     }
 
     public abstract function getModel(): Model;

@@ -35,6 +35,6 @@
     {{ $attributes->class([$modalClasses]) }}
     {{ $attributes->whereStartsWith('wire:model') }}
     :name="$action->modalUniqueName($id)">
-    @livewire($action->getComponent(), ['action' => $action, 'id' => $id], key($action->modalUniqueName($id)))
+    @livewire($action->getComponent(), array_merge(['action' => $action, 'id' => $id, 'model' => $action->getModel($id)], $action->getComponentData($id)), key($action->modalUniqueName($id)))
 </flux:modal>
 @endteleport
