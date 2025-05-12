@@ -51,7 +51,7 @@ class ModalAction extends Action implements HasContext
         return $this;
     }
 
-    public function flyoutPosition(string $position): static
+    public function modalFlyoutPosition(string $position): static
     {
         if (!in_array($position, ['left', 'right', 'top', 'bottom'])) {
             throw new \Exception('Flyout position must be left, right, top or bottom.');
@@ -61,13 +61,13 @@ class ModalAction extends Action implements HasContext
         return $this;
     }
 
-    public function variantFlyout(): static
+    public function modalVariantFlyout(): static
     {
         $this->modalVariant = 'flyout';
         return $this;
     }
 
-    public function variantBare(): static
+    public function modalVariantBare(): static
     {
         $this->modalVariant = 'bare';
         return $this;
