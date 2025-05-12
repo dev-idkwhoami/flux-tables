@@ -5,10 +5,11 @@ namespace Idkwhoami\FluxTables\Traits;
 use Flux\Flux;
 use Idkwhoami\FluxTables\Abstracts\Action\ModalAction;
 use Idkwhoami\FluxTables\Livewire\SimpleTable;
-use Illuminate\Database\Eloquent\Model;
 
 trait InteractsWithTable
 {
+    use InteractsWithData;
+
     public ModalAction $action;
     public mixed $id;
 
@@ -24,8 +25,6 @@ trait InteractsWithTable
         }
     }
 
-    public abstract function getModel(): Model;
-
     final public function closeModal(): void
     {
         Flux::modal($this->action->modalUniqueName($this->id))->close();
@@ -33,7 +32,7 @@ trait InteractsWithTable
 
     final public function refreshTable(string $tableComponent = SimpleTable::class): void
     {
-        $this->dispatch('flux-tables::table:refresh')->to($tableComponent);
+        $this->dispatch('flux-tables::table::refresh')->to($tableComponent);
     }
 
 }

@@ -5,6 +5,7 @@ namespace Idkwhoami\FluxTables\Livewire;
 use Idkwhoami\FluxTables\Abstracts\Column\Column;
 use Idkwhoami\FluxTables\Abstracts\Filter\Filter;
 use Idkwhoami\FluxTables\Abstracts\Table\Table;
+use Idkwhoami\FluxTables\Concretes\Column\ComponentColumn;
 use Idkwhoami\FluxTables\Concretes\Table\EloquentTable;
 use Idkwhoami\FluxTables\Traits\HasActions;
 use Idkwhoami\FluxTables\Traits\HasDynamicPagination;
@@ -19,6 +20,7 @@ use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Model;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Locked;
+use Livewire\Attributes\On;
 use Livewire\Component;
 use Livewire\WithPagination;
 
@@ -35,7 +37,7 @@ class SimpleTable extends Component
 
     /** @var array<string, string> $listeners */
     protected $listeners = [
-        'flux-tables::table:refresh' => '$refresh'
+        'flux-tables::table::refresh' => '$refresh'
     ];
 
     #[Locked]
@@ -59,9 +61,13 @@ class SimpleTable extends Component
 
     /**
      * @param  string  $title
+     * @param  string  $pageName
+     * @param  string  $searchName
      * @param  string  $defaultSortingColumn
      * @param  string[]  $defaultToggledColumns
      * @param  string  $defaultSortingDirection
+     * @param  string|null  $create
+     * @param  string|null  $createText
      * @param  bool  $verbose
      * @return void
      */
@@ -87,6 +93,19 @@ class SimpleTable extends Component
         $this->verbose = $verbose;
     }
 
+    #[On('flux-tables::table::refresh')]
+    public function propagateTableReload(): void
+    {
+        $componentColumns = array_filter(
+            $this->table->getColumns(),
+            fn (Column $column) => $column instanceof ComponentColumn
+        );
+        /** @var ComponentColumn $column */
+        foreach ($componentColumns as $column) {
+            $this->dispatch('flux-tables::table::refresh')->component($column->getComponent());
+        }
+    }
+
     public static function reload(Component $component = null): void
     {
         if (!$component) {
@@ -97,7 +116,7 @@ class SimpleTable extends Component
         }
 
         if ($component) {
-            $component->dispatch('flux-tables::table:refresh')->to(SimpleTable::class);
+            $component->dispatch('flux-tables::table::refresh')->to(SimpleTable::class);
         }
     }
 

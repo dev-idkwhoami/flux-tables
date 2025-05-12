@@ -27,7 +27,7 @@ trait HasTableCreateComponent
 
     final public function refreshTable(string $tableComponent = SimpleTable::class): void
     {
-        $this->dispatch('flux-tables::table:refresh')->to($tableComponent);
+        $this->dispatch('flux-tables::table::refresh')->to($tableComponent);
     }
 
 }
