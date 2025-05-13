@@ -10,7 +10,6 @@ use Illuminate\Contracts\Database\Eloquent\Builder;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Foundation\Auth\User;
-use Illuminate\Support\Facades\Session;
 use Illuminate\Support\HtmlString;
 use Illuminate\Support\Str;
 use Livewire\Wireable;
@@ -30,38 +29,12 @@ abstract class Operation implements Wireable
         //
     }
 
-    public abstract function modifyQuery(Builder $query): void;
+    abstract public function modifyQuery(Builder $query): void;
 
-    public abstract function hasAccess(?User $user, Model $model): bool;
+    abstract public function hasAccess(?User $user, Model $model): bool;
 
-    public abstract function handle(EloquentTable $table, mixed $id): void;
+    abstract public function handle(EloquentTable $table, mixed $id): void;
 
-    public abstract function render(Action $action, mixed $id): string|HtmlString|View|null;
-
-    final public function sessionKey(?string $table): string
-    {
-        return "flux-tables::table::{$table}::operations::{$this->name}::context";
-    }
-
-    final public function uniqueId(?string $table): string
-    {
-        return encrypt($this->sessionKey($table), false);
-    }
-
-    final public static function store(?string $table, Operation $operation): void
-    {
-        Session::put($operation->sessionKey($table), $operation);
-    }
-
-    final public static function get(string $operation): static
-    {
-        $operation = decrypt($operation, false);
-
-        if(Session::has($operation) === false) {
-            throw new \Exception("Operation {$operation} not found");
-        }
-
-        return Session::get($operation);
-    }
+    abstract public function render(Action $action, mixed $id): string|HtmlString|View|null;
 
 }

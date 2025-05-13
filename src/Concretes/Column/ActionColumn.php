@@ -29,7 +29,7 @@ class ActionColumn extends Column
     public function tableInitialized(Table $table): void
     {
         parent::tableInitialized($table);
-        array_walk($this->actions, fn(Action $action) => $action->tableInitialized($table));
+        array_walk($this->actions, fn (Action $action) => $action->tableInitialized($table));
     }
 
     /**
@@ -51,6 +51,15 @@ class ActionColumn extends Column
     }
 
     /**
+     * @param  class-string  $class
+     * @return Action[]
+     */
+    public function getActionsByClass(string $class): array
+    {
+        return array_filter($this->actions, fn (Action $action) => $action instanceof $class);
+    }
+
+    /**
      * @inheritDoc
      */
     public function render(object $value): string|HtmlString|View|null
@@ -59,7 +68,7 @@ class ActionColumn extends Column
             throw new \Exception('Unable to render action column without a valid value');
         }
 
-        $actions = array_filter($this->actions, fn(Action $action) => $action->hasAccess(Auth::user(), $value));
+        $actions = array_filter($this->actions, fn (Action $action) => $action->hasAccess(Auth::user(), $value));
 
         return view('flux-tables::column.actions', compact(['actions', 'value']));
     }

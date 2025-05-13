@@ -2,6 +2,7 @@
 
 namespace Idkwhoami\FluxTables\Concretes\Operation;
 
+use Closure;
 use Idkwhoami\FluxTables\Abstracts\Action\Action;
 use Idkwhoami\FluxTables\Abstracts\Table\Operation;
 use Idkwhoami\FluxTables\Concretes\Table\EloquentTable;
@@ -14,12 +15,19 @@ use Illuminate\View\ComponentAttributeBag;
 
 class RouteOperation extends Operation
 {
-    protected string $route;
+    protected ?Closure $modelQuery = null;
+    protected ?Closure $route = null;
     protected bool $navigate = false;
 
-    public function route(string $route): RouteOperation
+    public function modelQuery(Closure $modelQuery): RouteOperation
     {
-        $this->route = $route;
+        $this->modelQuery = $modelQuery;
+        return $this;
+    }
+
+    public function route(string|Closure $route): RouteOperation
+    {
+        $this->route = is_string($route) ? fn () => $route : $route;
         return $this;
     }
 
@@ -31,10 +39,11 @@ class RouteOperation extends Operation
 
     public function render(Action $action, mixed $id): string|HtmlString|View|null
     {
-        return view('flux-tables::action.route', [
+        return view('flux-tables::operation.route', [
             'action' => $action,
             'id' => $id,
             'route' => $this->route,
+            'model' => $this->modelQuery?->call($this, $id) ?? null,
             'attributes' => new ComponentAttributeBag(['wire:navigate' => $this->navigate])
         ]);
     }

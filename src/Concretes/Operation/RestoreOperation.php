@@ -34,7 +34,7 @@ class RestoreOperation extends Operation
 
     public function render(Action $action, mixed $id): string|HtmlString|View|null
     {
-        return view('flux-tables::action.delete', compact(['action', 'id']));
+        return view('flux-tables::operation.delete', compact(['action', 'id']));
     }
 
     public function modifyQuery(Builder $query): void

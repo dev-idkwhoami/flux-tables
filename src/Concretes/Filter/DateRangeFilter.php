@@ -30,8 +30,11 @@ class DateRangeFilter extends PropertyFilter
                 $query->whereDate($query->qualifyColumn($this->property), $value->start());
             }
 
-            if ($value->hasStart() && $value->hasEnd()) {
-                $query->whereBetween($query->qualifyColumn($this->property), [$value->start()->startOfDay(), $value->end()->endOfDay()]);
+            $start = $value->start();
+            $end = $value->end();
+
+            if ($start && $end) {
+                $query->whereBetween($query->qualifyColumn($this->property), [$start->startOfDay(), $end->endOfDay()]);
             }
         }
     }

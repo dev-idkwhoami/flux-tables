@@ -10,10 +10,15 @@ use Illuminate\Support\HtmlString;
 
 class JsonColumn extends PropertyColumn
 {
-
     protected string $propertyType = 'text';
+    /** @var string[] */
     protected array $jsonPath = [];
 
+
+    /**
+     * @param  string[]|string  $path
+     * @return $this
+     */
     public function path(array|string $path): JsonColumn
     {
         $this->jsonPath = is_string($path) ? explode('.', $path) : $path;

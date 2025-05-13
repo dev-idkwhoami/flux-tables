@@ -16,6 +16,10 @@ trait HasSearch
     #[Url]
     public string $search = '';
 
+
+    /**
+     * @return array<string, array<string, mixed>>
+     */
     public function queryStringHasSearch(): array
     {
         return [
@@ -53,10 +57,10 @@ trait HasSearch
     public function getSearchableProperties(Builder $query): array
     {
         return array_map(
-            fn(PropertyColumn $c) => $query->qualifyColumn($c->getProperty()),
+            fn (PropertyColumn $c) => $query->qualifyColumn($c->getProperty()),
             array_filter(
                 $this->table->getColumns(),
-                fn(Column $c) => $c->isSearchable() && $c instanceof PropertyColumn
+                fn (Column $c) => $c->isSearchable() && $c instanceof PropertyColumn
             )
         );
     }

@@ -2,12 +2,9 @@
 
 namespace Idkwhoami\FluxTables\Traits;
 
-use Idkwhoami\FluxTables\Abstracts\Action\Action;
 use Idkwhoami\FluxTables\Abstracts\Action\DirectAction;
 use Idkwhoami\FluxTables\Abstracts\Action\ModalAction;
 use Idkwhoami\FluxTables\Abstracts\Column\Column;
-use Idkwhoami\FluxTables\Abstracts\Table\Operation;
-use Idkwhoami\FluxTables\Abstracts\Table\TableAction;
 use Idkwhoami\FluxTables\Concretes\Column\ActionColumn;
 use Illuminate\Contracts\Database\Eloquent\Builder;
 
@@ -26,21 +23,39 @@ trait HasActions
 
     public function applyActions(Builder $query): void
     {
-        $columns = array_filter($this->table->getColumns(), fn(Column $column) => $column instanceof ActionColumn);
+        $columns = array_filter($this->table->getColumns(), fn (Column $column) => $column instanceof ActionColumn);
         /** @var ActionColumn $column */
         foreach ($columns as $column) {
-            $actions = array_filter($column->getActions(), fn($tableAction) => !($tableAction instanceof ModalAction));
+            $actions = array_filter($column->getActions(), fn ($tableAction) => !($tableAction instanceof ModalAction));
             /** @var DirectAction $action */
             foreach ($actions as $action) {
-                Operation::get($action->getOperationId())
+                $action->getOperation()
                     ->modifyQuery($query);
             }
         }
     }
 
-    public function callAction(mixed $id, string $operation): void
+    final public function callAction(mixed $id, string $operationId): void
     {
-        Operation::get($operation)->handle($this->table, $id);
+        $directActions = array_merge(
+            ...array_map(
+                fn (ActionColumn $column) => $column->getActionsByClass(DirectAction::class),
+                array_filter(
+                    $this->table->getColumns(),
+                    fn (
+                        Column $column
+                    ) => $column instanceof ActionColumn && !empty($column->getActionsByClass(DirectAction::class))
+                )
+            )
+        );
+
+        /** @var DirectAction $action */
+        foreach ($directActions as $action) {
+            if ($action->getOperationId() === $operationId) {
+                $action->getOperation()->handle($this->table, $id);
+            }
+        }
+
     }
 
 }

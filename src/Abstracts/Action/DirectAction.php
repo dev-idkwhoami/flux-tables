@@ -6,28 +6,33 @@ use Idkwhoami\FluxTables\Abstracts\Table\Operation;
 use Idkwhoami\FluxTables\Abstracts\Table\Table;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\HtmlString;
+use Illuminate\Support\Str;
 
 class DirectAction extends Action
 {
-    private ?Operation $handle = null;
-    protected string $operation;
-
-    public function getOperationId(): string
-    {
-        return $this->operation;
-    }
+    protected ?string $operationId = null;
+    protected Operation $operation;
 
     public function tableInitialized(Table $table): void
     {
-        Operation::store($table->name, $this->handle);
-        $this->operation = $this->handle->uniqueId($table->name);
+        $this->operationId = $this->operationId ?? Str::random(8);
 
         parent::tableInitialized($table);
     }
 
+    public function getOperationId(): ?string
+    {
+        return $this->operationId;
+    }
+
+    public function getOperation(): Operation
+    {
+        return $this->operation;
+    }
+
     public function operation(Operation $operation): static
     {
-        $this->handle = $operation;
+        $this->operation = $operation;
         return $this;
     }
 
@@ -36,16 +41,9 @@ class DirectAction extends Action
      */
     public function render(mixed $id): string|HtmlString|View|null
     {
-        $operation = Operation::get($this->operation);
-
-        if (!$operation) {
-            throw new \Exception('Unable to render direct action without a valid operation');
-        }
-
-        $operation->configureAction($this);
         $this->ensureVariantCompatibility();
 
-        return $operation->render($this, $id);
+        return $this->operation->render($this, $id) ?? '';
     }
 
 }

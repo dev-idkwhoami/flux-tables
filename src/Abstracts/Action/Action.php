@@ -18,7 +18,7 @@ abstract class Action implements Wireable, HasContext
 {
     use WireCompatible;
 
-    protected ?string $table = null;
+    protected string $table;
 
     protected string $label = '';
     protected string $icon = '';
@@ -57,8 +57,10 @@ abstract class Action implements Wireable, HasContext
                 throw new \Exception('TableAction Link variant must be either default or danger');
             }
 
-            if ($this->link && !in_array($this->variant,
-                    ['outline', 'filled', 'danger', 'primary', 'ghost', 'subtle'])) {
+            if ($this->link && !in_array(
+                $this->variant,
+                ['outline', 'filled', 'danger', 'primary', 'ghost', 'subtle']
+            )) {
                 throw new \Exception('TableAction Variant must be either outline, filled, danger, primary, ghost, subtle');
             }
         }
