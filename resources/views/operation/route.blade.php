@@ -1,6 +1,7 @@
 @props([
     'action',
     'route',
+    'target' => '_self',
     'model' => null,
     'id' => null
 ])
@@ -15,6 +16,7 @@
     <flux:button
         as="a"
         {{ $attributes }}
+        :target="$target"
         :href="$route->call($this, $model ?? $id)"
         operation="{{ $action->getOperationId() }}"
         :variant="$action->getVariant()"
@@ -26,6 +28,7 @@
     <flux:menu.item
         as="a"
         {{ $attributes }}
+        :target="$target"
         :href="$route->call($this, $model ?? $id)"
         operation="{{ $action->getOperationId() }}"
         :variant="$action->getVariant()"

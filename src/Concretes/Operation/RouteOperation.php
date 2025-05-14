@@ -18,6 +18,7 @@ class RouteOperation extends Operation
     protected ?Closure $modelQuery = null;
     protected ?Closure $route = null;
     protected bool $navigate = false;
+    protected string $target = '_self';
 
     public function modelQuery(Closure $modelQuery): RouteOperation
     {
@@ -28,6 +29,17 @@ class RouteOperation extends Operation
     public function route(string|Closure $route): RouteOperation
     {
         $this->route = is_string($route) ? fn () => $route : $route;
+        return $this;
+    }
+
+    public function opensInNewTab(): RouteOperation
+    {
+        return $this->target('_blank');
+    }
+
+    public function target(string $target): RouteOperation
+    {
+        $this->target = $target;
         return $this;
     }
 
@@ -43,6 +55,7 @@ class RouteOperation extends Operation
             'action' => $action,
             'id' => $id,
             'route' => $this->route,
+            'target' => $this->target,
             'model' => $this->modelQuery?->call($this, $id) ?? null,
             'attributes' => new ComponentAttributeBag(['wire:navigate' => $this->navigate])
         ]);
