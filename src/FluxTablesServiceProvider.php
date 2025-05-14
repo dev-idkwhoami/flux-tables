@@ -22,6 +22,15 @@ class FluxTablesServiceProvider extends ServiceProvider
 
         $this->loadViewsFrom(__DIR__.'/../resources/views', 'flux-tables');
 
+        $this->loadViewComponentsAs('flux-tables', [
+            'table-filters' => 'flux-tables::components.table.filters',
+            'table-create' => 'flux-tables::components.table.create',
+            'table-filter-pills' => 'flux-tables::components.table.filter-pills',
+            'table-column' => 'flux-tables::components.table.column',
+            'table-row' => 'flux-tables::components.table.row',
+            'table-menu' => 'flux-tables::components.table.menu',
+        ]);
+
         $this->publishes([
             __DIR__.'/../resources/views/flux' => resource_path('views/flux'),
         ], 'flux-tables-flux-views');

@@ -34,7 +34,7 @@ trait HasToggleableColumns
      */
     public function getToggleableColumns(): array
     {
-        return array_filter($this->table->getColumns(), fn (Column $c) => $c->isToggleable());
+        return array_filter($this->table->getColumns(), fn(Column $c) => $c->isToggleable());
     }
 
     /**
@@ -75,6 +75,14 @@ trait HasToggleableColumns
     {
         $this->toggledColumns = $this->defaultToggledColumns();
         Session::put($this->toggleableColumnsValueSessionKey(), $this->toggledColumns);
+    }
+
+    /**
+     * @return Column[]
+     */
+    public function getToggledColumns(): array
+    {
+        return $this->toggledColumns;
     }
 
     /**

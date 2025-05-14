@@ -5,7 +5,6 @@
         * @var \Idkwhoami\FluxTables\Abstracts\Filter\Filter $filter
         * @var \Illuminate\Database\Eloquent\Model $model
         */
-        //dump(session()->all())
     @endphp
 
     <div class="flex w-full flex-col space-y-2">
@@ -18,55 +17,15 @@
                         {{ $this->table->getLabel() }}
                     </flux:heading>
                 @endif
-                <flux:dropdown class="flex items-center">
-                    <flux:button size="xs" square variant="ghost" icon="chevron-down"/>
-
-                    <flux:menu>
-
-                        <flux:menu.submenu :heading="__('flux-tables::table/toggleable.dropdown')">
-                            <flux:menu.checkbox.group>
-                                @foreach($this->getToggleableColumns() as $column)
-                                    <flux:menu.checkbox
-                                        wire:click.prevent="toggle('{{ $column->getName() }}')"
-                                        :value="$column->getName()"
-                                        :checked="$this->isColumnToggled($column->getName())">
-                                        {{ $column->getLabel() }}
-                                    </flux:menu.checkbox>
-                                @endforeach
-                            </flux:menu.checkbox.group>
-                        </flux:menu.submenu>
-
-                        <flux:menu.submenu :heading="__('flux-tables::table/pagination.dropdown')">
-                            <flux:menu.radio.group>
-                                @foreach($this->getPaginationOptions() as $value)
-                                    <flux:menu.radio
-                                        wire:click.prevent="setPaginationValue({{ $value }})"
-                                        :checked="$this->getPaginationValue() === $value"
-                                        :$value>
-                                        {{ __('flux-tables::table/pagination.items', ['number' => $value]) }}
-                                    </flux:menu.radio>
-                                @endforeach
-                            </flux:menu.radio.group>
-                        </flux:menu.submenu>
-
-                        <flux:menu.item wire:click.prevent="resetSorting" class="hover:text-orange-400">
-                            {{ __('flux-tables::table/sorting.reset') }}
-                        </flux:menu.item>
-                    </flux:menu>
-                </flux:dropdown>
+                <x-flux-tables-table-menu
+                    :pagination-options="$this->getPaginationOptions()"
+                    :pagination-value="$this->getPaginationValue()"
+                    :toggleable-columns="$this->getToggleableColumns()"
+                    :toggled-columns="$this->getToggledColumns()"
+                />
                 <flux:spacer/>
                 @if($this->table->hasCreate())
-                    <div class="flex items-center">
-                        <flux:modal.trigger :name="$this->table->getCreateModalName()">
-                            <flux:button size="sm" icon="plus" variant="primary">
-                                {{ $this->table->getCreateText() }}
-                            </flux:button>
-                        </flux:modal.trigger>
-
-                        <flux:modal class="p-2" :name="$this->table->getCreateModalName()">
-                            @livewire($this->table->getCreateComponent(), ['table' => $this->table, 'modal' => $this->table->getCreateModalName()], key($this->table->getCreateComponent() . '-key'))
-                        </flux:modal>
-                    </div>
+                    <x-flux-tables-table-create :table="$this->table"/>
                 @endif
             </div>
             <div class="flex space-x-3">
@@ -96,68 +55,36 @@
             <div class="flex space-x-3">
                 <flux:spacer/>
                 @if($this->hasActiveFilters())
-                    <div>
-                        @foreach($this->getActiveFilters() as $filter)
-                            <flux:badge size="sm" class="flex space-x-1" variant="pill">
-                                {!! $filter->renderPill() !!}
-                                <flux:badge.close wire:click.prevent="resetFilter('{{ $filter->getName() }}')"/>
-                            </flux:badge>
-                        @endforeach
-                    </div>
+                    <x-flux-tables-table-filter-pills :filters="$this->getFilters()"/>
                 @endif
             </div>
         </div>
 
 
         @if($this->table->hasFilters())
-            <flux:modal class="min-w-[15svw] space-y-6" variant="flyout" :name="$this->getFilterModalName()">
-                <flux:heading>
-                    Filters
-                </flux:heading>
-                <div class="flex flex-col w-full space-y-4">
-                    @foreach($this->table->getFilters() as $filter)
-                        @livewire($filter->component(), ['filter' => $filter, 'table' => $this->table], key($filter->getName()))
-                    @endforeach
-                </div>
-            </flux:modal>
+            <x-flux-tables-table-filters :modal="$this->getFilterModalName()" :table="$this->table"/>
         @endif
 
         <flux:table :paginate="$this->models">
 
             <flux:table.columns>
                 @foreach($this->table->getColumns() as $column)
-                    @if($column->isSortable())
-                        <flux:table.column
-                            @class(['hidden' => $this->isColumnToggled($column->getName())])
-                            sortable
-                            :sorted="$this->getSortingColumn() === $column->getName()"
-                            :direction="$this->getSortingDirection()"
-                            :key="$column->getName()"
-                            wire:click.prevent="sort('{{ $column->getName() }}')">
-                            {{ $column->getLabel() }}
-                        </flux:table.column>
-                    @else
-                        <flux:table.column
-                            @class(['hidden' => $this->isColumnToggled($column->getName())])
-                            :key="$column->getName()">
-                            {{ $column->getLabel() }}
-                        </flux:table.column>
-                    @endif
+                    <x-flux-tables-table-column
+                        :column="$column"
+                        :sorting-column="$this->getSortingColumn()"
+                        :sorting-direction="$this->getSortingDirection()"
+                        :toggled-columns="$this->getToggledColumns()"
+                    />
                 @endforeach
             </flux:table.columns>
 
             <flux:table.rows>
                 @foreach($this->models as $model)
-                    <flux:table.row
-                        wire:loading.class="animate-pulse"
-                        :key="$model->getKey()">
-                        @foreach($this->table->getColumns() as $column)
-                            <flux:table.cell
-                                @class(['hidden' => $this->isColumnToggled($column->getName())])>
-                                {{ $column->render($model) }}
-                            </flux:table.cell>
-                        @endforeach
-                    </flux:table.row>
+                    <x-flux-tables-table-row
+                        :model="$model"
+                        :table="$this->table"
+                        :toggled-columns="$this->getToggledColumns()"
+                    />
                 @endforeach
             </flux:table.rows>
 
