@@ -56,21 +56,21 @@ trait TableForm
     {
         Gate::authorize('create', $this->configureModel());
 
-        return $this->configureModel()::query()->create($this->validatedForAction());
+        return $this->configureModel()::query()->create($this->validatedForAction(action: 'store'));
     }
 
     public function update(Model $model): bool
     {
         Gate::authorize('update', $model);
 
-        return $model->update($this->validatedForAction($model));
+        return $model->update($this->validatedForAction($model, action: 'update'));
     }
 
     public function delete(Model $model): bool
     {
         Gate::authorize('delete', $model);
 
-        $this->validate($this->rulesForAction($model));
+        $this->validate($this->rulesForAction($model, action: 'delete'));
 
         return $model->delete();
     }
@@ -79,7 +79,7 @@ trait TableForm
     {
         Gate::authorize('restore', $model);
 
-        $this->validate($this->rulesForAction($model));
+        $this->validate($this->rulesForAction($model, action: 'restore'));
 
         if (!in_array(SoftDeletes::class, class_uses($model))) {
             throw new \Exception('Model must use SoftDeletes trait.');
@@ -91,6 +91,8 @@ trait TableForm
     public function forceDelete(Model $model): bool
     {
         Gate::authorize('forceDelete', $model);
+
+        $this->validate($this->rulesForAction($model, action: 'forceDelete'));
 
         return $model->forceDelete();
     }
