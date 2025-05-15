@@ -97,6 +97,14 @@ trait HasFilters
     /**
      * @return Filter[]
      */
+    public function getFilters(): array
+    {
+        return $this->table->getFilters();
+    }
+
+    /**
+     * @return Filter[]
+     */
     public function getActiveFilters(): array
     {
         return array_filter($this->table->getFilters(), fn (Filter $f) => Session::has($f->filterValueSessionKey()));
