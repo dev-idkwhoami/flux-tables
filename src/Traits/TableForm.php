@@ -2,14 +2,17 @@
 
 namespace Idkwhoami\FluxTables\Traits;
 
+use Closure;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Str;
 
 /**
  * @method array validate(array $rules = [], array $messages = [], array $attributes = [])
  * @method array only(array|mixed $keys)
+ * @method array all()
  */
 trait TableForm
 {
@@ -50,6 +53,19 @@ trait TableForm
         );
 
         return $this->validate(rules: $rules, attributes: $attributes);
+    }
+
+    public function setup(array $dataMapping = []): void
+    {
+        foreach ($dataMapping as $key => $value) {
+            if ($value instanceof Closure) {
+                /** @var Closure $value */
+                /* fn(User $user, array $data) */
+                $value = $value->call($this, Auth::user(), $this->all());
+            }
+
+            $this->$key = $value;
+        }
     }
 
     public function store(): ?Model
