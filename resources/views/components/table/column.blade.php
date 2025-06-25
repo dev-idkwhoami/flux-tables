@@ -3,10 +3,10 @@
     'column',
     'sortingColumn',
     'sortingDirection',
-    'toggledColumns'
+    'toggledColumns' => []
 ])
 @php
-    $toggled = in_array($column->getName(), $toggledColumns);
+    $toggled = isset($toggledColumns) ? in_array($column->getName(), $toggledColumns) : false
 @endphp
 <div>
     @if($column->isSortable())
