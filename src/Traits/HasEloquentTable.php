@@ -118,13 +118,9 @@ trait HasEloquentTable
                     }
                 }
 
-                /*$groupColumns = array_filter($query->getQuery()->getColumns(), function ($column) {
-                    return !preg_match('/(COUNT|SUM|AVG|MIN|MAX|json_agg)\(/i', $column);
-                });*/
-
                 $groupColumns = array_filter(
                     $this->table->getColumns(),
-                    fn ($column) => $column instanceof PropertyColumn && !$column->hasCount()
+                    fn ($column) => $column instanceof PropertyColumn && !$column->hasRelation()
                 );
                 $groupColumns = array_map(fn (PropertyColumn $column) => $column->getGroupByColumn(), $groupColumns);
                 $groupColumns = $query->qualifyColumns($groupColumns);
