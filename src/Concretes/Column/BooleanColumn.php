@@ -5,7 +5,6 @@ namespace Idkwhoami\FluxTables\Concretes\Column;
 use Idkwhoami\FluxTables\Abstracts\Column\PropertyColumn;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\HtmlString;
 
 class BooleanColumn extends PropertyColumn

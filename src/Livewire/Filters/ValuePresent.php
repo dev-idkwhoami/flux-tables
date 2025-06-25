@@ -6,7 +6,6 @@ use Idkwhoami\FluxTables\Abstracts\Filter\PropertyFilter;
 use Idkwhoami\FluxTables\Concretes\Table\EloquentTable;
 use Idkwhoami\FluxTables\Traits\TableFilter;
 use Illuminate\Contracts\View\View;
-use Livewire\Attributes\Computed;
 use Livewire\Attributes\Locked;
 use Livewire\Component;
 

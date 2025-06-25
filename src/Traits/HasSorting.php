@@ -71,7 +71,8 @@ trait HasSorting
 
         if (str_contains($sortingColumn, '::json')) {
             $query->orderByRaw(
-                sprintf("%s %s",
+                sprintf(
+                    "%s %s",
                     sprintf("(\"%s\".%s)::%s", $query->getModel()->getTable(), $sortingColumn, $columnCast),
                     $this->getSortingDirection()
                 )

@@ -34,7 +34,7 @@ trait HasToggleableColumns
      */
     public function getToggleableColumns(): array
     {
-        return array_filter($this->table->getColumns(), fn(Column $c) => $c->isToggleable());
+        return array_filter($this->table->getColumns(), fn (Column $c) => $c->isToggleable());
     }
 
     /**

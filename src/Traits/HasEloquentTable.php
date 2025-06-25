@@ -122,9 +122,11 @@ trait HasEloquentTable
                     return !preg_match('/(COUNT|SUM|AVG|MIN|MAX|json_agg)\(/i', $column);
                 });*/
 
-                $groupColumns = array_filter($this->table->getColumns(),
-                    fn($column) => $column instanceof PropertyColumn && !$column->hasCount());
-                $groupColumns = array_map(fn(PropertyColumn $column) => $column->getGroupByColumn(), $groupColumns);
+                $groupColumns = array_filter(
+                    $this->table->getColumns(),
+                    fn ($column) => $column instanceof PropertyColumn && !$column->hasCount()
+                );
+                $groupColumns = array_map(fn (PropertyColumn $column) => $column->getGroupByColumn(), $groupColumns);
                 $groupColumns = $query->qualifyColumns($groupColumns);
 
                 $groupColumns[] = $query->qualifyColumn($model->getKeyName());
@@ -154,7 +156,7 @@ trait HasEloquentTable
 
         $nonRelationColumns = array_filter(
             $this->table->getColumns(),
-            fn(Column $c) => !$c instanceof PropertyColumn || !$c->hasRelation()
+            fn (Column $c) => !$c instanceof PropertyColumn || !$c->hasRelation()
         );
 
         if (!empty($nonRelationColumns)) {
@@ -187,7 +189,7 @@ trait HasEloquentTable
     {
         return array_filter(
             $this->table->getColumns(),
-            fn(Column $c) => $c instanceof PropertyColumn && $c->hasRelation()
+            fn (Column $c) => $c instanceof PropertyColumn && $c->hasRelation()
         );
     }
 

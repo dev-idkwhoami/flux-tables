@@ -47,7 +47,7 @@ class DatetimeColumn extends PropertyColumn
      */
     public function render(object $value): string|HtmlString|View|null
     {
-        if(!($value instanceof Model)) {
+        if (!($value instanceof Model)) {
             throw new \Exception('Unable to render datetime column without a valid value');
         }
 

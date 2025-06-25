@@ -19,4 +19,3 @@ enum JsonPropertyType: string
     case Cidr = 'cidr';
     case Bytea = 'bytea';
 }
-

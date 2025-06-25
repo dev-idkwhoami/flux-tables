@@ -22,8 +22,13 @@ class ModalAction extends Action implements HasContext
 
     public function modalUniqueName(mixed $id): string
     {
-        return str($this->label)->lower()->snake()->append('-', md5($this->component), '-', strval($id),
-            '-modal')->toString();
+        return str($this->label)->lower()->snake()->append(
+            '-',
+            md5($this->component),
+            '-',
+            strval($id),
+            '-modal'
+        )->toString();
     }
 
     public function modelQuery(Closure $modelQuery): static
@@ -95,7 +100,7 @@ class ModalAction extends Action implements HasContext
     {
         $modelOrId = $id;
 
-        if(!is_null($this->modelQuery)) {
+        if (!is_null($this->modelQuery)) {
             $modelOrId = $this->getModel($id) ?? $id;
         }
 

@@ -2,7 +2,6 @@
 
 namespace Idkwhoami\FluxTables\Concretes\Filter;
 
-use Idkwhoami\FluxTables\Abstracts\Filter\Filter;
 use Idkwhoami\FluxTables\Abstracts\Filter\PropertyFilter;
 use Illuminate\Contracts\Database\Query\Builder;
 use Illuminate\Contracts\View\View;

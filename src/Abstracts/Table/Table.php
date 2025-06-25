@@ -33,7 +33,7 @@ abstract class Table implements Wireable
     public function columns(array $columns): Table
     {
         $this->columns = $columns;
-        array_walk($this->columns, fn(Column $column) => $column->tableInitialized($this));
+        array_walk($this->columns, fn (Column $column) => $column->tableInitialized($this));
         return $this;
     }
 
@@ -42,12 +42,12 @@ abstract class Table implements Wireable
      */
     public function getColumns(): array
     {
-        return array_filter($this->columns, fn(Column $c) => $c->shouldBeVisible($this));
+        return array_filter($this->columns, fn (Column $c) => $c->shouldBeVisible($this));
     }
 
     public function getColumn(string $key): Column
     {
-        $filtered = array_filter($this->columns, fn(Column $c) => $c->getName() === $key);
+        $filtered = array_filter($this->columns, fn (Column $c) => $c->getName() === $key);
 
         if (empty($filtered)) {
             throw new \Exception("Column with key {$key} not found");
@@ -69,7 +69,7 @@ abstract class Table implements Wireable
      */
     public function filters(array $filters): Table
     {
-        $this->filters = array_map(fn($filter) => $filter->table($this->name), $filters);
+        $this->filters = array_map(fn ($filter) => $filter->table($this->name), $filters);
         return $this;
     }
 
@@ -78,7 +78,7 @@ abstract class Table implements Wireable
      */
     public function getFilters(): array
     {
-        return array_filter($this->filters, fn(Filter $f) => $f->shouldBeVisible($this));
+        return array_filter($this->filters, fn (Filter $f) => $f->shouldBeVisible($this));
     }
 
     /**
