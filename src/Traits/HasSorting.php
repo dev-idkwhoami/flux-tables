@@ -80,7 +80,12 @@ trait HasSorting
             return;
         }
 
-        $query->orderBy($query->qualifyColumn($sortingColumn), $this->getSortingDirection());
+        $qualifiedColumn = $query->qualifyColumn($sortingColumn);
+        if (array_filter($query->getQuery()->getColumns(), fn ($column) => preg_match('/^.* as (.+)$/i', $column, $matches) && $matches[1] === $sortingColumn)) {
+            $qualifiedColumn = $sortingColumn;
+        }
+
+        $query->orderBy($qualifiedColumn, $this->getSortingDirection());
     }
 
     /**
