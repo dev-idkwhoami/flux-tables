@@ -3,7 +3,7 @@
     'column',
     'sortingColumn',
     'sortingDirection',
-    'toggledColumns' => []
+    'toggledColumns'
 ])
 @php
     $toggled = isset($toggledColumns) ? in_array($column->getName(), $toggledColumns) : false

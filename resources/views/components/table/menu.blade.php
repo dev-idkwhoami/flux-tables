@@ -1,8 +1,8 @@
 @props([
     'paginationOptions',
     'paginationValue',
-    'toggleableColumns' => [],
-    'toggledColumns' => []
+    'toggleableColumns',
+    'toggledColumns'
 ])
 <flux:dropdown {{ $attributes->class(['flex items-center']) }}>
     <flux:button size="xs" square variant="ghost" icon="chevron-down"/>

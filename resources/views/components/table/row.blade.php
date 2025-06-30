@@ -3,7 +3,7 @@
     'model',
     /** @var \Idkwhoami\FluxTables\Concretes\Table\EloquentTable $table */
     'table',
-    'toggledColumns' => []
+    'toggledColumns'
 ])
 <flux:table.row
         wire:loading.class="animate-pulse"
