@@ -45,6 +45,11 @@ trait TableForm
             }
         }
         $rules = $this->rulesForAction($model, $action);
+
+        if(method_exists($this, 'rules')) {
+            $rules = array_merge($this->rules(), $rules);
+        }
+
         $attributes = array_unique(
             array_map(
                 fn (string $property) => strpos($property, '.') ? strstr($property, '.', true) : $property,
@@ -66,6 +71,11 @@ trait TableForm
 
             $this->$key = $value;
         }
+    }
+
+    public function rules(): array
+    {
+        return [];
     }
 
     public function store(): ?Model
