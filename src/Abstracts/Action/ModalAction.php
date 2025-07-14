@@ -11,7 +11,7 @@ use Illuminate\Support\HtmlString;
 
 class ModalAction extends Action implements HasContext
 {
-    protected string $modalClasses = 'md:w-96';
+    protected string $modalClasses = 'w-full';
     protected ?string $modalVariant = 'default';
     protected ?string $modalPosition = null;
     protected bool $dismissible = false;

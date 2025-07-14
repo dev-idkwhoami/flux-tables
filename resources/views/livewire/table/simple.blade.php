@@ -25,7 +25,12 @@
                 />
                 <flux:spacer/>
                 @if($this->table->hasCreate())
-                    <x-flux-tables-table-create :table="$this->table"/>
+                    <x-flux-tables-table-create
+                        :modal-classes="$this->getCreateModalClasses()"
+                        :modal-variant="$this->getCreateModalVariant()"
+                        :modal-position="$this->getCreateModalPosition()"
+                        :dismissible="$this->isCreateModalDismissible()"
+                        :table="$this->table"/>
                 @endif
             </div>
             <div class="flex space-x-3">

@@ -1,4 +1,8 @@
 @props([
+    'modalClasses' => 'w-full p-2',
+    'modalVariant' => null,
+    'modalPosition' => null,
+    'dismissible' => false,
     /** @var \Idkwhoami\FluxTables\Concretes\Table\EloquentTable $table */
     'table'
 ])
@@ -10,7 +14,13 @@
         </flux:button>
     </flux:modal.trigger>
 
-    <flux:modal class="p-2" :name="$table->getCreateModalName()">
+    <flux:modal
+        :position="$modalPosition"
+        :variant="$modalVariant"
+        :dismissible="$dismissible"
+        @class([$modalClasses])
+        {{ $attributes->whereStartsWith('wire:model') }}
+        :name="$table->getCreateModalName()">
         @livewire($table->getCreateComponent(), ['table' => $table, 'modal' => $table->getCreateModalName()], key($table->getCreateComponent() . '-key'))
     </flux:modal>
 </div>

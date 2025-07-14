@@ -23,6 +23,7 @@ use Livewire\Attributes\Locked;
 use Livewire\Attributes\On;
 use Livewire\Component;
 use Livewire\WithPagination;
+use Idkwhoami\FluxTables\Concretes\Table\SimpleTable as BaseTable;
 
 class SimpleTable extends Component
 {
@@ -57,7 +58,15 @@ class SimpleTable extends Component
     #[Locked]
     public ?string $createText = null;
     #[Locked]
-    public ?string $create = null;
+    public ?string $createComponent = null;
+    #[Locked]
+    public string $createModalClasses = 'w-full';
+    #[Locked]
+    public ?string $createModalVariant = 'default';
+    #[Locked]
+    public ?string $createModalPosition = null;
+    #[Locked]
+    public bool $createDismissible = false;
 
     /**
      * @param  string  $title
@@ -80,6 +89,10 @@ class SimpleTable extends Component
         string $defaultSortingDirection = 'desc',
         ?string $create = null,
         ?string $createText = null,
+        string $createModalClasses = 'w-full',
+        string $createModalVariant = 'default',
+        ?string $createModalPosition = null,
+        bool $createDismissible = false,
         bool $verbose = false
     ): void {
         $this->title = $title;
@@ -88,8 +101,12 @@ class SimpleTable extends Component
         $this->defaultSortingColumn = $defaultSortingColumn;
         $this->defaultToggledColumns = $defaultToggledColumns;
         $this->defaultSortingDirection = $defaultSortingDirection;
-        $this->create = $create;
+        $this->createComponent = $create;
         $this->createText = $createText;
+        $this->createModalClasses = $createModalClasses;
+        $this->createModalVariant = $createModalVariant;
+        $this->createModalPosition = $createModalPosition;
+        $this->createDismissible = $createDismissible;
         $this->verbose = $verbose;
     }
 
@@ -175,11 +192,14 @@ class SimpleTable extends Component
      */
     public function table(string $model, array $columns = [], array $filters = []): Table
     {
-        return EloquentTable::make(strtolower(class_basename($model)))
+        return BaseTable::make(strtolower(class_basename($model)))
             ->label($this->title)
             ->model($model)
-            ->createComponent($this->create)
+            ->createComponent($this->createComponent)
             ->createText($this->createText)
+            ->createModalClasses($this->createModalClasses)
+            ->createModalFlyoutPosition($this->createModalPosition)
+            ->createModalVariant($this->createModalVariant)
             ->filters($filters)
             ->columns($columns);
     }

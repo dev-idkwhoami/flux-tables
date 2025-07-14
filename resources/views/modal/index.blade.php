@@ -1,7 +1,7 @@
 @props([
     'action',
     'id' => null,
-    'modalClasses' => 'md:w-96',
+    'modalClasses' => 'w-full',
     'modalVariant' => null,
     'modalPosition' => null,
     'dismissible' => false,
@@ -32,7 +32,7 @@
     :position="$modalPosition"
     :variant="$modalVariant"
     :dismissible="$dismissible"
-    {{ $attributes->class([$modalClasses]) }}
+    @class([$modalClasses])
     {{ $attributes->whereStartsWith('wire:model') }}
     :name="$action->modalUniqueName($id)">
     @livewire($action->getComponent(), array_merge(['action' => $action, 'id' => $id, 'model' => $action->getModel($id)], $action->getComponentData($id)), key($action->modalUniqueName($id)))
