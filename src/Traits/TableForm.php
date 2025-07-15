@@ -46,7 +46,7 @@ trait TableForm
         }
         $rules = $this->rulesForAction($model, $action);
 
-        if(method_exists($this, 'rules')) {
+        if (method_exists($this, 'rules')) {
             $rules = array_merge($this->rules(), $rules);
         }
 

@@ -2,11 +2,8 @@
 
 namespace Idkwhoami\FluxTables\Traits;
 
-use Idkwhoami\FluxTables\Concretes\Table\EloquentTable;
-
 trait HasTableCreate
 {
-
     protected ?string $createComponent = null;
     protected ?string $createText = null;
 
@@ -78,7 +75,7 @@ trait HasTableCreate
         return $this;
     }
 
-    public function createModalFlyoutPosition(string $position): static
+    public function createModalFlyoutPosition(?string $position): static
     {
         if (!in_array($position, ['left', 'right', 'top', 'bottom'])) {
             throw new \Exception('Flyout position must be left, right, top or bottom.');
