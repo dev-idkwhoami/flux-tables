@@ -77,7 +77,7 @@ trait HasTableCreate
 
     public function createModalFlyoutPosition(?string $position): static
     {
-        if (!in_array($position, ['left', 'right', 'top', 'bottom'])) {
+        if (!is_null($position) && !in_array($position, ['left', 'right', 'top', 'bottom'])) {
             throw new \Exception('Flyout position must be left, right, top or bottom.');
         }
 
