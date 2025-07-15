@@ -13,6 +13,7 @@ use Idkwhoami\FluxTables\Traits\HasEloquentTable;
 use Idkwhoami\FluxTables\Traits\HasFilters;
 use Idkwhoami\FluxTables\Traits\HasSearch;
 use Idkwhoami\FluxTables\Traits\HasSorting;
+use Idkwhoami\FluxTables\Traits\HasTableCreate;
 use Idkwhoami\FluxTables\Traits\HasToggleableColumns;
 use Illuminate\Contracts\Database\Eloquent\Builder;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
@@ -35,6 +36,7 @@ class SimpleTable extends Component
     use HasSorting;
     use HasDynamicPagination;
     use WithPagination;
+    use HasTableCreate;
 
     /** @var array<string, string> $listeners */
     protected $listeners = [
@@ -55,16 +57,6 @@ class SimpleTable extends Component
     /** @var string[] $defaultToggledColumns */
     #[Locked]
     public array $defaultToggledColumns = [];
-    #[Locked]
-    public ?string $createText = null;
-    #[Locked]
-    public ?string $createComponent = null;
-    #[Locked]
-    public string $createModalClasses = 'w-full';
-    #[Locked]
-    public ?string $createModalVariant = 'default';
-    #[Locked]
-    public ?string $createModalPosition = null;
     #[Locked]
     public bool $createDismissible = false;
 
