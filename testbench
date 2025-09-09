@@ -1,0 +1,7 @@
+#!/usr/bin/env php
+<?php
+
+$args = array_slice($argv, 1);
+$command = 'php vendor/bin/testbench ' . implode(' ', array_map('escapeshellarg', $args));
+passthru($command, $exitCode);
+exit($exitCode);
