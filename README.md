@@ -679,7 +679,7 @@ Create `resources/views/livewire/custom-user-table.blade.php`:
                 class="w-24"
             >
                 @foreach($this->getPaginationOptions() as $option)
-                    <flux:option value="{{ $option }}">{{ $option }}</flux:option>
+                    <flux:select.option value="{{ $option }}">{{ $option }}</flux:select.option>
                 @endforeach
             </flux:select>
 

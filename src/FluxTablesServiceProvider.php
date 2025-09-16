@@ -3,17 +3,19 @@
 namespace Idkwhoami\FluxTables;
 
 use Idkwhoami\FluxTables\Console\Commands\InstallCommand;
-use Idkwhoami\FluxTables\Livewire\Filters\Boolean;
-use Idkwhoami\FluxTables\Livewire\Filters\ValuePresent;
+use Idkwhoami\FluxTables\Data\TableDataRepository;
 use Idkwhoami\FluxTables\Livewire\SimpleTable;
-use Idkwhoami\FluxTables\Livewire\Filters\DateRange;
-use Idkwhoami\FluxTables\Livewire\Filters\Deleted;
-use Idkwhoami\FluxTables\Livewire\Filters\Select;
+use Idkwhoami\FluxTables\Services\TableStateService;
 use Illuminate\Support\ServiceProvider;
 use Livewire\Livewire;
 
 class FluxTablesServiceProvider extends ServiceProvider
 {
+    public function register(): void
+    {
+        $this->registerServices();
+    }
+
     public function boot(): void
     {
         $this->prepareConfig();
@@ -22,25 +24,29 @@ class FluxTablesServiceProvider extends ServiceProvider
 
         $this->loadViewsFrom(__DIR__.'/../resources/views', 'flux-tables');
 
-        $this->loadViewComponentsAs('flux-tables', [
-            'table-filters' => 'flux-tables::components.table.filters',
-            'table-create' => 'flux-tables::components.table.create',
-            'table-filter-pills' => 'flux-tables::components.table.filter-pills',
-            'table-column' => 'flux-tables::components.table.column',
-            'table-row' => 'flux-tables::components.table.row',
-            'table-menu' => 'flux-tables::components.table.menu',
-        ]);
 
         $this->publishes([
             __DIR__.'/../resources/views/flux' => resource_path('views/flux'),
         ], 'flux-tables-flux-views');
 
+        // New three-tier table system
         Livewire::component('flux-simple-table', SimpleTable::class);
-        Livewire::component('flux-filter-deleted', Deleted::class);
-        Livewire::component('flux-filter-date-range', DateRange::class);
-        Livewire::component('flux-filter-select', Select::class);
-        Livewire::component('flux-filter-value-present', ValuePresent::class);
-        Livewire::component('flux-filter-boolean', Boolean::class);
+        Livewire::component('flux-advanced-table', \Idkwhoami\FluxTables\Livewire\AdvancedTable::class);
+        Livewire::component('flux-enhanced-table', \Idkwhoami\FluxTables\Livewire\EnhancedTable::class);
+    }
+
+    private function registerServices(): void
+    {
+        $this->app->bind(TableStateService::class, function ($app, $parameters) {
+            return new TableStateService(
+                $parameters['tableId'],
+                $app['events']
+            );
+        });
+
+        $this->app->bind(TableDataRepository::class, function ($app, $parameters) {
+            return new TableDataRepository($parameters['modelClass']);
+        });
     }
 
     /**

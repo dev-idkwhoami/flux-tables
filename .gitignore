@@ -32,3 +32,8 @@ testbench.yaml
 
 #FluxUI
 auth.json
+
+#Claude
+.mcp.json
+CLAUDE.md
+.claude
