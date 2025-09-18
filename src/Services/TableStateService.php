@@ -144,6 +144,26 @@ class TableStateService
         return in_array($columnName, $this->toggledColumns);
     }
 
+    public function showColumn(string $columnName): static
+    {
+        $this->toggledColumns = array_diff($this->toggledColumns, [$columnName]);
+        return $this;
+    }
+
+    public function hideColumn(string $columnName): static
+    {
+        if (!in_array($columnName, $this->toggledColumns)) {
+            $this->toggledColumns[] = $columnName;
+        }
+        return $this;
+    }
+
+    public function resetColumnVisibility(): static
+    {
+        $this->toggledColumns = [];
+        return $this;
+    }
+
     public function reset(): static
     {
         $this->filterValues = [];

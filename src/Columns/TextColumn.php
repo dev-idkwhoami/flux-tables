@@ -87,28 +87,12 @@ class TextColumn extends Column
 
         $text = (string) $value;
 
-        // Auto-link URLs and emails (keep this server-side since it involves HTML structure)
-        if ($this->autolink) {
-            // Email pattern
-            if (filter_var($text, FILTER_VALIDATE_EMAIL)) {
-                return sprintf(
-                    '<a href="mailto:%s">%s</a>',
-                    htmlspecialchars($text),
-                    htmlspecialchars($text)
-                );
-            }
-
-            // URL pattern
-            if (filter_var($text, FILTER_VALIDATE_URL)) {
-                return sprintf(
-                    '<a href="%s" target="_blank" rel="noopener">%s</a>',
-                    htmlspecialchars($text),
-                    htmlspecialchars($text)
-                );
-            }
+        // Only handle word truncation (character truncation is handled by CSS)
+        if ($this->limit && $this->words) {
+            $text = Str::words($text, $this->limit, $this->truncateEnd);
         }
 
-        return htmlspecialchars($text);
+        return $text;
     }
 
     public function render(object $record): View
@@ -125,6 +109,7 @@ class TextColumn extends Column
             'lowercase' => $this->lowercase,
             'capitalize' => $this->capitalize,
             'limit' => $this->limit,
+            'words' => $this->words,
         ]);
     }
 

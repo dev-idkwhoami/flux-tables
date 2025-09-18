@@ -19,7 +19,6 @@ class TableConfiguration implements Wireable
     protected array|Closure $columns = [];
     protected array|Closure $filters = [];
     protected array|Closure $actions = [];
-    protected array|Closure $searchableColumns = [];
 
     // Dynamic configuration support
     protected ?object $tableInstance = null;
@@ -267,6 +266,12 @@ class TableConfiguration implements Wireable
         return $this;
     }
 
+    public function columns(array $columns): static
+    {
+        $this->columns = $columns;
+        return $this;
+    }
+
     // Core getter methods
     public function getModelClass(): ?string
     {
@@ -296,15 +301,6 @@ class TableConfiguration implements Wireable
         return $this->resolveValue($this->columns);
     }
 
-    public function getSearchableColumns(): array
-    {
-        return $this->resolveValue($this->searchableColumns);
-    }
-
-    public function hasSearchableColumns(): bool
-    {
-        return !empty($this->getSearchableColumns());
-    }
 
     public function hasFilters(): bool
     {
@@ -431,6 +427,202 @@ class TableConfiguration implements Wireable
     public function getColumnToggleable(): array
     {
         return $this->columnToggleable;
+    }
+
+    public function getColumnShowToggleButton(): bool
+    {
+        return $this->resolveValue($this->columnShowToggleButton);
+    }
+
+    public function getColumnToggleButtonPosition(): string
+    {
+        return $this->resolveValue($this->columnToggleButtonPosition);
+    }
+
+    public function getColumnRememberToggleState(): bool
+    {
+        return $this->resolveValue($this->columnRememberToggleState);
+    }
+
+    public function getColumnTexts(): array
+    {
+        return $this->resolveValue($this->columnTexts);
+    }
+
+    public function getColumnOrder(): array
+    {
+        return $this->resolveValue($this->columnOrder);
+    }
+
+    // Filter getters
+    public function getFilterEnabled(): bool
+    {
+        return $this->resolveValue($this->filterEnabled);
+    }
+
+    public function getFilterPosition(): string
+    {
+        return $this->resolveValue($this->filterPosition);
+    }
+
+    public function getFilterCollapsible(): bool
+    {
+        return $this->resolveValue($this->filterCollapsible);
+    }
+
+    public function getFilterDefaultExpanded(): bool
+    {
+        return $this->resolveValue($this->filterDefaultExpanded);
+    }
+
+    public function getFilterDefaultValues(): array
+    {
+        return $this->resolveValue($this->filterDefaultValues);
+    }
+
+    public function getFilterPersistFilters(): bool
+    {
+        return $this->resolveValue($this->filterPersistFilters);
+    }
+
+    public function getFilterModalPosition(): string
+    {
+        return $this->resolveValue($this->filterModalPosition);
+    }
+
+    public function getFilterModalDismissible(): bool
+    {
+        return $this->resolveValue($this->filterModalDismissible);
+    }
+
+    public function getFilterShowClearAll(): bool
+    {
+        return $this->resolveValue($this->filterShowClearAll);
+    }
+
+    public function getFilterShowActiveCount(): bool
+    {
+        return $this->resolveValue($this->filterShowActiveCount);
+    }
+
+    public function getFilterTexts(): array
+    {
+        return $this->resolveValue($this->filterTexts);
+    }
+
+    // Action getters
+    public function getActionEnabled(): bool
+    {
+        return $this->resolveValue($this->actionEnabled);
+    }
+
+    public function getActionPosition(): string
+    {
+        return $this->resolveValue($this->actionPosition);
+    }
+
+    public function getActionSticky(): bool
+    {
+        return $this->resolveValue($this->actionSticky);
+    }
+
+    public function getActionBulkActions(): array
+    {
+        return $this->resolveValue($this->actionBulkActions);
+    }
+
+    public function getActionShowBulkActions(): bool
+    {
+        return $this->resolveValue($this->actionShowBulkActions);
+    }
+
+    public function getActionConfirmDestructive(): bool
+    {
+        return $this->resolveValue($this->actionConfirmDestructive);
+    }
+
+    public function getActionConfirmationModalVariant(): string
+    {
+        return $this->resolveValue($this->actionConfirmationModalVariant);
+    }
+
+    public function getActionTexts(): array
+    {
+        return $this->resolveValue($this->actionTexts);
+    }
+
+    // Pagination getters
+    public function getPaginationShowPerPageSelector(): bool
+    {
+        return $this->resolveValue($this->paginationShowPerPageSelector);
+    }
+
+    public function getPaginationShowPageInfo(): bool
+    {
+        return $this->resolveValue($this->paginationShowPageInfo);
+    }
+
+    public function getPaginationShowFirstLastButtons(): bool
+    {
+        return $this->resolveValue($this->paginationShowFirstLastButtons);
+    }
+
+    public function getPaginationPageName(): string
+    {
+        return $this->resolveValue($this->paginationPageName);
+    }
+
+    public function getPaginationTexts(): array
+    {
+        return $this->resolveValue($this->paginationTexts);
+    }
+
+    // Sorting getters
+    public function getSortingMultiSort(): bool
+    {
+        return $this->resolveValue($this->sortingMultiSort);
+    }
+
+    // Search getters
+    public function getSearchEnabled(): bool
+    {
+        return $this->resolveValue($this->searchEnabled);
+    }
+
+    public function getSearchPlaceholder(): string
+    {
+        return $this->resolveValue($this->searchPlaceholder);
+    }
+
+    public function getSearchDefaultQuery(): string
+    {
+        return $this->resolveValue($this->searchDefaultQuery);
+    }
+
+    // UI getters
+    public function getUiCreateIcon(): string
+    {
+        return $this->resolveValue($this->uiCreateIcon);
+    }
+
+    public function getUiCreateVariant(): string
+    {
+        return $this->resolveValue($this->uiCreateVariant);
+    }
+
+    public function getUiCreateSize(): string
+    {
+        return $this->resolveValue($this->uiCreateSize);
+    }
+
+    public function getUiModalConfig(): array
+    {
+        return $this->resolveValue($this->uiModalConfig);
+    }
+
+    public function getUiTexts(): array
+    {
+        return $this->resolveValue($this->uiTexts);
     }
 
     // Helper methods for backward compatibility

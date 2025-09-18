@@ -79,20 +79,29 @@ class TableQueryBuilder
 
         $clone = clone $this;
 
-        // Ensure all relationship columns needed for search are joined
+        // Convert column objects to column names if needed
+        $columnNames = [];
         foreach ($searchableColumns as $column) {
-            if ($this->isRelationshipColumn($column)) {
-                $clone = $clone->ensureRelationshipJoined($column);
+            $columnName = is_object($column) && method_exists($column, 'getName')
+                ? $column->getName()
+                : (string) $column;
+            $columnNames[] = $columnName;
+        }
+
+        // Ensure all relationship columns needed for search are joined
+        foreach ($columnNames as $columnName) {
+            if ($this->isRelationshipColumn($columnName)) {
+                $clone = $clone->ensureRelationshipJoined($columnName);
             }
         }
 
-        $clone->query->where(function (Builder $query) use ($searchableColumns, $search) {
-            foreach ($searchableColumns as $column) {
-                if ($this->isJsonColumn($column)) {
+        $clone->query->where(function (Builder $query) use ($columnNames, $search) {
+            foreach ($columnNames as $columnName) {
+                if ($this->isJsonColumn($columnName)) {
                     // PostgreSQL JSON search optimization
-                    $query->orWhereRaw("({$column})::text ILIKE ?", ["%{$search}%"]);
+                    $query->orWhereRaw("({$columnName})::text ILIKE ?", ["%{$search}%"]);
                 } else {
-                    $query->orWhere($column, 'ILIKE', "%{$search}%");
+                    $query->orWhere($columnName, 'ILIKE', "%{$search}%");
                 }
             }
         });

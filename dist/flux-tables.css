@@ -1,2 +1,59 @@
 @source '../resources/';
-@source '../src/'
+@source '../src/';
+
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer components {
+    .skeleton {
+        --skeleton-opacity: 0.85;
+
+        /* Block all interaction */
+        @apply pointer-events-none cursor-default select-none;
+    }
+
+    /* Hide real content, keep layout */
+    .skeleton,
+    .skeleton * {
+        @apply text-transparent border-transparent shadow-none;
+        -webkit-text-fill-color: transparent;
+        caret-color: transparent;
+    }
+
+    /* Positioning context for overlays */
+    .skeleton :where(*) {
+        @apply relative;
+    }
+
+    /* Uniform pill for every leaf node */
+    .skeleton :where(*):not(:has(*))::after {
+        @apply content-[''] absolute left-0 right-0 top-1/2 -translate-y-1/2
+        h-2.5 rounded-md animate-pulse;
+        background-color: var(--color-zinc-600);
+        opacity: var(--skeleton-opacity);
+        transition: opacity 180ms ease-out;
+    }
+}
+
+@starting-style {
+    .skeleton :where(*):not(:has(*))::after { opacity: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .skeleton :where(*):not(:has(*))::after {
+        animation: none !important;
+    }
+}
+
+@supports not (selector(:has(*))) {
+    .skeleton :where(*)::after {
+        @apply content-[''] absolute left-0 right-0 top-1/2 -translate-y-1/2
+        h-2.5 rounded-md animate-pulse;
+        background-color: var(--color-zinc-600);
+        opacity: var(--skeleton-opacity);
+        transition: opacity 180ms ease-out;
+    }
+    .skeleton :where(script, style, link, meta, br, hr)::after { content: none; }
+}

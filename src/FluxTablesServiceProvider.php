@@ -4,7 +4,7 @@ namespace Idkwhoami\FluxTables;
 
 use Idkwhoami\FluxTables\Console\Commands\InstallCommand;
 use Idkwhoami\FluxTables\Data\TableDataRepository;
-use Idkwhoami\FluxTables\Livewire\SimpleTable;
+use Idkwhoami\FluxTables\Livewire\FluxTable;
 use Idkwhoami\FluxTables\Services\TableStateService;
 use Illuminate\Support\ServiceProvider;
 use Livewire\Livewire;
@@ -24,15 +24,7 @@ class FluxTablesServiceProvider extends ServiceProvider
 
         $this->loadViewsFrom(__DIR__.'/../resources/views', 'flux-tables');
 
-
-        $this->publishes([
-            __DIR__.'/../resources/views/flux' => resource_path('views/flux'),
-        ], 'flux-tables-flux-views');
-
-        // New three-tier table system
-        Livewire::component('flux-simple-table', SimpleTable::class);
-        Livewire::component('flux-advanced-table', \Idkwhoami\FluxTables\Livewire\AdvancedTable::class);
-        Livewire::component('flux-enhanced-table', \Idkwhoami\FluxTables\Livewire\EnhancedTable::class);
+        Livewire::component('flux-table', FluxTable::class);
     }
 
     private function registerServices(): void
@@ -85,7 +77,7 @@ class FluxTablesServiceProvider extends ServiceProvider
         $this->loadTranslationsFrom(__DIR__.'/../lang', 'flux-tables');
 
         $this->publishes([
-            __DIR__.'/../lang' => lang_path('vendor/flux-tables'),
+            __DIR__.'/../lang' => $this->app->langPath('vendor/flux-tables'),
         ], [
             'flux-tables-lang',
             'flux-tables'

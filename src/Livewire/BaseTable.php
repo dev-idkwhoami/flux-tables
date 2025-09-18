@@ -4,110 +4,122 @@ namespace Idkwhoami\FluxTables\Livewire;
 
 use Idkwhoami\FluxTables\Configuration\TableConfiguration;
 use Idkwhoami\FluxTables\Data\TableDataRepository;
-use Idkwhoami\FluxTables\Services\TableConfigurationManager;
+use Idkwhoami\FluxTables\Data\TableQueryBuilder;
 use Idkwhoami\FluxTables\Services\TableStateService;
+use Idkwhoami\FluxTables\Traits\HasTableConfiguration;
+use Idkwhoami\FluxTables\Traits\HasSearching;
+use Idkwhoami\FluxTables\Traits\HasSorting;
+use Idkwhoami\FluxTables\Traits\HasPagination;
+use Idkwhoami\FluxTables\Traits\HasFiltering;
+use Idkwhoami\FluxTables\Traits\HasActions;
+use Idkwhoami\FluxTables\Traits\HasColumnToggling;
+use Idkwhoami\FluxTables\Traits\HasCreate;
 use Illuminate\Contracts\Container\Container;
-use Illuminate\Contracts\Events\Dispatcher;
-use Livewire\Attributes\Locked;
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Contracts\View\View;
+use Livewire\Attributes\Computed;
 use Livewire\Component;
 use Livewire\WithPagination;
 
-abstract class BaseTable extends Component
+class BaseTable extends Component
 {
-    use WithPagination;
-
-    // Common properties
-    public ?string $modelClass = null;
-
-    #[Locked]
-    public ?string $configurationId = null;
-
-    #[Locked]
-    public string $tableId;
-
-    public string $search = '';
-    public int $perPage = 15;
+    use WithPagination,
+        HasTableConfiguration,
+        HasSearching,
+        HasSorting,
+        HasPagination,
+        HasFiltering,
+        HasActions,
+        HasColumnToggling,
+        HasCreate;
 
     // Store service instances (not serialized with Livewire)
     protected ?TableStateService $stateService = null;
     protected ?TableDataRepository $dataRepository = null;
     protected ?Container $container = null;
 
-    protected function initializeBaseTable(?Container $container = null): void
+    public function mount(?Container $container = null): void
     {
         $this->container = $container ?? app();
-        $this->tableId = uniqid($this->getTableType() . '_');
-
-        // Create or use provided configuration
-        $configuration = $this->createTableConfiguration();
-
-        // Set table instance context
-        $configuration->setTableInstance($this);
-
-        // Store configuration server-side and keep only the ID for Livewire serialization
-        $this->configurationId = TableConfigurationManager::store($configuration);
-
-        // Initialize component state from configuration
-        $this->initializeFromConfiguration($configuration);
+        $this->tableId = $this->generateTableId();
     }
 
-    protected function createTableConfiguration(): TableConfiguration
+    public function boot(): void
     {
-        if ($this->modelClass) {
-            return TableConfiguration::forModel($this->modelClass);
+        // Ensure container is available after Livewire hydration
+        if (!$this->container) {
+            $this->container = app();
+        }
+    }
+
+    public function hydrate(): void
+    {
+        // Reset services after Livewire hydration to ensure they're fresh
+        $this->stateService = null;
+        $this->dataRepository = null;
+
+        // Ensure container is available
+        if (!$this->container) {
+            $this->container = app();
+        }
+    }
+
+    #[Computed]
+    public function models(): LengthAwarePaginator
+    {
+        $configuration = $this->getConfiguration();
+        if (!$configuration) {
+            return $this->emptyPaginator();
         }
 
-        throw new \InvalidArgumentException('modelClass must be provided');
-    }
-
-    protected function initializeFromConfiguration(TableConfiguration $configuration): void
-    {
-        $this->perPage = $configuration->getPaginationDefaultPerPage();
-    }
-
-    public function getConfiguration(): ?TableConfiguration
-    {
-        if ($this->configurationId && TableConfigurationManager::has($this->configurationId)) {
-            return TableConfigurationManager::get($this->configurationId);
+        $query = $this->buildQuery();
+        if (!$query) {
+            return $this->emptyPaginator();
         }
 
-        return null;
+        $dataRepository = $this->getDataRepository($configuration);
+        if (!$dataRepository) {
+            return $this->emptyPaginator();
+        }
+
+        return $dataRepository->paginate($query, $this->perPage);
     }
 
-    public function getPaginationOptions(): array
+    protected function buildQuery(): ?TableQueryBuilder
     {
-        $config = $this->getConfiguration();
-        return $config ? $config->getPerPageOptions() : [10, 15, 25, 50];
-    }
+        $configuration = $this->getConfiguration();
+        if (!$configuration) {
+            return null;
+        }
 
-    public function updatedSearch(): void
-    {
-        $this->resetPage();
-    }
+        $dataRepository = $this->getDataRepository($configuration);
+        if (!$dataRepository) {
+            return null;
+        }
 
-    public function updatedPerPage(): void
-    {
-        $this->resetPage();
-    }
+        $query = $dataRepository->query();
+        sleep(2);
 
-    public function updatePerPage(int $perPage): void
-    {
-        $this->perPage = $perPage;
-        $this->resetPage();
-    }
+        // Apply filters
+        if ($this->hasFiltering() && $this->hasActiveFilters()) {
+            $query = $query->applyFilters(
+                $configuration->getFilters(),
+                $this->getActiveFilters()
+            );
+        }
 
-    protected function emptyPaginator()
-    {
-        return new \Illuminate\Pagination\LengthAwarePaginator(
-            collect([]),
-            0,
-            $this->perPage,
-            1,
-            [
-                'path' => request()->url(),
-                'pageName' => 'page',
-            ]
-        );
+        // Apply search
+        if ($this->hasActiveSearch() && $this->hasSearchableColumns()) {
+            $searchColumns = $this->getSearchableColumns();
+            $query = $query->applySearch($searchColumns, $this->search);
+        }
+
+        // Apply sorting
+        if ($this->hasActiveSort()) {
+            $query = $query->applySort($this->sortColumn, $this->sortDirection);
+        }
+
+        return $query;
     }
 
     protected function getStateService(): ?TableStateService
@@ -121,21 +133,36 @@ abstract class BaseTable extends Component
         return $this->stateService;
     }
 
-    protected function getDataRepository(): ?TableDataRepository
+    protected function getDataRepository(?TableConfiguration $configuration = null): ?TableDataRepository
     {
-        if ($this->dataRepository === null && $this->modelClass && $this->container) {
+        if ($this->dataRepository === null && $this->container) {
+            $config = $configuration ?? $this->getConfiguration();
+            if (!$config) {
+                return null;
+            }
+
+            $modelClass = $config->getModelClass();
+            if (!$modelClass) {
+                return null;
+            }
+
             $this->dataRepository = $this->container->makeWith(TableDataRepository::class, [
-                'modelClass' => $this->modelClass
+                'modelClass' => $modelClass
             ]);
         }
 
         return $this->dataRepository;
     }
 
-    protected function hasAdvancedFeatures(): bool
+    protected function getTableType(): string
     {
-        return method_exists($this, 'sortBy') || method_exists($this, 'updateFilter');
+        return 'base_table';
     }
 
-    abstract protected function getTableType(): string;
+    public function render(): View
+    {
+        return view('flux-tables::livewire.base-table', [
+            'configuration' => $this->getConfiguration(),
+        ]);
+    }
 }
