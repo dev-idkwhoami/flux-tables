@@ -8,6 +8,7 @@ trait HasPagination
 {
     public int $perPage = 15;
 
+
     /**
      * Handle per page updates
      */

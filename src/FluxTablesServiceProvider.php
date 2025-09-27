@@ -11,22 +11,29 @@ use Livewire\Livewire;
 
 class FluxTablesServiceProvider extends ServiceProvider
 {
+    /**
+     * Register any application services.
+     */
     public function register(): void
     {
         $this->registerServices();
+        $this->registerConfig();
     }
 
+    /**
+     * Bootstrap any application services.
+     */
     public function boot(): void
     {
-        $this->prepareConfig();
-        $this->prepareLocalization();
-        $this->prepareCommands();
-
-        $this->loadViewsFrom(__DIR__.'/../resources/views', 'flux-tables');
-
-        Livewire::component('flux-table', FluxTable::class);
+        $this->bootViews();
+        $this->bootLivewireComponents();
+        $this->bootPublishing();
+        $this->bootCommands();
     }
 
+    /**
+     * Register application services.
+     */
     private function registerServices(): void
     {
         $this->app->bind(TableStateService::class, function ($app, $parameters) {
@@ -42,27 +49,10 @@ class FluxTablesServiceProvider extends ServiceProvider
     }
 
     /**
-     * @return void
+     * Register configuration.
      */
-    private function prepareCommands(): void
+    private function registerConfig(): void
     {
-        $this->commands([
-            InstallCommand::class
-        ]);
-    }
-
-    /**
-     * @return void
-     */
-    private function prepareConfig(): void
-    {
-        $this->publishes([
-            __DIR__.'/../config/flux-tables.php' => config_path('flux-tables.php'),
-        ], [
-            'flux-tables-config',
-            'flux-tables'
-        ]);
-
         $this->mergeConfigFrom(
             __DIR__.'/../config/flux-tables.php',
             'flux-tables'
@@ -70,12 +60,45 @@ class FluxTablesServiceProvider extends ServiceProvider
     }
 
     /**
-     * @return void
+     * Bootstrap views.
      */
-    public function prepareLocalization(): void
+    private function bootViews(): void
     {
+        $this->loadViewsFrom(__DIR__.'/../resources/views', 'flux-tables');
         $this->loadTranslationsFrom(__DIR__.'/../lang', 'flux-tables');
+    }
 
+    /**
+     * Bootstrap Livewire components.
+     */
+    private function bootLivewireComponents(): void
+    {
+        Livewire::component('flux-table', FluxTable::class);
+    }
+
+    /**
+     * Bootstrap publishing.
+     */
+    private function bootPublishing(): void
+    {
+        if (!$this->app->runningInConsole()) {
+            return;
+        }
+
+        // Publish configuration
+        $this->publishes([
+            __DIR__.'/../config/flux-tables.php' => config_path('flux-tables.php'),
+        ], [
+            'flux-tables-config',
+            'flux-tables'
+        ]);
+
+        // Publish migrations with automatic timestamps
+        $this->publishesMigrations([
+            __DIR__.'/../database/migrations' => database_path('migrations'),
+        ], 'flux-tables-migrations');
+
+        // Publish language files
         $this->publishes([
             __DIR__.'/../lang' => $this->app->langPath('vendor/flux-tables'),
         ], [
@@ -84,4 +107,17 @@ class FluxTablesServiceProvider extends ServiceProvider
         ]);
     }
 
+    /**
+     * Bootstrap Artisan commands.
+     */
+    private function bootCommands(): void
+    {
+        if (!$this->app->runningInConsole()) {
+            return;
+        }
+
+        $this->commands([
+            InstallCommand::class
+        ]);
+    }
 }

@@ -10,11 +10,16 @@ class TableConfigurationManager
 
     public static function store(TableConfiguration $configuration): string
     {
-        $id = uniqid('table_config_');
+        $id = static::generateConfigurationId($configuration);
         $configurations = session()->get(static::$sessionKey, []);
-        // Serialize the configuration for session storage (handles closures properly)
-        $configurations[$id] = $configuration->toLivewire();
-        session()->put(static::$sessionKey, $configurations);
+
+        // Only store if not already present (idempotent)
+        if (!isset($configurations[$id])) {
+            // Serialize the configuration for session storage (handles closures properly)
+            $configurations[$id] = $configuration->toLivewire();
+            session()->put(static::$sessionKey, $configurations);
+        }
+
         return $id;
     }
 
@@ -53,5 +58,36 @@ class TableConfigurationManager
     {
         $configurations = session()->get(static::$sessionKey, []);
         return count($configurations);
+    }
+
+    /**
+     * Generate a deterministic configuration ID based on content
+     */
+    protected static function generateConfigurationId(TableConfiguration $configuration): string
+    {
+        // Build a unique identifier from configuration properties
+        $identifier = static::buildConfigurationIdentifier($configuration);
+
+        // Create a hash of the identifier for consistent ID generation
+        $hash = substr(md5($identifier), 0, 12);
+
+        return 'table_config_' . $hash;
+    }
+
+    /**
+     * Build a unique identifier string for this configuration
+     */
+    protected static function buildConfigurationIdentifier(TableConfiguration $configuration): string
+    {
+        $parts = [
+            // Core configuration elements
+            $configuration->getModelClass() ?? 'unknown',
+
+            // Serialize the configuration to capture all settings
+            // This ensures identical configs get identical IDs
+            serialize($configuration->toLivewire()),
+        ];
+
+        return implode('|', $parts);
     }
 }

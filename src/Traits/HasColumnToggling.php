@@ -3,9 +3,65 @@
 namespace Idkwhoami\FluxTables\Traits;
 
 use Idkwhoami\FluxTables\Configuration\TableConfiguration;
+use Illuminate\View\Component;
 
+/**
+ * @mixin Component
+ */
 trait HasColumnToggling
 {
+    public int $columnToggleVersion = 0;
+
+    public function bootedHasColumnToggling(): void
+    {
+        // Default initialization will happen later in getStateService() after persistence is loaded
+    }
+
+    /**
+     * Initialize default toggled columns only if no persisted state exists
+     */
+    protected function initializeDefaultToggledColumns(): void
+    {
+        $stateService = method_exists($this, 'getStateService') ? $this->getStateService() : null;
+        if (!$stateService) {
+            return;
+        }
+
+        // Check if we have any persisted toggle state for this table
+        $hasPersistedState = $this->hasPersistedColumnToggleState();
+
+        // Only initialize defaults if no persisted state exists
+        if (!$hasPersistedState) {
+            $defaultToggledColumns = $this->getDefaultToggledColumns();
+            if (!empty($defaultToggledColumns)) {
+                $stateService->resetColumnVisibility($defaultToggledColumns);
+            }
+        }
+    }
+
+    /**
+     * Check if there's persisted column toggle state for this table
+     */
+    protected function hasPersistedColumnToggleState(): bool
+    {
+        $stateService = method_exists($this, 'getStateService') ? $this->getStateService() : null;
+        if (!$stateService) {
+            return false;
+        }
+
+        // Get the persistence configuration for column toggles
+        $persistenceConfig = $stateService->getPersistenceConfig(\Idkwhoami\FluxTables\Enums\StateType::COLUMN_TOGGLES);
+        if (!$persistenceConfig || $persistenceConfig->getDriver() === 'none') {
+            return false;
+        }
+
+        // Check if persisted state exists
+        $persistenceService = new \Idkwhoami\FluxTables\Services\StatePersistenceService($this->tableId ?? '');
+        $persistedData = $persistenceService->load($persistenceConfig, \Idkwhoami\FluxTables\Enums\StateType::COLUMN_TOGGLES, null);
+
+        return $persistedData !== null;
+    }
+
     /**
      * Toggle visibility of a specific column
      */
@@ -20,6 +76,9 @@ trait HasColumnToggling
 
         // Clear computed properties to force refresh
         unset($this->models);
+
+        // Increment version to trigger reactivity
+        $this->columnToggleVersion++;
     }
 
     /**
@@ -94,7 +153,40 @@ trait HasColumnToggling
             return;
         }
 
-        $stateService->resetColumnVisibility();
+        // Get default toggled columns (columns that should be hidden by default)
+        $defaultToggledColumns = $this->getDefaultToggledColumns();
+
+        $stateService->resetColumnVisibility($defaultToggledColumns);
+
+        // Clear cached services and computed properties to force refresh
+        if (property_exists($this, 'stateService')) {
+            $this->stateService = null;
+        }
+        unset($this->models);
+
+        // Increment version to trigger reactivity
+        $this->columnToggleVersion++;
+    }
+
+    /**
+     * Get columns that should be toggled (hidden) by default
+     */
+    public function getDefaultToggledColumns(): array
+    {
+        $configuration = $this->getConfiguration();
+        if (!$configuration) {
+            return [];
+        }
+
+        $defaultToggledColumns = [];
+        foreach ($configuration->getColumns() as $column) {
+            // Only include columns that are visible and toggleable but set to be toggled by default
+            if ($column->isVisible() && $column->isToggleable() && $column->isToggled()) {
+                $defaultToggledColumns[] = $column->getName();
+            }
+        }
+
+        return $defaultToggledColumns;
     }
 
     /**
@@ -110,8 +202,25 @@ trait HasColumnToggling
         return $configuration->getColumnShowToggleButton() && !empty($this->getToggleableColumns());
     }
 
+
     /**
-     * Get all toggleable columns
+     * Check if all toggleable columns are currently toggled
+     */
+    public function hasAllToggleableColumnsToggled(): bool
+    {
+        $toggleableColumns = $this->getToggleableColumns();
+        $toggledColumns = $this->getToggledColumns();
+
+        if (empty($toggleableColumns)) {
+            return false;
+        }
+
+        $toggleableColumnNames = array_map(fn($column) => $column->getName(), $toggleableColumns);
+        return empty(array_diff($toggleableColumnNames, $toggledColumns));
+    }
+
+    /**
+     * Get all toggleable columns (only includes visible columns)
      */
     public function getToggleableColumns(): array
     {
@@ -122,7 +231,8 @@ trait HasColumnToggling
 
         $toggleableColumns = [];
         foreach ($configuration->getColumns() as $column) {
-            if ($column->isToggleable()) {
+            // Only include columns that are both visible and toggleable
+            if ($column->isToggleable() && $column->isVisible()) {
                 $toggleableColumns[] = $column;
             }
         }
@@ -163,14 +273,19 @@ trait HasColumnToggling
             return false;
         }
 
-        // Check if column is toggled off by user
+        // First check if column is visible (handles permissions, business logic)
+        // Note: visibility is evaluated at table level, not per record
+        if (!$column->isVisible()) {
+            return false;
+        }
+
+        // Then check if column is toggled off by user
         $toggledColumns = $this->getToggledColumns();
         if (in_array($columnName, $toggledColumns)) {
             return false;
         }
 
-        // Return the column's base visibility
-        return $column->isVisible();
+        return true;
     }
 
     /**

@@ -5,7 +5,7 @@ namespace Idkwhoami\FluxTables\Configuration;
 use Idkwhoami\FluxTables\Services\ClosureManager;
 use Idkwhoami\FluxTables\Columns\TextColumn;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Str;
 use Livewire\Wireable;
 use Closure;
 
@@ -207,6 +207,13 @@ class TableConfiguration implements Wireable
         'confirm_message' => 'flux-tables::modals.confirm_message',
     ];
 
+    // Persistence properties
+    protected ?Persistence $columnTogglePersistence = null;
+    protected ?Persistence $filterPersistence = null;
+    protected ?Persistence $sortingPersistence = null;
+    protected ?Persistence $searchPersistence = null;
+    protected ?Persistence $paginationPersistence = null;
+
     // Localization properties
     protected array $localizationTexts = [];
     protected string $localizationDefaultLocale = 'en';
@@ -246,6 +253,12 @@ class TableConfiguration implements Wireable
         return $instance;
     }
 
+    /**
+     * Set the Eloquent model class for the table
+     *
+     * @param string $modelClass The fully qualified class name of the Eloquent model
+     * @return static Returns the configuration instance for method chaining
+     */
     public function model(string $modelClass): static
     {
         $this->modelClass = $modelClass;
@@ -253,6 +266,12 @@ class TableConfiguration implements Wireable
         return $this;
     }
 
+    /**
+     * Set a pre-configured Eloquent query builder for the table
+     *
+     * @param Builder $query The Eloquent query builder instance with pre-applied conditions
+     * @return static Returns the configuration instance for method chaining
+     */
     public function query(Builder $query): static
     {
         $this->query = $query;
@@ -260,29 +279,68 @@ class TableConfiguration implements Wireable
         return $this;
     }
 
+    /**
+     * Set the table instance for dynamic configuration support
+     *
+     * @param object $tableInstance The table component instance for accessing dynamic properties and methods
+     * @return static Returns the configuration instance for method chaining
+     */
     public function setTableInstance(object $tableInstance): static
     {
         $this->tableInstance = $tableInstance;
         return $this;
     }
 
+    /**
+     * Set the table columns configuration
+     *
+     * @param array $columns Array of Column instances or closures that return Column instances
+     * @return static Returns the configuration instance for method chaining
+     */
     public function columns(array $columns): static
     {
         $this->columns = $columns;
         return $this;
     }
 
+    /**
+     * Set the table title/label that appears in the header
+     *
+     * @param string|Closure $title The table title as string or closure for dynamic titles
+     * @return static Returns the configuration instance for method chaining
+     */
+    public function label(string|Closure $title): static
+    {
+        $this->title = $title;
+        return $this;
+    }
+
     // Core getter methods
+    /**
+     * Get the configured Eloquent model class
+     *
+     * @return string|null Returns the model class name or null if not configured
+     */
     public function getModelClass(): ?string
     {
         return $this->modelClass;
     }
 
+    /**
+     * Get the configured query builder instance
+     *
+     * @return Builder|null Returns the query builder or null if not configured
+     */
     public function getQuery(): ?Builder
     {
         return $this->query;
     }
 
+    /**
+     * Get a fresh base query builder for the configured model
+     *
+     * @return Builder Returns a cloned query builder or new model instance query
+     */
     public function getBaseQuery(): Builder
     {
         if ($this->query) {
@@ -296,75 +354,168 @@ class TableConfiguration implements Wireable
         return (new $this->modelClass())->newQuery();
     }
 
+    /**
+     * Get the configured table columns
+     *
+     * @return array Returns an array of Column instances
+     */
     public function getColumns(): array
     {
         return $this->resolveValue($this->columns);
     }
 
 
+    /**
+     * Check if the table has any filters configured
+     *
+     * @return bool Returns true if filters are configured, false otherwise
+     */
     public function hasFilters(): bool
     {
         return !empty($this->resolveValue($this->filters));
     }
 
+    /**
+     * Get the configured table filters
+     *
+     * @return array Returns an array of Filter instances
+     */
     public function getFilters(): array
     {
         return $this->resolveValue($this->filters);
     }
 
+    /**
+     * Set the filters for the table
+     *
+     * @param array $filters Array of Filter instances or closures that return Filter instances
+     * @return static Returns the configuration instance for method chaining
+     */
+    public function filters(array $filters): static
+    {
+        $this->filters = $filters;
+        return $this;
+    }
+
+
+    /**
+     * Check if the table has a label/title configured
+     *
+     * @return bool Returns true if a label is configured, false otherwise
+     */
     public function hasLabel(): bool
     {
         return !empty($this->resolveValue($this->title));
     }
 
+    /**
+     * Get the table label/title, with automatic fallback to model name
+     *
+     * @return string Returns the configured label or auto-generated title from model class
+     */
     public function getLabel(): string
     {
-        return $this->resolveValue($this->title);
+        $label = $this->resolveValue($this->title);
+        return !empty($label)
+            ? $label
+            : Str::of(
+                class_basename($this->modelClass ?? get_class($this->query?->getModel()))
+            )
+                ->plural()
+                ->title()
+                ->toString();
     }
 
+    /**
+     * Check if the table has a create feature enabled
+     *
+     * @return bool Returns true if create component is configured, false otherwise
+     */
     public function hasCreate(): bool
     {
         return !empty($this->resolveValue($this->uiCreateComponent ?? ''));
     }
 
+    /**
+     * Get the text for the create button
+     *
+     * @return string|null Returns the create button text or null if not configured
+     */
     public function getCreateText(): ?string
     {
         return $this->resolveValue($this->uiCreateText ?? null);
     }
 
+    /**
+     * Get the Livewire component class for the create modal
+     *
+     * @return string|null Returns the component class name or null if not configured
+     */
     public function getCreateComponent(): ?string
     {
         return $this->resolveValue($this->uiCreateComponent ?? null);
     }
 
+    /**
+     * Check if the table has row actions configured
+     *
+     * @return bool Returns true if actions are configured, false otherwise
+     */
     public function hasActions(): bool
     {
         return !empty($this->resolveValue($this->actions));
     }
 
+    /**
+     * Get the configured row actions
+     *
+     * @return array Returns an array of Action instances
+     */
     public function getActions(): array
     {
         return $this->resolveValue($this->actions);
     }
 
     // Pagination methods
+    /**
+     * Set the default number of items to display per page
+     *
+     * @param int|Closure $perPage The number of items per page or closure returning the count
+     * @return static Returns the configuration instance for method chaining
+     */
     public function paginationDefaultPerPage(int|Closure $perPage): static
     {
         $this->paginationDefaultPerPage = $perPage;
         return $this;
     }
 
+    /**
+     * Set the available options for items per page selector
+     *
+     * @param array|Closure $options Array of integer options or closure returning the options
+     * @return static Returns the configuration instance for method chaining
+     */
     public function paginationPerPageOptions(array|Closure $options): static
     {
         $this->paginationPerPageOptions = $options;
         return $this;
     }
 
+    /**
+     * Get the default number of items per page
+     *
+     * @return int Returns the default items per page count
+     */
     public function getPaginationDefaultPerPage(): int
     {
         return $this->resolveValue($this->paginationDefaultPerPage);
     }
 
+    /**
+     * Get the available per page options for the selector
+     *
+     * @return array Returns array of integer options for items per page
+     */
     public function getPaginationPerPageOptions(): array
     {
         return $this->resolveValue($this->paginationPerPageOptions);
@@ -452,6 +603,117 @@ class TableConfiguration implements Wireable
     public function getColumnOrder(): array
     {
         return $this->resolveValue($this->columnOrder);
+    }
+
+    // Persistence methods
+    /**
+     * Configure persistence for column toggle state (which columns are hidden/shown)
+     *
+     * @param Persistence $persistence Persistence configuration (session, database, or none)
+     * @return static Returns the configuration instance for method chaining
+     */
+    public function columnTogglePersistence(Persistence $persistence): static
+    {
+        $this->columnTogglePersistence = $persistence;
+        return $this;
+    }
+
+    /**
+     * Configure persistence for filter values and state
+     *
+     * @param Persistence $persistence Persistence configuration (session, database, or none)
+     * @return static Returns the configuration instance for method chaining
+     */
+    public function filterPersistence(Persistence $persistence): static
+    {
+        $this->filterPersistence = $persistence;
+        return $this;
+    }
+
+    /**
+     * Configure persistence for sorting column and direction
+     *
+     * @param Persistence $persistence Persistence configuration (session, database, or none)
+     * @return static Returns the configuration instance for method chaining
+     */
+    public function sortingPersistence(Persistence $persistence): static
+    {
+        $this->sortingPersistence = $persistence;
+        return $this;
+    }
+
+    /**
+     * Configure persistence for search query
+     *
+     * @param Persistence $persistence Persistence configuration (session, database, or none)
+     * @return static Returns the configuration instance for method chaining
+     */
+    public function searchPersistence(Persistence $persistence): static
+    {
+        $this->searchPersistence = $persistence;
+        return $this;
+    }
+
+    /**
+     * Configure persistence for pagination settings (items per page)
+     *
+     * @param Persistence $persistence Persistence configuration (session, database, or none)
+     * @return static Returns the configuration instance for method chaining
+     */
+    public function paginationPersistence(Persistence $persistence): static
+    {
+        $this->paginationPersistence = $persistence;
+        return $this;
+    }
+
+    /**
+     * Get the persistence configuration for column toggle state
+     *
+     * @return Persistence Returns the persistence config, defaults to session storage
+     */
+    public function getColumnTogglePersistence(): Persistence
+    {
+        return $this->columnTogglePersistence ?? Persistence::session();
+    }
+
+    /**
+     * Get the persistence configuration for filter state
+     *
+     * @return Persistence Returns the persistence config, defaults to no persistence
+     */
+    public function getFilterPersistence(): Persistence
+    {
+        return $this->filterPersistence ?? Persistence::none();
+    }
+
+    /**
+     * Get the persistence configuration for sorting state
+     *
+     * @return Persistence Returns the persistence config, defaults to no persistence
+     */
+    public function getSortingPersistence(): Persistence
+    {
+        return $this->sortingPersistence ?? Persistence::none();
+    }
+
+    /**
+     * Get the persistence configuration for search state
+     *
+     * @return Persistence Returns the persistence config, defaults to no persistence
+     */
+    public function getSearchPersistence(): Persistence
+    {
+        return $this->searchPersistence ?? Persistence::none();
+    }
+
+    /**
+     * Get the persistence configuration for pagination state
+     *
+     * @return Persistence Returns the persistence config, defaults to session storage
+     */
+    public function getPaginationPersistence(): Persistence
+    {
+        return $this->paginationPersistence ?? Persistence::session();
     }
 
     // Filter getters
@@ -705,10 +967,10 @@ class TableConfiguration implements Wireable
                 array_unshift(
                     $columns,
                     TextColumn::make('id')
-                    ->label('ID')
-                    ->sortable(true)
-                    ->searchable(false)
-                    ->visible(true)
+                        ->label('ID')
+                        ->sortable(true)
+                        ->searchable(false)
+                        ->visible(true)
                 );
             }
 

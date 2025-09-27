@@ -23,7 +23,8 @@ abstract class Column
 
     // Display configuration
     protected bool $visible = true;
-    protected bool $toggleable = true;
+    protected bool $toggleable = false;
+    protected bool $toggled = false;
     protected mixed $default = null;
     protected ?Closure $displayTransform = null;
     protected ?Closure $visibility = null;
@@ -106,6 +107,12 @@ abstract class Column
         return $this;
     }
 
+    public function toggled(bool $toggled = true): static
+    {
+        $this->toggled = $toggled;
+        return $this;
+    }
+
     public function default(mixed $default): static
     {
         $this->default = $default;
@@ -183,6 +190,11 @@ abstract class Column
     public function isToggleable(): bool
     {
         return $this->toggleable;
+    }
+
+    public function isToggled(): bool
+    {
+        return $this->toggled;
     }
 
     public function hasTooltip(): bool

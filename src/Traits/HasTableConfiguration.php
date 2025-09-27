@@ -62,12 +62,54 @@ trait HasTableConfiguration
         }
     }
 
+
     /**
-     * Generate a unique table ID for this instance
+     * Generate a deterministic table ID based on configuration
      */
     protected function generateTableId(): string
     {
-        return uniqid($this->getTableType() . '_');
+        // Allow override of table ID for custom use cases
+        if (method_exists($this, 'getCustomTableId') && $customId = $this->getCustomTableId()) {
+            return $customId;
+        }
+
+        // Create a hash based on the table configuration to ensure idempotency
+        $identifier = $this->buildTableIdentifier();
+        $hash = substr(md5($identifier), 0, 8);
+        return $this->getTableType() . '_' . $hash;
+    }
+
+    /**
+     * Build a unique identifier string for this table configuration
+     *
+     * This creates an idempotent identifier by combining:
+     * - Component class name (e.g., App\Livewire\UsersTable)
+     * - Route context (name or path)
+     * - Model class being displayed
+     * - Custom identifier (if getCustomTableIdentifier() method exists)
+     *
+     * The same configuration will always produce the same identifier,
+     * ensuring persistence works correctly across page loads.
+     */
+    protected function buildTableIdentifier(): string
+    {
+        $parts = [
+            // Component class name
+            static::class,
+
+            // Route information for context
+            request()->route()?->getName() ?? request()->path(),
+
+            // Model class if configured
+            $this->getConfiguration()?->getModelClass() ?? 'unknown',
+        ];
+
+        // Add any custom identifier parts
+        if (method_exists($this, 'getCustomTableIdentifier')) {
+            $parts[] = $this->getCustomTableIdentifier();
+        }
+
+        return implode('|', array_filter($parts));
     }
 
     /**

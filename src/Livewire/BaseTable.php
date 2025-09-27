@@ -33,6 +33,8 @@ class BaseTable extends Component
         HasColumnToggling,
         HasCreate;
 
+    protected $listeners = [];
+
     // Store service instances (not serialized with Livewire)
     protected ?TableStateService $stateService = null;
     protected ?TableDataRepository $dataRepository = null;
@@ -128,9 +130,64 @@ class BaseTable extends Component
             $this->stateService = $this->container->makeWith(TableStateService::class, [
                 'tableId' => $this->tableId
             ]);
+
+            // Configure persistence settings from table configuration
+            $this->configurePersistenceForStateService();
+
+            // Initialize state from persistence
+            $this->stateService->initialize();
+
+            // Initialize default state only if no persisted state exists
+            $this->initializeDefaultStateIfNeeded();
         }
 
         return $this->stateService;
+    }
+
+    /**
+     * Configure persistence settings for the state service
+     */
+    protected function configurePersistenceForStateService(): void
+    {
+        $configuration = $this->getConfiguration();
+        if (!$configuration || !$this->stateService) {
+            return;
+        }
+
+        // Configure each persistence type
+        if ($config = $configuration->getColumnTogglePersistence()) {
+            $this->stateService->configurePersistence(\Idkwhoami\FluxTables\Enums\StateType::COLUMN_TOGGLES, $config);
+        }
+
+        if ($config = $configuration->getFilterPersistence()) {
+            $this->stateService->configurePersistence(\Idkwhoami\FluxTables\Enums\StateType::FILTERS, $config);
+        }
+
+        if ($config = $configuration->getSortingPersistence()) {
+            $this->stateService->configurePersistence(\Idkwhoami\FluxTables\Enums\StateType::SORTING, $config);
+        }
+
+        if ($config = $configuration->getSearchPersistence()) {
+            $this->stateService->configurePersistence(\Idkwhoami\FluxTables\Enums\StateType::SEARCH, $config);
+        }
+
+        if ($config = $configuration->getPaginationPersistence()) {
+            $this->stateService->configurePersistence(\Idkwhoami\FluxTables\Enums\StateType::PAGINATION, $config);
+        }
+    }
+
+    /**
+     * Initialize default state only if no persisted state exists
+     */
+    protected function initializeDefaultStateIfNeeded(): void
+    {
+        // Initialize default column toggles if needed
+        if (method_exists($this, 'initializeDefaultToggledColumns')) {
+            $this->initializeDefaultToggledColumns();
+        }
+
+        // Add other default initializations here as needed
+        // (filters, sorting, etc.)
     }
 
     protected function getDataRepository(?TableConfiguration $configuration = null): ?TableDataRepository
@@ -157,6 +214,11 @@ class BaseTable extends Component
     protected function getTableType(): string
     {
         return 'base_table';
+    }
+
+    public function uniqueId(string $key): string
+    {
+        return "$this->tableId-$key";
     }
 
     public function render(): View

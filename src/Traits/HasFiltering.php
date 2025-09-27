@@ -93,7 +93,7 @@ trait HasFiltering
             return false;
         }
 
-        return $configuration->getFilterEnabled() && $configuration->hasFilters();
+        return $configuration->hasFilters();
     }
 
     /**
@@ -252,5 +252,70 @@ trait HasFiltering
         }
 
         return $configuration->getFilterPersistFilters();
+    }
+
+    /**
+     * Get active filter badges for display
+     */
+    public function getActiveFilterBadges(): array
+    {
+        if (!$this->hasActiveFilters()) {
+            return [];
+        }
+
+        $configuration = $this->getConfiguration();
+        $filters = $configuration->getFilters();
+        $badges = [];
+
+        foreach ($filters as $filter) {
+            if ($filter->isActive()) {
+                $badges[$filter->getName()] = [
+                    'label' => $filter->getLabel(),
+                    'description' => $filter->getValueDescription(),
+                    'detailed_description' => $filter->getDescription() ?? $filter->getValueDescription(),
+                ];
+            }
+        }
+
+        return $badges;
+    }
+
+    /**
+     * Remove a specific filter
+     */
+    public function removeFilter(string $filterName): void
+    {
+        $this->resetFilter($filterName);
+    }
+
+    /**
+     * Edit a specific filter (placeholder for future functionality)
+     */
+    public function editFilter(string $filterName): void
+    {
+        // For now, this could open a modal or redirect to filter editing
+        // This is a placeholder for future implementation
+    }
+
+
+    /**
+     * Search relationship options for RelationshipFilter
+     */
+    public function searchRelationshipOptions(string $filterName, string $query): array
+    {
+        $configuration = $this->getConfiguration();
+        if (!$configuration) {
+            return [];
+        }
+
+        $filters = $configuration->getFilters();
+
+        foreach ($filters as $filter) {
+            if ($filter->getName() === $filterName && method_exists($filter, 'search')) {
+                return $filter->search($query)->toArray();
+            }
+        }
+
+        return [];
     }
 }
