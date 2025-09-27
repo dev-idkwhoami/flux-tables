@@ -15,7 +15,7 @@ trait HasFiltering
     {
         $this->resetPage();
 
-        $stateService = method_exists($this, 'getStateService') ? $this->getStateService() : null;
+        $stateService = $this->getStateServiceIfAvailable();
         if ($stateService) {
             if (empty($value)) {
                 $stateService->resetFilter($name);
@@ -32,7 +32,7 @@ trait HasFiltering
      */
     public function updateFilter(string $filterName, mixed $value): void
     {
-        $stateService = method_exists($this, 'getStateService') ? $this->getStateService() : null;
+        $stateService = $this->getStateServiceIfAvailable();
         if (!$stateService) {
             return;
         }
@@ -54,7 +54,7 @@ trait HasFiltering
      */
     public function resetFilter(string $filterName): void
     {
-        $stateService = method_exists($this, 'getStateService') ? $this->getStateService() : null;
+        $stateService = $this->getStateServiceIfAvailable();
         if (!$stateService) {
             return;
         }
@@ -71,7 +71,7 @@ trait HasFiltering
      */
     public function resetAllFilters(): void
     {
-        $stateService = method_exists($this, 'getStateService') ? $this->getStateService() : null;
+        $stateService = $this->getStateServiceIfAvailable();
         if (!$stateService) {
             return;
         }
@@ -86,7 +86,7 @@ trait HasFiltering
     /**
      * Check if filtering is enabled based on configuration
      */
-    public function hasFiltering(): bool
+    public function filtersEnabled(): bool
     {
         $configuration = $this->getConfiguration();
         if (!$configuration) {
@@ -94,6 +94,15 @@ trait HasFiltering
         }
 
         return $configuration->hasFilters();
+    }
+
+    /**
+     * Backward compatibility alias for filtersEnabled()
+     * @deprecated Use filtersEnabled() instead
+     */
+    public function hasFiltering(): bool
+    {
+        return $this->filtersEnabled();
     }
 
     /**
@@ -114,7 +123,7 @@ trait HasFiltering
      */
     public function hasActiveFilters(): bool
     {
-        $stateService = method_exists($this, 'getStateService') ? $this->getStateService() : null;
+        $stateService = $this->getStateServiceIfAvailable();
         if (!$stateService) {
             return false;
         }
@@ -127,7 +136,7 @@ trait HasFiltering
      */
     public function getActiveFilters(): array
     {
-        $stateService = method_exists($this, 'getStateService') ? $this->getStateService() : null;
+        $stateService = $this->getStateServiceIfAvailable();
         if (!$stateService) {
             return [];
         }
@@ -280,13 +289,6 @@ trait HasFiltering
         return $badges;
     }
 
-    /**
-     * Remove a specific filter
-     */
-    public function removeFilter(string $filterName): void
-    {
-        $this->resetFilter($filterName);
-    }
 
     /**
      * Edit a specific filter (placeholder for future functionality)
@@ -317,5 +319,15 @@ trait HasFiltering
         }
 
         return [];
+    }
+
+    /**
+     * Helper method to get state service if available, with caching to reduce method_exists calls
+     *
+     * @return \Idkwhoami\FluxTables\Services\TableStateService|null
+     */
+    protected function getStateServiceIfAvailable(): ?\Idkwhoami\FluxTables\Services\TableStateService
+    {
+        return method_exists($this, 'getStateService') ? $this->getStateService() : null;
     }
 }

@@ -208,4 +208,178 @@ class StatePersistenceService
             ->where('state_type', $stateType)
             ->delete();
     }
+
+    // Utility methods (moved from StatePersistenceManager)
+
+    /**
+     * Delete all state persistence for a specific state ID
+     */
+    public function deleteAllForStateId(mixed $stateId, string $connection = null): void
+    {
+        $table = config('flux-tables.persistence.database.table', 'table_state_preferences');
+
+        DB::connection($connection)->table($table)
+            ->where('state_id', $stateId)
+            ->delete();
+
+        // Also clear session data for this table
+        $this->clearSessionForTable($this->tableId);
+    }
+
+    /**
+     * Delete all state persistence for this table
+     */
+    public function deleteAllForTable(string $connection = null): void
+    {
+        $table = config('flux-tables.persistence.database.table', 'table_state_preferences');
+
+        DB::connection($connection)->table($table)
+            ->where('table_id', $this->tableId)
+            ->delete();
+
+        // Also clear session data
+        $this->clearSessionForTable($this->tableId);
+    }
+
+    /**
+     * Delete expired database records for this table
+     */
+    public function cleanupExpired(string $connection = null): int
+    {
+        $table = config('flux-tables.persistence.database.table', 'table_state_preferences');
+
+        $query = DB::connection($connection)->table($table)
+            ->where('table_id', $this->tableId)
+            ->whereNotNull('expires_at')
+            ->where('expires_at', '<', now());
+
+        $deletedCount = $query->count();
+        $query->delete();
+
+        return $deletedCount;
+    }
+
+    /**
+     * Check if state exists for given parameters
+     */
+    public function hasState(mixed $stateId, StateType|string $stateType, string $driver = 'session'): bool
+    {
+        $stateTypeValue = $stateType instanceof StateType ? $stateType->value : $stateType;
+
+        if ($driver === 'session') {
+            $key = "flux_tables.{$this->tableId}.{$stateTypeValue}";
+            return Session::has($key);
+        }
+
+        if ($driver === 'database') {
+            $table = config('flux-tables.persistence.database.table', 'table_state_preferences');
+
+            return DB::table($table)
+                ->where('state_id', $stateId)
+                ->where('table_id', $this->tableId)
+                ->where('state_type', $stateTypeValue)
+                ->exists();
+        }
+
+        return false;
+    }
+
+    /**
+     * Get statistics about stored state data for this table
+     */
+    public function getStatistics(string $connection = null): array
+    {
+        $table = config('flux-tables.persistence.database.table', 'table_state_preferences');
+
+        $stats = [
+            'total_records' => 0,
+            'expired_records' => 0,
+            'state_types' => [],
+            'unique_state_ids' => 0,
+        ];
+
+        try {
+            $query = DB::connection($connection)->table($table)
+                ->where('table_id', $this->tableId);
+
+            $stats['total_records'] = $query->count();
+
+            $stats['expired_records'] = $query->clone()
+                ->whereNotNull('expires_at')
+                ->where('expires_at', '<', now())
+                ->count();
+
+            $stats['state_types'] = $query->clone()
+                ->select('state_type')
+                ->groupBy('state_type')
+                ->pluck('state_type')
+                ->toArray();
+
+            $stats['unique_state_ids'] = $query->clone()
+                ->distinct('state_id')
+                ->count();
+
+        } catch (\Exception $e) {
+            // Table might not exist yet
+        }
+
+        return $stats;
+    }
+
+    /**
+     * Clear session data for this table
+     */
+    protected function clearSessionForTable(string $tableId): void
+    {
+        $sessionKeys = $this->getSessionKeysForTable($tableId);
+
+        foreach ($sessionKeys as $key) {
+            Session::forget($key);
+        }
+    }
+
+    /**
+     * Get session keys for this table
+     */
+    protected function getSessionKeysForTable(string $tableId): array
+    {
+        $prefix = "flux_tables.{$tableId}.";
+        $keys = [];
+
+        foreach (Session::all() as $key => $value) {
+            if (str_starts_with($key, $prefix)) {
+                $keys[] = $key;
+            }
+        }
+
+        return $keys;
+    }
+
+    /**
+     * Generate a composite state ID from an owner (following Laravel Pennant pattern)
+     */
+    public static function generateStateId(mixed $owner): string
+    {
+        if (is_object($owner) && method_exists($owner, 'getKey')) {
+            // Eloquent model - use class name and primary key
+            $modelClass = get_class($owner);
+            $modelId = $owner->getKey();
+            return "{$modelClass}|{$modelId}";
+        }
+
+        if (is_string($owner) || is_numeric($owner)) {
+            // Simple ID - use session-based fallback
+            return "session|{$owner}";
+        }
+
+        // Fallback: use authenticated user ID or session ID
+        $fallbackOwner = auth()->user();
+        if ($fallbackOwner && method_exists($fallbackOwner, 'getKey')) {
+            $modelClass = get_class($fallbackOwner);
+            $modelId = $fallbackOwner->getKey();
+            return "{$modelClass}|{$modelId}";
+        }
+
+        return "session|" . session()->getId();
+    }
 }

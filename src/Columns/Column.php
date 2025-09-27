@@ -7,6 +7,15 @@ use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Builder;
 
+/**
+ * Base abstract class for table columns
+ *
+ * Provides common functionality for column configuration including display,
+ * sorting, searching, visibility, and transformations. All column types
+ * extend this base class.
+ *
+ * @package Idkwhoami\FluxTables\Columns
+ */
 abstract class Column
 {
     protected string $name;
@@ -32,12 +41,23 @@ abstract class Column
     protected array $attributes = [];
     protected array $classes = [];
 
+    /**
+     * Create a new column instance
+     *
+     * @param string $name The column name (usually database field name)
+     */
     public function __construct(string $name)
     {
         $this->name = $name;
         $this->label = str($name)->title()->replace('_', ' ')->toString();
     }
 
+    /**
+     * Create a new column instance using static factory method
+     *
+     * @param string $name The column name
+     * @return static Returns new instance of the calling column class
+     */
     public static function make(string $name): static
     {
         return new static($name);

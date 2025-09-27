@@ -80,7 +80,7 @@
                                 <flux:badge variant="outline" size="sm" class="cursor-pointer">
                                     {{ $filter['label'] }}: {{ $filter['description'] }}
                                     <flux:button size="xs" variant="ghost"
-                                                 wire:click="removeFilter('{{ $filterName }}')" class="ml-1">
+                                                 wire:click="resetFilter('{{ $filterName }}')" class="ml-1">
                                         <flux:icon name="x-mark" class="size-3"/>
                                     </flux:button>
                                 </flux:badge>
@@ -96,7 +96,7 @@
                                                 Edit
                                             </flux:button>
                                             <flux:button size="xs" variant="danger"
-                                                         wire:click="removeFilter('{{ $filterName }}')">
+                                                         wire:click="resetFilter('{{ $filterName }}')">
                                                 Remove
                                             </flux:button>
                                         </div>

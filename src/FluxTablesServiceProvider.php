@@ -46,6 +46,42 @@ class FluxTablesServiceProvider extends ServiceProvider
         $this->app->bind(TableDataRepository::class, function ($app, $parameters) {
             return new TableDataRepository($parameters['modelClass']);
         });
+
+        // Register facade binding for TableStateService
+        $this->app->singleton('flux-tables.state-service', function ($app) {
+            return new class($app) {
+                private $app;
+
+                public function __construct($app)
+                {
+                    $this->app = $app;
+                }
+
+                public function forTable(string $tableId): TableStateService
+                {
+                    return $this->app->makeWith(TableStateService::class, [
+                        'tableId' => $tableId
+                    ]);
+                }
+
+                public function make(string $tableId): TableStateService
+                {
+                    return $this->forTable($tableId);
+                }
+
+                public function __call($method, $arguments)
+                {
+                    if (empty($arguments)) {
+                        throw new \InvalidArgumentException('Table ID is required as first argument');
+                    }
+
+                    $tableId = array_shift($arguments);
+                    $service = $this->forTable($tableId);
+
+                    return $service->$method(...$arguments);
+                }
+            };
+        });
     }
 
     /**

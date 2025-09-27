@@ -8,6 +8,13 @@ trait HasPagination
 {
     public int $perPage = 15;
 
+    public function mountHasPagination(): void
+    {
+        // Load per page from state service if available
+        if (method_exists($this, 'getStateService') && $this->getStateService()) {
+            $this->perPage = $this->getStateService()->getPerPage() ?: $this->getDefaultPerPage();
+        }
+    }
 
     /**
      * Handle per page updates

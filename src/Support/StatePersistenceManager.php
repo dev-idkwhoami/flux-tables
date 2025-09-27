@@ -3,61 +3,63 @@
 namespace Idkwhoami\FluxTables\Support;
 
 use Idkwhoami\FluxTables\Enums\StateType;
+use Idkwhoami\FluxTables\Services\StatePersistenceService;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Session;
 
+/**
+ * Static utility class for managing table state persistence across multiple tables
+ *
+ * For single table operations, use StatePersistenceService directly.
+ * This class provides convenience methods for bulk operations and global state management.
+ */
 class StatePersistenceManager
 {
     /**
-     * Delete all state persistence for a specific owner
+     * Delete all state persistence for a specific owner across all tables
      */
     public static function deleteAllForOwner(mixed $owner): void
     {
-        $stateId = static::generateStateId($owner);
+        $stateId = StatePersistenceService::generateStateId($owner);
 
-        // Clear session data
-        static::clearSessionForStateId($stateId);
-
-        // Clear database data
+        // Clear database data for this state ID across all tables
         static::clearDatabaseForStateId($stateId);
+
+        // Clear all session data (since session is not scoped by state ID)
+        static::clearAllSessions();
     }
 
     /**
-     * Delete all state persistence for a specific state ID
+     * Delete all state persistence for a specific state ID across all tables
      */
     public static function deleteAllForStateId(mixed $stateId): void
     {
-        // Clear session data
-        static::clearSessionForStateId($stateId);
-
-        // Clear database data
+        // Clear database data for this state ID across all tables
         static::clearDatabaseForStateId($stateId);
+
+        // Clear all session data (since session is not scoped by state ID)
+        static::clearAllSessions();
     }
 
     /**
-     * Delete all state persistence for a specific table
+     * Delete all state persistence for a specific table (delegates to StatePersistenceService)
      */
     public static function deleteAllForTable(string $tableId): void
     {
-        // Clear session data for table
-        static::clearSessionForTable($tableId);
-
-        // Clear database data for table
-        static::clearDatabaseForTable($tableId);
+        $service = new StatePersistenceService($tableId);
+        $service->deleteAllForTable();
     }
 
     /**
-     * Delete specific state type for a state ID
+     * Delete specific state type for a state ID (delegates to StatePersistenceService)
      */
     public static function deleteStateType(mixed $stateId, string $tableId, StateType|string $stateType): void
     {
-        $stateTypeValue = $stateType instanceof StateType ? $stateType->value : $stateType;
-
-        // Clear from session
-        static::clearSessionStateType($tableId, $stateTypeValue);
-
-        // Clear from database
-        static::clearDatabaseStateType($stateId, $tableId, $stateTypeValue);
+        $service = new StatePersistenceService($tableId);
+        $service->delete(
+            new \Idkwhoami\FluxTables\Configuration\Persistence('database'),
+            $stateType
+        );
     }
 
     /**
@@ -65,8 +67,12 @@ class StatePersistenceManager
      */
     public static function deleteStateTypes(mixed $stateId, string $tableId, array $stateTypes): void
     {
+        $service = new StatePersistenceService($tableId);
         foreach ($stateTypes as $stateType) {
-            static::deleteStateType($stateId, $tableId, $stateType);
+            $service->delete(
+                new \Idkwhoami\FluxTables\Configuration\Persistence('database'),
+                $stateType
+            );
         }
     }
 
@@ -75,9 +81,15 @@ class StatePersistenceManager
      */
     public static function deletePersistentStates(mixed $stateId, string $tableId): void
     {
-        $persistentTypes = collect(StateType::cases())
-            ->filter(fn(StateType $type) => $type->isPersistentByDefault())
-            ->toArray();
+        // This method would need StateType enum to have an isPersistentByDefault method
+        // For now, delete all common persistent state types
+        $persistentTypes = [
+            StateType::COLUMN_TOGGLES,
+            StateType::FILTERS,
+            StateType::SORTING,
+            StateType::SEARCH,
+            StateType::PAGINATION,
+        ];
 
         static::deleteStateTypes($stateId, $tableId, $persistentTypes);
     }
@@ -95,7 +107,7 @@ class StatePersistenceManager
     }
 
     /**
-     * Delete expired database records
+     * Delete expired database records across all tables
      */
     public static function cleanupExpired(string $connection = null): int
     {
@@ -112,7 +124,7 @@ class StatePersistenceManager
     }
 
     /**
-     * Get statistics about stored state data
+     * Get statistics about stored state data across all tables
      */
     public static function getStatistics(string $connection = null): array
     {

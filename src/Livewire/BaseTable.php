@@ -100,10 +100,9 @@ class BaseTable extends Component
         }
 
         $query = $dataRepository->query();
-        sleep(2);
 
         // Apply filters
-        if ($this->hasFiltering() && $this->hasActiveFilters()) {
+        if ($this->filtersEnabled() && $this->hasActiveFilters()) {
             $query = $query->applyFilters(
                 $configuration->getFilters(),
                 $this->getActiveFilters()
