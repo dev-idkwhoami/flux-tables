@@ -2,17 +2,59 @@
 
 namespace Idkwhoami\FluxTables\Traits;
 
-use Idkwhoami\FluxTables\Configuration\TableConfiguration;
-
 trait HasFiltering
 {
     public array $filterValues = [];
+    public bool $useFilterModal = true;
 
     /**
-     * Handle updates to filterValues array
+     * Listen for filter application from master filter component
+     */
+    protected function getListeners(): array
+    {
+        return array_merge(parent::getListeners() ?? [], [
+            'filtersApplied' => 'handleFiltersApplied',
+        ]);
+    }
+
+    /**
+     * Handle filters applied from master filter component
+     */
+    public function handleFiltersApplied(array $filters): void
+    {
+        $this->filterValues = $filters;
+        $this->resetPage();
+
+        $stateService = $this->getStateServiceIfAvailable();
+        if ($stateService) {
+            // Update state service with new filter values
+            foreach ($filters as $name => $value) {
+                $stateService->setFilterValue($name, $value);
+            }
+
+            // Remove filters that are no longer present
+            $currentFilters = $stateService->getFilterValues();
+            foreach ($currentFilters as $name => $value) {
+                if (!isset($filters[$name])) {
+                    $stateService->resetFilter($name);
+                }
+            }
+        }
+
+        // Clear computed properties to force refresh
+        unset($this->models);
+    }
+
+    /**
+     * Handle updates to filterValues array (legacy support)
      */
     public function updatedFilterValues($value, $name): void
     {
+        // Only handle this if not using master filter component
+        if ($this->useFilterModal) {
+            return;
+        }
+
         $this->resetPage();
 
         $stateService = $this->getStateServiceIfAvailable();
@@ -289,6 +331,28 @@ trait HasFiltering
         return $badges;
     }
 
+
+    /**
+     * Get visible column names for filter visibility checking
+     */
+    public function getVisibleColumnNames(): array
+    {
+        if (method_exists($this, 'getVisibleColumns')) {
+            return collect($this->getVisibleColumns())
+                ->map(fn ($column) => method_exists($column, 'getName') ? $column->getName() : (string) $column)
+                ->toArray();
+        }
+
+        // Fallback: get all column names if visibility method not available
+        $configuration = $this->getConfiguration();
+        if (!$configuration) {
+            return [];
+        }
+
+        return $configuration->getColumns()
+            ->map(fn ($column) => $column->getName())
+            ->toArray();
+    }
 
     /**
      * Edit a specific filter (placeholder for future functionality)

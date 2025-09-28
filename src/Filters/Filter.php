@@ -75,7 +75,7 @@ abstract class Filter
         if ($visible instanceof Closure) {
             $this->visibility = $visible;
         } else {
-            $this->visibility = fn() => $visible;
+            $this->visibility = fn () => $visible;
         }
         return $this;
     }
@@ -88,6 +88,7 @@ abstract class Filter
         $this->attributes = array_merge($this->attributes, $attributes);
         return $this;
     }
+
 
     // Getters
     public function getName(): string
@@ -131,6 +132,7 @@ abstract class Filter
         return $this->attributes;
     }
 
+
     public function isVisible(?object $context = null): bool
     {
         if ($this->visibility instanceof Closure) {
@@ -153,6 +155,22 @@ abstract class Filter
     public function reset(): void
     {
         $this->value = $this->default;
+    }
+
+    /**
+     * Get the Livewire component name for this filter
+     */
+    public function getComponentName(): ?string
+    {
+        return null; // Override in subclasses if needed
+    }
+
+    /**
+     * Get configuration for the Livewire component
+     */
+    public function getComponentConfig(): array
+    {
+        return []; // Override in subclasses
     }
 
     // Abstract methods that must be implemented by concrete filter classes

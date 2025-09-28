@@ -292,37 +292,12 @@
         {{-- Filters Modal --}}
         @if($this->hasFiltering())
             <flux:modal :name="$this->getFilterModalName()" variant="flyout" position="right">
-                <div class="space-y-6">
-                    {{-- Header Section --}}
-                    <div>
-                        <flux:heading size="lg">{{ __($this->getFilterTexts()['title']) ?? 'Filters' }}</flux:heading>
-                    </div>
-
-                    {{-- Body Section --}}
-                    <div class="space-y-4">
-                        {{-- Render filter inputs using the new Filter system --}}
-                        @foreach($this->getFilters() as $filter)
-                            @if($filter->isVisible())
-                                <div>
-                                    {!! $filter->render() !!}
-                                </div>
-                            @endif
-                        @endforeach
-                    </div>
-
-                    {{-- Footer Section --}}
-                    <div class="flex space-x-2">
-                        <flux:button variant="ghost" wire:click="resetAllFilters">
-                            {{ __($this->getFilterTexts()['clear_all']) ?? 'Clear All' }}
-                        </flux:button>
-                        <flux:spacer/>
-                        <flux:modal.close>
-                            <flux:button variant="primary">
-                                {{ __($this->getFilterTexts()['done']) ?? 'Done' }}
-                            </flux:button>
-                        </flux:modal.close>
-                    </div>
-                </div>
+                @livewire('flux-tables::master-filter', [
+                    'tableId' => $this->tableId,
+                    'configuration' => $this->getConfiguration(),
+                    'filterValues' => $this->filterValues,
+                    'visibleColumnNames' => $this->getVisibleColumnNames(),
+                ], key('master-filter-' . $this->tableId))
             </flux:modal>
         @endif
 

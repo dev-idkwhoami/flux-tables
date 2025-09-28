@@ -220,4 +220,14 @@ class DateRangeFilter extends Filter
     {
         return $this->includeTime;
     }
+
+    /**
+     * Get configuration for the Livewire component
+     */
+    public function getComponentConfig(): array
+    {
+        return [
+            'include_time' => $this->includeTime,
+        ];
+    }
 }

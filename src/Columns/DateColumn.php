@@ -72,6 +72,14 @@ class DateColumn extends Column
         }
     }
 
+    /**
+     * Get the default view name for this column type
+     */
+    protected function getDefaultView(): string
+    {
+        return 'flux-tables::columns.date';
+    }
+
     public function render(object $record): View
     {
         $value = $this->getValue($record);
@@ -90,7 +98,7 @@ class DateColumn extends Column
             }
         }
 
-        return view('flux-tables::columns.date', [
+        return view($this->getView(), [
             'formatted' => $formatted,
             'value' => $value,
             'tooltip' => $this->tooltip,

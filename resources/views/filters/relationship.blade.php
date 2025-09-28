@@ -1,6 +1,4 @@
 {{-- RelationshipFilter Template --}}
-<div class="space-y-3">
-    <flux:label>{{ $filter->getLabel() }}</flux:label>
 
     @if($searchable)
         {{-- Searchable Select with Live Search --}}
@@ -33,11 +31,11 @@
                 if (this.multiple) {
                     if (!this.selected.includes(option.id)) {
                         this.selected.push(option.id);
-                        $wire.set('filterValues.{{ $filter->getName() }}', this.selected);
+                        $wire.set('value', this.selected);
                     }
                 } else {
                     this.selected = [option.id];
-                    $wire.set('filterValues.{{ $filter->getName() }}', option.id);
+                    $wire.set('value', option.id);
                     this.open = false;
                 }
                 this.search = '';
@@ -47,10 +45,10 @@
             removeOption(optionId) {
                 if (this.multiple) {
                     this.selected = this.selected.filter(id => id !== optionId);
-                    $wire.set('filterValues.{{ $filter->getName() }}', this.selected);
+                    $wire.set('value', this.selected);
                 } else {
                     this.selected = [];
-                    $wire.set('filterValues.{{ $filter->getName() }}', null);
+                    $wire.set('value', null);
                 }
             }
         }">
@@ -119,7 +117,7 @@
     @else
         {{-- Simple Select (Non-searchable) --}}
         <flux:select
-            wire:model.live="filterValues.{{ $filter->getName() }}"
+            wire:model.live="value"
             :multiple="$multiple"
         >
             @if(!$multiple)
@@ -136,10 +134,3 @@
             @endforeach
         </flux:select>
     @endif
-
-    @if($filter->getDescription())
-        <div class="text-sm text-gray-500">
-            {{ $filter->getDescription() }}
-        </div>
-    @endif
-</div>

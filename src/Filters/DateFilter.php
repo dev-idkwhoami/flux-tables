@@ -313,4 +313,16 @@ class DateFilter extends Filter
         $parsedDate = $this->parseDate($date, $operator);
         return $query->where($this->column, $operator, $parsedDate);
     }
+
+    /**
+     * Get configuration for the Livewire component
+     */
+    public function getComponentConfig(): array
+    {
+        return [
+            'operators' => $this->availableOperators,
+            'operator_labels' => $this->operatorLabels,
+            'input_type' => $this->inputType,
+        ];
+    }
 }

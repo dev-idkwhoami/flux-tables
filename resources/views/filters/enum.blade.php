@@ -1,13 +1,10 @@
 {{-- EnumFilter Template --}}
-<div class="space-y-3">
-    <flux:label>{{ $filter->getLabel() }}</flux:label>
-
-    @if($displayMode === 'select')
-        {{-- Select Mode --}}
-        <flux:select
-            wire:model.live="filterValues.{{ $filter->getName() }}"
-            :multiple="$multiple"
-        >
+@if($displayMode === 'select')
+    {{-- Select Mode --}}
+    <flux:select
+        wire:model.live="value"
+        :multiple="$multiple"
+    >
             @if($multiple)
                 @foreach($options as $value => $label)
                     <flux:select.option
@@ -35,7 +32,7 @@
         <div class="space-y-2">
             @foreach($options as $value => $label)
                 <flux:radio
-                    wire:model.live="filterValues.{{ $filter->getName() }}"
+                    wire:model.live="value"
                     :value="$value"
                     :checked="in_array($value, $selectedValues)"
                 >
@@ -49,7 +46,7 @@
         <div class="space-y-2">
             @foreach($options as $value => $label)
                 <flux:checkbox
-                    wire:model.live="filterValues.{{ $filter->getName() }}"
+                    wire:model.live="value"
                     :value="$value"
                     :checked="in_array($value, $selectedValues)"
                 >
@@ -57,11 +54,4 @@
                 </flux:checkbox>
             @endforeach
         </div>
-    @endif
-
-    @if($filter->getDescription())
-        <div class="text-sm text-gray-500">
-            {{ $filter->getDescription() }}
-        </div>
-    @endif
-</div>
+@endif

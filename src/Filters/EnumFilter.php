@@ -264,11 +264,23 @@ class EnumFilter extends Filter
 
         // Remove from current value if selected
         if ($this->multiple && is_array($this->value)) {
-            $this->value = array_values(array_filter($this->value, fn($v) => $v !== $value));
+            $this->value = array_values(array_filter($this->value, fn ($v) => $v !== $value));
         } elseif (!$this->multiple && $this->value === $value) {
             $this->value = null;
         }
 
         return $this;
+    }
+
+    /**
+     * Get configuration for the Livewire component
+     */
+    public function getComponentConfig(): array
+    {
+        return [
+            'options' => $this->options,
+            'multiple' => $this->multiple,
+            'display_mode' => $this->displayMode ?? $this->getDefaultDisplayMode(),
+        ];
     }
 }

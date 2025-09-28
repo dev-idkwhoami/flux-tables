@@ -238,7 +238,12 @@ class RelationshipFilter extends Filter
             $queryBuilder->where($searchColumn, 'like', "%{$query}%");
         }
 
+        // Only select the columns we need
+        $columns = array_merge([$this->getRelatedKeyName()], $this->displayColumns);
+        $uniqueColumns = array_unique($columns);
+
         return $queryBuilder
+            ->select($uniqueColumns)
             ->limit($this->searchLimit)
             ->get()
             ->map(function (Model $model) {
@@ -250,7 +255,7 @@ class RelationshipFilter extends Filter
     }
 
     /**
-     * Get the currently selected options
+     * Get the currently selected options (optimized to prevent N+1)
      */
     public function getSelectedOptions(): \Illuminate\Support\Collection
     {
@@ -270,7 +275,14 @@ class RelationshipFilter extends Filter
             return collect([]);
         }
 
-        return $modelClass::whereIn($this->getRelatedKeyName(), $values)->get();
+        // Use a single query to get all selected options
+        // Only select the columns we need
+        $columns = array_merge(['id'], $this->displayColumns);
+        $uniqueColumns = array_unique($columns);
+
+        return $modelClass::select($uniqueColumns)
+            ->whereIn($this->getRelatedKeyName(), $values)
+            ->get();
     }
 
     /**
@@ -349,5 +361,21 @@ class RelationshipFilter extends Filter
     public function getMinSearchLength(): int
     {
         return $this->minSearchLength;
+    }
+
+    /**
+     * Get configuration for the Livewire component
+     */
+    public function getComponentConfig(): array
+    {
+        return [
+            'multiple' => $this->multiple,
+            'search_limit' => $this->searchLimit,
+            'min_search_length' => $this->minSearchLength,
+            'model_class' => $this->relatedModel,
+            'display_column' => $this->getDisplayColumn(),
+            'value_column' => $this->getRelatedKeyName(),
+            'query_callback' => $this->queryCallback,
+        ];
     }
 }

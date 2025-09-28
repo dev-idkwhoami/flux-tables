@@ -40,6 +40,7 @@ abstract class Column
     protected ?string $tooltip = null;
     protected array $attributes = [];
     protected array $classes = [];
+    protected ?string $view = null;
 
     /**
      * Create a new column instance
@@ -173,6 +174,18 @@ abstract class Column
         return $this;
     }
 
+    /**
+     * Set a view for this column
+     *
+     * @param string $view The view name/path to use for rendering this column
+     * @return static
+     */
+    public function view(string $view): static
+    {
+        $this->view = $view;
+        return $this;
+    }
+
     // Getters
     public function getName(): string
     {
@@ -235,6 +248,31 @@ abstract class Column
     public function getClasses(): array
     {
         return $this->classes;
+    }
+
+    /**
+     * Get the custom view name if set
+     */
+    public function getCustomView(): ?string
+    {
+        return $this->customView;
+    }
+
+    /**
+     * Get the default view name for this column type
+     */
+    protected function getDefaultView(): string
+    {
+        // Override in subclasses to provide default view names
+        return 'flux-tables::columns.text';
+    }
+
+    /**
+     * Get the view name to use for rendering (custom or default)
+     */
+    public function getView(): string
+    {
+        return $this->customView ?? $this->getDefaultView();
     }
 
     /**

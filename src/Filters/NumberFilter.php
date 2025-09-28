@@ -329,4 +329,18 @@ class NumberFilter extends Filter
 
         return $attributes;
     }
+
+    /**
+     * Get configuration for the Livewire component
+     */
+    public function getComponentConfig(): array
+    {
+        return [
+            'operators' => $this->availableOperators,
+            'operator_labels' => $this->operatorLabels,
+            'min' => $this->min,
+            'max' => $this->max,
+            'step' => $this->step,
+        ];
+    }
 }

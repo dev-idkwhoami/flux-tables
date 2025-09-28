@@ -95,12 +95,20 @@ class TextColumn extends Column
         return $text;
     }
 
+    /**
+     * Get the default view name for this column type
+     */
+    protected function getDefaultView(): string
+    {
+        return 'flux-tables::columns.text';
+    }
+
     public function render(object $record): View
     {
         $value = $this->getValue($record);
         $formatted = $this->formatValue($value);
 
-        return view('flux-tables::columns.text', [
+        return view($this->getView(), [
             'formatted' => $formatted,
             'copyable' => $this->copyable,
             'copyId' => 'copy_' . Str::random(8),
